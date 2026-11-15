@@ -1,0 +1,24 @@
+{
+  "image": "assets/bottle.png",
+  "width": 24,
+  "height": 32,
+  "grip": {
+    "x": 12,
+    "y": 10
+  },
+  "speed": 180,
+  "upwardSpeed": -65,
+  "gravity": 250,
+  "spin": 9,
+  "radius": 7,
+  "damage": 10,
+  "cooldownMs": 1000,
+  "maxAgeMs": 2500,
+  "units": "native character pixels, seconds; speeds/gravity/radius multiplied by owner.scale; cooldown/maxAge in ms",
+  "animation": "throwBottle",
+  "releaseFrame": 3,
+  "durationMs": 620,
+  "universal": true,
+  "appearance": "Estrella Galicia Especial",
+  "detailImage": "assets/bottle-estrella-galicia-4x.png"
+}

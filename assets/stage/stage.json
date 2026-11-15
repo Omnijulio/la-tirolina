@@ -1,0 +1,58 @@
+{
+  "name": "La Trolina — terraza nocturna",
+  "assetWidth": 544,
+  "assetHeight": 270,
+  "viewportWidth": 480,
+  "viewportHeight": 270,
+  "overscanX": 32,
+  "maxCameraX": 24,
+  "groundY": 243,
+  "arena": {
+    "top": 215,
+    "bottom": 258
+  },
+  "spawnPoints": [
+    {
+      "x": 140,
+      "y": 243,
+      "facing": 1
+    },
+    {
+      "x": 355,
+      "y": 243,
+      "facing": -1
+    }
+  ],
+  "layers": [
+    {
+      "id": "wall",
+      "name": "Pared y fachada",
+      "image": "assets/stage/01-wall.png",
+      "depth": 0,
+      "parallax": 0.18
+    },
+    {
+      "id": "tables",
+      "name": "Mesas, sillas y jardinera",
+      "image": "assets/stage/02-tables.png",
+      "depth": 1,
+      "parallax": 0.55
+    },
+    {
+      "id": "arena",
+      "name": "Suelo y personajes delante",
+      "image": "assets/stage/03-arena-floor.png",
+      "depth": 2,
+      "parallax": 1,
+      "dynamicActors": true
+    }
+  ],
+  "drawOrder": [
+    "wall",
+    "tables",
+    "arena",
+    "characters",
+    "projectiles"
+  ],
+  "units": "Native stage pixels. Viewport 480x270. All PNG layers 544x270. Draw x=-32 at camera 0; the extra width allows camera movement without empty side edges."
+}

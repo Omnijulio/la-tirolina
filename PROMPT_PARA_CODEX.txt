@@ -1,0 +1,7 @@
+Continúa este proyecto de juego de lucha 2D en HTML, JavaScript y Canvas (La Trolina Fighters, v0.2).
+
+Lee primero AGENTS.md, PLAN.md, CONTEXTO_CODEX.md, README.md y STAGE.md. Ejecuta npm test y abre index.html en un navegador (o index.html?autoplay=1&fast=3) para ver el estado real antes de cambiar nada.
+
+El juego ya es jugable: 1 jugador contra la CPU con 4 dificultades, modo historia con desbloqueo progresivo, pelea rápida, La Barra (botellines a 2,90 € que dan fuerza pero suben el puntillo: niebla e imprecisión crecientes), objetos que lo compensan, tienda, cinemáticas provisionales, guardado y controles táctiles. index.html es el juego (game/); fighter-preview.html es el Fighter Lab generado con python3 tools/build_demo.py. Conserva el estilo pixel art, el botellín como arma compartida y la terraza en tres planos con los personajes delante de las mesas.
+
+Mi siguiente petición concreta para el proyecto es: [escribir aquí la función o cambio que quiero desarrollar].

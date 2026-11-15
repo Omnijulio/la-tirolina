@@ -1,0 +1,23 @@
+Generación mediante ImageGen integrado. Referencias: las dos fotografías del usuario; no se incluyen las fotografías en el paquete.
+
+Prompt de producción:
+Use case: stylized-concept. Transparent production sprite sheet of the man in the two reference photos for an original late-1990s PlayStation-1-era 2D arcade fighting game. Preserve his recognizable long narrow face, receding hairline/bald top with short brown hair at sides, reddish brown full beard, olive green open zip hoodie over vivid blue T-shirt, dark charcoal cargo trousers, black sneakers with brown soles. Lean adult build. Carefully hand-pixelled expressive 2D arcade fighter, dark outlines and a limited shaded palette. Full body facing right in every frame. Exactly 18 distinct frames, six columns by three rows. Row 1: six-frame idle guard breathing loop. Row 2: six-frame straight punch with anticipation, extension, impact and recovery. Row 3: six-frame high side kick with chamber, extension, impact and recovery. Consistent identity, clothing and scale; generous margins, transparent background, no labels or scenery.
+
+Segundo pase: extracción del fondo con transparencia alfa; conservar las poses, colores, tamaño y posiciones del atlas.
+
+Empaquetado: extracción de 18 poses, ancla del pie normalizada, escala 1/2 mediante vecino más próximo; celdas de 192 × 176 px y atlas 1152 × 528 px.
+
+Ampliación v1.1 — seis poses de lanzamiento:
+Same pixel-art man and original arcade style. Six frames in a 3x2 transparent sheet: guard, weight shift with arm pulling back, arm cocked near ear, forward release with open fingers, lowered follow-through, recovery. Hands empty in every pose because the held item and flying bottle are rendered separately. Keep identity, outfit, consistent proportions and clear margins. Normalize supporting foot to existing anchor (56,160) in 192x176 cells.
+
+Proyectil compartido:
+One unbranded amber brown glass botellín, short narrow neck, gold cap, cream label without text or logos, dark outline and limited pixel-art palette. Upright, isolated, actual transparent alpha. Pack into 24x32 PNG with an 8x23 bottle inside. All characters share this image and the BottleSystem physics.
+
+
+V1.2 — sustitución del botellín según la imagen del usuario:
+ImageGen integrado, referencia de Estrella Galicia Especial. Prompt: Transform the supplied bottle into one upright crisp pixel-art projectile. Preserve amber glass, black crown cap, black neck label with white writing and red band; black main label with a white star in a red circle, white Estrella Galicia lettering, red lower label and white Especial. Hard stepped dark outline, arcade palette, real transparent alpha, no surrounding objects or shadow. Packed to a 24x32 game cell with an 8x27 object; optional 96x128 detail version.
+
+
+V1.3 — escenario La Trolina, referencias: las dos fotos nuevas de la terraza.
+Generación ImageGen integrada. Pared: remake de pixel art nocturno para lucha 2D lateral, fachada antigua crema, balcones de hierro, dos entradas acristaladas de madera, letrero rojo La Trolina entre ellas, mosaico, mirador blanco, farola negra y persiana con grafiti; suelo de piedra mojado con reflejos cálidos, rojos y azules; sin personas ni mobiliario. Mesas: overlay transparente alineado con esa composición, mesas cuadradas, sillas negras con tubo metálico y jardinera negra en tres grupos; sin pared, pavimento ni personas.
+Empaquetado: remuestreo por vecino más próximo, mismo lienzo 544x270, franja de suelo frontal extraída del pavimento común a partir de y=210; mobiliario alineado por detrás de la zona de combate y con ruido de alfa exterior eliminado. Vista lógica480x270 con 32px de margen horizontal a cada lado. Personajes dibujados dinámicamente sobre el tercer plano, nunca integrados en las imágenes de escenario.

@@ -1,0 +1,9 @@
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+build/
+.DS_Store
+
+# Fotos originales de personas reales: no publicar
+references/

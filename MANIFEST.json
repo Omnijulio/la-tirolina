@@ -1,0 +1,418 @@
+{
+  "schema_version": 1,
+  "snapshot": "v1.3-codex-handoff",
+  "created_on": "2026-11-15",
+  "note": "Snapshot lists every packaged file except MANIFEST.json itself. Build intermediates and caches are excluded.",
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 57,
+      "sha256": "44eeb9ae88c69bbe6860416d4754000802e419d1f9b0d53e2be95a4997377aa1"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 2647,
+      "sha256": "7ed2aa5eea4f1acb83f1caa54547d1965cdd5c29d4acf298255c37e281eb8174"
+    },
+    {
+      "path": "ART_DIRECTION.txt",
+      "bytes": 3835,
+      "sha256": "e26729a61b31a4027f2b75e5046aecc2658c0ed41080835551e90b7c226e0276"
+    },
+    {
+      "path": "CONTEXTO_CODEX.md",
+      "bytes": 11686,
+      "sha256": "f13d285de4820c8aa6c491e69c3daa2b6f9e3d2bff590b6d979234e5240cfe31"
+    },
+    {
+      "path": "EMPEZAR_AQUI.md",
+      "bytes": 1066,
+      "sha256": "0189834e56c4688113532905dfb492b4045ffc4636f56125d9be8e1ce5ffd9f8"
+    },
+    {
+      "path": "PROMPT_PARA_CODEX.txt",
+      "bytes": 1142,
+      "sha256": "1b3fad08a7e07f6d682d74c735ade95b4166a4cd4a756177424bb931a4819cac"
+    },
+    {
+      "path": "README.md",
+      "bytes": 9902,
+      "sha256": "411e6ae225bf38e5703d64831430e9bdf64ad7e6f36ecf7e36bb07625a36b8b9"
+    },
+    {
+      "path": "STAGE.md",
+      "bytes": 4797,
+      "sha256": "a0344d1cc0a02aabfccda41d9f4f2fd0a429887d3ea2cc4424e515287e5723e4"
+    },
+    {
+      "path": "VALIDACION.txt",
+      "bytes": 1232,
+      "sha256": "cc28d06e2d6e908570d3f0caf0bfc47b3d25c9b77f5fdb4748fa3be17baa6c29"
+    },
+    {
+      "path": "VERIFICACION_TRASPASO.md",
+      "bytes": 1660,
+      "sha256": "8888d6478af229cd02d3c9689e646abaa8b33076ce417b0dd592a1f494a25323"
+    },
+    {
+      "path": "assets/bottle-data.js",
+      "bytes": 495,
+      "sha256": "8ff00b294d6547f628d0a4c804f2dbdd86761088af93631bbea6931e8ab7ecfc"
+    },
+    {
+      "path": "assets/bottle-estrella-galicia-4x.png",
+      "bytes": 7082,
+      "sha256": "6861d4e4d610fa0de046f65bb805b134e11c134e70bbe66bf2635a689380af83"
+    },
+    {
+      "path": "assets/bottle.json",
+      "bytes": 564,
+      "sha256": "55138adc12e3df6c70824ed0d3b4ea640eb6b51df858a340a43d4b38f63a5276"
+    },
+    {
+      "path": "assets/bottle.png",
+      "bytes": 730,
+      "sha256": "3d883061182bed1d997bde411d3b775158459695c0bdfad7de22e6c2244f5805"
+    },
+    {
+      "path": "assets/fighter-data.js",
+      "bytes": 3216,
+      "sha256": "fc1a1a0a8cb3752aca4f87faf5db4148039281927b33fb434061a8b2d24f58a6"
+    },
+    {
+      "path": "assets/fighter.json",
+      "bytes": 8038,
+      "sha256": "6463e9da37d2d0aba70b1fddc6e95df0b4b2874567a0173f04045f88aec0d163"
+    },
+    {
+      "path": "assets/fighter.png",
+      "bytes": 629550,
+      "sha256": "121201091faa5dd1273c41619c0f8ca68834ef05b2879ae8e28aff72d1da8db1"
+    },
+    {
+      "path": "assets/frames/idle-00.png",
+      "bytes": 24713,
+      "sha256": "959350d22e8f9cff88f82b3ce60e98e479a8a0813ec35214017e3b3193e2f37d"
+    },
+    {
+      "path": "assets/frames/idle-01.png",
+      "bytes": 24271,
+      "sha256": "2020aa91bb3d2bde49a6aec2f178a3e9e615da148bcae94f56af1a5a930639af"
+    },
+    {
+      "path": "assets/frames/idle-02.png",
+      "bytes": 23753,
+      "sha256": "b273ac67d17a394931bb3088e48083fb27858c7fd68aeac7f0ba00d1f22c9a25"
+    },
+    {
+      "path": "assets/frames/idle-03.png",
+      "bytes": 24116,
+      "sha256": "a82af294d56a2fa2f07b00164e1b4a1a23ce0e7856d9ef7d9273d497d6bf54fb"
+    },
+    {
+      "path": "assets/frames/idle-04.png",
+      "bytes": 24955,
+      "sha256": "25e93de76d79a268afcfc5f286d87e0902dccb368bfcfed385dde08d3786d8f0"
+    },
+    {
+      "path": "assets/frames/idle-05.png",
+      "bytes": 24431,
+      "sha256": "92999819c68a1af28761fcbb276bf98227cc94c9b35c6110c1bcced5105e861b"
+    },
+    {
+      "path": "assets/frames/kick-00.png",
+      "bytes": 25449,
+      "sha256": "5c3fd8ee5f00da8a1cbb4ce3acfec5abe34809f78d8e9ce40921e94bcb6b57b4"
+    },
+    {
+      "path": "assets/frames/kick-01.png",
+      "bytes": 23208,
+      "sha256": "0a2b48903ccb4b1437061054cf11041f1b95884a2b7db363f347d24ff4b50813"
+    },
+    {
+      "path": "assets/frames/kick-02.png",
+      "bytes": 29866,
+      "sha256": "33c250a3d599ca7d9d84d4625e21351c657620fbd63845c574b0296a7cffa2fb"
+    },
+    {
+      "path": "assets/frames/kick-03.png",
+      "bytes": 33225,
+      "sha256": "1f8af6e2b312ac70f3d8c4c283bb2cd286e5e6676fc9fafc8bff6f5d5e2c1333"
+    },
+    {
+      "path": "assets/frames/kick-04.png",
+      "bytes": 25386,
+      "sha256": "c0c93148961920324aa1ad7076c189506069043edfef5455c9334e0781fe8f91"
+    },
+    {
+      "path": "assets/frames/kick-05.png",
+      "bytes": 25358,
+      "sha256": "9a5cd8d70d0c2f3aef4f5959526521f5710a34e5c61d3e65187017b287871023"
+    },
+    {
+      "path": "assets/frames/punch-00.png",
+      "bytes": 24907,
+      "sha256": "be2c7cd2b4c7037d60744680a6566e4ae68d278d095e4fe4e69e4cd9d116fc46"
+    },
+    {
+      "path": "assets/frames/punch-01.png",
+      "bytes": 26363,
+      "sha256": "50cd88cc56cc63609cb9b5a3fdd436e727c14c9248539d20ab1c107888606425"
+    },
+    {
+      "path": "assets/frames/punch-02.png",
+      "bytes": 26875,
+      "sha256": "82140ec91db7dc4b0063b20a198cc80fa7340c2677ac094dfa0c351eeb81cd53"
+    },
+    {
+      "path": "assets/frames/punch-03.png",
+      "bytes": 29359,
+      "sha256": "f531e801a0c08a0b47fac3c1d3fad1850ce665b2abbca06eb74f6bc6cb537c3f"
+    },
+    {
+      "path": "assets/frames/punch-04.png",
+      "bytes": 26827,
+      "sha256": "286a63ec16f5ba0838178961288e543bdcc831abd5161250b50329e9bfe486d6"
+    },
+    {
+      "path": "assets/frames/punch-05.png",
+      "bytes": 25340,
+      "sha256": "7dd378a73e2449a8c5bbc03c4db9865a9c39e9ed1ed3a6c307e10b8597425f46"
+    },
+    {
+      "path": "assets/frames/throwBottle-00.png",
+      "bytes": 27044,
+      "sha256": "2410c1790c13893cbf222ecd1c3051c9a75d4ac579f25aa7b7ed3b908ed1cd55"
+    },
+    {
+      "path": "assets/frames/throwBottle-01.png",
+      "bytes": 30447,
+      "sha256": "6e3503d77d81d094c78f338e5041b6db5620126d7376b2242ed82e77792e705d"
+    },
+    {
+      "path": "assets/frames/throwBottle-02.png",
+      "bytes": 30938,
+      "sha256": "bfc8d45de0a5585e822cc4c320df550749aa875180c65c72cb9c8017f7398dc5"
+    },
+    {
+      "path": "assets/frames/throwBottle-03.png",
+      "bytes": 32515,
+      "sha256": "c817c801236302ed5ef2301ee4479a7c603c85e019882b7d413a59644b667119"
+    },
+    {
+      "path": "assets/frames/throwBottle-04.png",
+      "bytes": 33018,
+      "sha256": "00f4bf054afe7a64bfbc7310751ccffbc58728bfd3b6f846f6cafb656540781f"
+    },
+    {
+      "path": "assets/frames/throwBottle-05.png",
+      "bytes": 27539,
+      "sha256": "9e8792a06628bde4e9f6bb802c6fb15b5709e6a11dcbf90a8a25780331fdac07"
+    },
+    {
+      "path": "assets/stage/01-wall.png",
+      "bytes": 290143,
+      "sha256": "64da888885283296840ff713d189be12d0357e22e4b0fa8fefdd139b8b0a740a"
+    },
+    {
+      "path": "assets/stage/02-tables.png",
+      "bytes": 87005,
+      "sha256": "5611e80c4724e006f285423f85b9f8f3f5228127bed88027156b2fcd27676bbf"
+    },
+    {
+      "path": "assets/stage/03-arena-floor.png",
+      "bytes": 82136,
+      "sha256": "a60eb821ccf8c2ef9647141ff8eb6508de7567c2a43346ec3e4b6543304a75f6"
+    },
+    {
+      "path": "assets/stage/stage-composite.png",
+      "bytes": 387512,
+      "sha256": "8dc8059de16b41be3d7aac1f4d98af2008054d797db17f8e8aa84e6f447961a2"
+    },
+    {
+      "path": "assets/stage/stage-data.js",
+      "bytes": 890,
+      "sha256": "880c868d2e4924ef04ffe77b0a81cfc5adfd5cceeafe71f15a7459dc2fdf6ac8"
+    },
+    {
+      "path": "assets/stage/stage-layers-guide.png",
+      "bytes": 196980,
+      "sha256": "76b99b876aa8954c8e6abd34141ad9e54dfda1c9cbc86e81c66440565d263f9e"
+    },
+    {
+      "path": "assets/stage/stage-with-fighters.png",
+      "bytes": 386721,
+      "sha256": "39b45526d14c85ca8b2f131612e6da6533512c601102a0d193f1bc74acfa55d4"
+    },
+    {
+      "path": "assets/stage/stage.json",
+      "bytes": 1188,
+      "sha256": "69c7b3fb58d1737bc4f68d5cef7fad0243e3858507e63d7b820e1f2d07267b01"
+    },
+    {
+      "path": "example.html",
+      "bytes": 3061,
+      "sha256": "3152247e28813e39d653fdf944d2f497ef69d11181e838a17c6783f157ad4e5a"
+    },
+    {
+      "path": "fighter-animation.gif",
+      "bytes": 1375328,
+      "sha256": "de5ebba8d86b64f43e175d7d5f5ec10cd0acaa020803663dac3361158a5a4bb2"
+    },
+    {
+      "path": "fighter-preview.html",
+      "bytes": 1481330,
+      "sha256": "9dc6477e57094cfcbd792b042b9532798025c107bbd4ba0cab013b494272ce66"
+    },
+    {
+      "path": "index.html",
+      "bytes": 1481330,
+      "sha256": "9dc6477e57094cfcbd792b042b9532798025c107bbd4ba0cab013b494272ce66"
+    },
+    {
+      "path": "package.json",
+      "bytes": 497,
+      "sha256": "5624c20cd3d0c20f396d61c38a8eb5d4acd64de55e5eca628d042080a2ece3dd"
+    },
+    {
+      "path": "references/README.md",
+      "bytes": 598,
+      "sha256": "d1cf4e22fac7a91bbfe4142dda2849ff783ed6ec0094b2fe35797cfa464a34e1"
+    },
+    {
+      "path": "references/botellin-estrella-galicia.png",
+      "bytes": 108042,
+      "sha256": "222f96b0fd37e46c17c5ea9bfe19a1b3976711e5b2dc0c1714ed516239aea465"
+    },
+    {
+      "path": "references/personaje-cuerpo.jpg",
+      "bytes": 440417,
+      "sha256": "51ac37298acf552a024115fea1d619aa9114cfe5088746e670ddf8e4835a40fb"
+    },
+    {
+      "path": "references/personaje-rostro.jpg",
+      "bytes": 303890,
+      "sha256": "91df893a195c067bcb7d6fbde2820ff5ca6790c7423eab9b4870db5732df841a"
+    },
+    {
+      "path": "references/terraza-frontal.jpg",
+      "bytes": 459391,
+      "sha256": "16540bbcfb5d106560b8e8d95af86acc4f1f7e30f2b33033ab6702d6d6498ef0"
+    },
+    {
+      "path": "references/terraza-general.jpg",
+      "bytes": 387861,
+      "sha256": "9fba46ce718f388edc86862f77c9a857aa20c155bc0250bd62d8468bc1f86550"
+    },
+    {
+      "path": "requirements-art.txt",
+      "bytes": 42,
+      "sha256": "b6fecdd0e86fbc0277badc3d6fa6e28f92f33799c4e174e70e5037dbeaa76681"
+    },
+    {
+      "path": "source-art/README.md",
+      "bytes": 822,
+      "sha256": "da7d63f65b8d48b16cfe9a6ef4161060ea97e801df46c0830b53375ea5b2d748"
+    },
+    {
+      "path": "source-art/bottle-estrella-galicia.png",
+      "bytes": 959451,
+      "sha256": "a7ca6b6296c87837c6b1e80e8befa912f09e80427998cb4cc0c9ccbf7367a425"
+    },
+    {
+      "path": "source-art/fighter-base.png",
+      "bytes": 2042289,
+      "sha256": "25a586392d24821c002bd378691e53acb69ed7e50d4745d783fc28250beab0a3"
+    },
+    {
+      "path": "source-art/fighter-throw.png",
+      "bytes": 1866674,
+      "sha256": "254db255dc7b285932061e87017864934065a57fac614976a41a37c7caeafea8"
+    },
+    {
+      "path": "source-art/stage-tables.png",
+      "bytes": 768323,
+      "sha256": "9f188665470fc6f884cc4887dbc3fe88f87a69c11a9327945d4b0b821dad5639"
+    },
+    {
+      "path": "source-art/stage-wall.png",
+      "bytes": 2775527,
+      "sha256": "54913f0b048ccbe544dd46ab030268e4187b372b45e183607a3a030c455f37c7"
+    },
+    {
+      "path": "src/bottle.js",
+      "bytes": 6012,
+      "sha256": "a2bb32e4401a744d993b9c2d5564c0850d75cfe6894be97215fb2736fe25eda9"
+    },
+    {
+      "path": "src/fighter.js",
+      "bytes": 2760,
+      "sha256": "0255b443398f76ae90bdc5550709d4673fedb4083aba69aa2d47a90e4c7ae81f"
+    },
+    {
+      "path": "src/stage.js",
+      "bytes": 1499,
+      "sha256": "87023d1819038afb20d7bcdead75a8110dd7bfd5a7034c5e194d6855aa8785c1"
+    },
+    {
+      "path": "templates/index.template.html",
+      "bytes": 13806,
+      "sha256": "a3169bd48fb1eb06b6bd87538a67308ecda85d950439946e9c70640371eeb4ed"
+    },
+    {
+      "path": "tests/bottle.test.cjs",
+      "bytes": 3999,
+      "sha256": "eeb6547259987ec166213d8ca56303a1e9b3ffe6a73dcb550fe5d84327fad890"
+    },
+    {
+      "path": "tests/stage.test.cjs",
+      "bytes": 1739,
+      "sha256": "64fce7801d972b4694983fe88c4c15165e3a638236949744e692750eea655444"
+    },
+    {
+      "path": "tools/build_bottle.py",
+      "bytes": 595,
+      "sha256": "6feff50684bca5994718f4f5195c4efecc8a8d452e94839f314c2b21cbc57d64"
+    },
+    {
+      "path": "tools/build_demo.py",
+      "bytes": 1724,
+      "sha256": "889f73c0ee61557e6bbec094e1d463d61432831791836c40f42d74abb6abd8b7"
+    },
+    {
+      "path": "tools/build_fighter_base.py",
+      "bytes": 2429,
+      "sha256": "1a00ea7e9331a51af948e9de2351cf65d29a2fec3d9c2185f2871570858104bc"
+    },
+    {
+      "path": "tools/build_fighter_throw.py",
+      "bytes": 2329,
+      "sha256": "e0fbe7dc72923ade60a61eaa6e742234c7dfe7281f9f71014f09dd145961a9c1"
+    },
+    {
+      "path": "tools/build_stage.py",
+      "bytes": 4037,
+      "sha256": "cc0f929ad14041a85c2ff4d2540720e23589236bac52cc54a24384156c761a7e"
+    },
+    {
+      "path": "tools/rebuild_assets.py",
+      "bytes": 572,
+      "sha256": "5bea5fb772d7cf1b3f41fd8b7cce2d0798eceb3964f563f9af6e434a80674d75"
+    },
+    {
+      "path": "tools/render_preview.cjs",
+      "bytes": 1365,
+      "sha256": "288a4fb729514604f39ff78b85333ee31e6478d01032376663cf02e10c51e50a"
+    },
+    {
+      "path": "tools/render_preview.py",
+      "bytes": 2829,
+      "sha256": "53d543a4f362a2922104e214d7d712aaeec5f7823e04c07cec14e81354470943"
+    },
+    {
+      "path": "tools/verify_manifest.py",
+      "bytes": 743,
+      "sha256": "f6bd3f9bbb304076be2eeeaf62cb7bac260d3b271f5c69baf75c9bd312f85e20"
+    }
+  ]
+}

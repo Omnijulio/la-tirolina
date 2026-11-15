@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#06080e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="La Trolina">
+<meta name="description" content="Juego de lucha arcade 2D en la terraza de La Trolina.">
+<title>La Trolina Fighters</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<link rel="stylesheet" href="game/style.css">
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="game" width="960" height="540" aria-label="Combate"></canvas>
+    <button id="pauseBtn" aria-label="Pausa">❚❚</button>
+  </div>
+  <div id="touch" aria-hidden="true">
+    <div class="dpad"><span data-dir="left">◀</span><span data-dir="up">▲</span><span data-dir="right">▶</span></div>
+    <div class="abtns">
+      <button class="tbtn bottle" data-act="bottle"><img src="assets/bottle.png" alt="">BOTELLÍN</button>
+      <button class="tbtn kick" data-act="kick">PATADA</button>
+      <button class="tbtn block" data-act="block">GUARDIA</button>
+      <button class="tbtn punch" data-act="punch">PUÑO</button>
+    </div>
+  </div>
+</div>
+<div id="ui"></div>
+<noscript><p style="color:#fff;padding:20px">Este juego necesita JavaScript.</p></noscript>
+
+<!-- Kit base (personaje, botellín compartido, escenario) -->
+<script src="assets/fighter-data.js"></script>
+<script src="assets/bottle-data.js"></script>
+<script src="assets/stage/stage-data.js"></script>
+<script src="src/fighter.js"></script>
+<script src="src/bottle.js"></script>
+<script src="src/stage.js"></script>
+<!-- Juego -->
+<script src="game/core/rules.js"></script>
+<script src="game/data/characters.js"></script>
+<script src="game/data/items.js"></script>
+<script src="game/data/cinematics.js"></script>
+<script src="game/core/save.js"></script>
+<script src="game/core/input.js"></script>
+<script src="game/core/audio.js"></script>
+<script src="game/combat/combatant.js"></script>
+<script src="game/combat/ai.js"></script>
+<script src="game/combat/match.js"></script>
+<script src="game/ui/screens.js"></script>
+<script src="game/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,416 @@
+{
+  "name": "El Barbas",
+  "image": "assets/fighter.png",
+  "frameWidth": 192,
+  "frameHeight": 176,
+  "columns": 6,
+  "rows": 4,
+  "anchor": {
+    "x": 56,
+    "y": 160
+  },
+  "facing": "right",
+  "units": "pixels; origin top-left of frame; anchor at supporting rear foot",
+  "animations": {
+    "idle": {
+      "loop": true,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 768,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "punch": {
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 60,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 45,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": [
+            {
+              "x": 123,
+              "y": 48,
+              "w": 30,
+              "h": 21
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "kick": {
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 70,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 65,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 140,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": [
+            {
+              "x": 139,
+              "y": 51,
+              "w": 42,
+              "h": 24
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 110,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "throwBottle": {
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": [],
+          "itemSocket": {
+            "x": 110,
+            "y": 61,
+            "rotation": 0
+          }
+        },
+        {
+          "x": 192,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 110,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": [],
+          "itemSocket": {
+            "x": 54,
+            "y": 59,
+            "rotation": -0.5
+          }
+        },
+        {
+          "x": 384,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": [],
+          "itemSocket": {
+            "x": 57,
+            "y": 32,
+            "rotation": -0.8
+          }
+        },
+        {
+          "x": 576,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": [],
+          "events": [
+            {
+              "type": "spawn-projectile",
+              "weapon": "bottle",
+              "socket": {
+                "x": 147,
+                "y": 51,
+                "rotation": 0.8
+              }
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 120,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 130,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 63,
+            "h": 139
+          },
+          "hitboxes": []
+        }
+      ]
+    }
+  }
+}

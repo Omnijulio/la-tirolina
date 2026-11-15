@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Botellín compartido — ejemplo mínimo</title>
+<style>body{background:#172132;color:white;font:16px sans-serif;max-width:900px;margin:24px auto;padding:12px}canvas{width:min(100%,960px);image-rendering:pixelated;border:1px solid #405369}button{padding:12px;margin:5px}p{line-height:1.5}</style>
+<p>Dos instancias del personaje comparten el mismo movimiento y proyectil.<br>J: puñetazo A · K: patada A · L: botellín A · P: botellín B.</p>
+<canvas id="game" width="960" height="540"></canvas><br>
+<button onclick="fighters[0]?.play('punch')">Puñetazo A</button><button onclick="fighters[0]?.play('kick')">Patada A</button>
+<button onclick="launch(0)">Botellín A</button><button onclick="launch(1)">Botellín B</button><p id="hits">Impactos: 0</p>
+<script src="assets/fighter-data.js"></script><script src="assets/bottle-data.js"></script>
+<script src="src/fighter.js"></script><script src="src/bottle.js"></script>
+<script src="assets/stage/stage-data.js"></script><script src="src/stage.js"></script>
+<script>
+const ctx=document.getElementById('game').getContext('2d');
+const image=new Image(),bottleImage=new Image();let fighters=[],bottles,terrace,last,hits=0;
+const stageImages={};for(const layer of TERRACE_STAGE_DATA.layers){const img=new Image();img.src=layer.image;stageImages[layer.id]=img;}
+function launch(i){if(bottles&&fighters[i])bottles.throw(fighters[i]);}
+function start(){
+ if(fighters.length||![image,bottleImage,...Object.values(stageImages)].every(i=>i.complete&&i.naturalWidth))return;
+ // Each character supplies its own image, data and optional hand sockets.
+ // install() uses its throwBottle animation, or falls back to its punch animation.
+ const dataA=BottleAttack.install(FIGHTER_DATA),dataB=BottleAttack.install(FIGHTER_DATA);
+ fighters=[new Fighter(image,dataA,{x:280,y:486,scale:2}),new Fighter(image,dataB,{x:710,y:486,scale:2,facing:-1})];
+ bottles=new BottleSystem(bottleImage,BOTTLE_DATA,{groundY:486,minX:-60,maxX:1040,onHit:()=>{
+  hits++;document.getElementById('hits').textContent='Impactos: '+hits;
+ }});
+ terrace=new TerraceStage(stageImages,TERRACE_STAGE_DATA);
+ requestAnimationFrame(function loop(time){
+  const dt=last===undefined?0:Math.min(100,time-last);last=time;
+  for(const actor of fighters)actor.update(dt);
+  bottles.update(dt,fighters,fighters);
+  terrace.draw(ctx,{drawActors:c=>{for(const actor of fighters)actor.draw(c);bottles.draw(c,fighters);}});
+  requestAnimationFrame(loop);
+ });
+}
+image.onload=start;bottleImage.onload=start;for(const img of Object.values(stageImages))img.onload=start;image.src=FIGHTER_DATA.image;bottleImage.src=BOTTLE_DATA.image;
+addEventListener('keydown',e=>{
+ if(!fighters.length||e.repeat)return;
+ const k=e.key.toLowerCase();if(k==='j')fighters[0].play('punch');if(k==='k')fighters[0].play('kick');
+ if(k==='l')launch(0);if(k==='p')launch(1);
+});
+document.addEventListener('visibilitychange',()=>{last=undefined;});
+</script></html>
