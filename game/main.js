@@ -31,7 +31,7 @@
       root.addEventListener('orientationchange', () => setTimeout(() => this.layout(), 200));
       document.addEventListener('visibilitychange', () => {
         this.last = null;
-        if (document.hidden && this.match && !this.match.ended && !this.paused) this.pause();
+        if (document.hidden && this.match && !this.match.ended && !this.paused && !this.lockstep) this.pause();
       });
       this.applySettings();
       this.setupFullscreen();
@@ -50,6 +50,7 @@
       this.attract = this.makeAttract();
       requestAnimationFrame((t) => this.loop(t));
       if (params.has('autoplay')) this.debugQuick(true);
+      else if (params.get('sala')) UI.show('online', { join: params.get('sala') });
       else if (params.get('screen')) this.debugScreen(params.get('screen'));
       else UI.show('title');
     },
@@ -84,7 +85,10 @@
     },
 
     /** ¿Sale el montón de botellines en la jardinera? (opción, o siempre en el Modo salvaje) */
-    jardinera() { return !!(Save.data.settings.jardinera || this.session.wild); },
+    jardinera() {
+      if (this.session.mode === 'online') return !!(this.netCfg && this.netCfg.jardinera);
+      return !!(Save.data.settings.jardinera || this.session.wild);
+    },
 
     stageById(id) { return (root.TROLINA_STAGES || []).find((s) => s.id === id) || { id: 'noche', name: 'Noche', night: true, weather: null }; },
 
@@ -297,13 +301,13 @@
     },
     resume() { this.paused = false; this.last = null; this.input.releaseAll(); UI.hide(); },
     togglePause() {
-      if (!this.match || this.match.ended) return;
+      if (!this.match || this.match.ended || this.lockstep) return;   // en el multijugador no se pausa
       if (this.paused) { if (UI.current === 'pause') this.resume(); } else this.pause();
     },
 
     /** Carga del ultimate y cigarrillos en los botones táctiles (solo si cambian). */
     updateTouchHud() {
-      const p = this.match.p1, h = this.touchHud || (this.touchHud = {});
+      const p = this.match.viewer || this.match.p1, h = this.touchHud || (this.touchHud = {});
       const charge = Math.floor(p.meter);
       if (h.charge !== charge) {
         h.charge = charge;
@@ -312,6 +316,155 @@
         btn.classList.toggle('ready', p.meterFull);
       }
       if (h.cigs !== p.cigs) { h.cigs = p.cigs; document.getElementById('cigCount').textContent = p.cigs; }
+    },
+
+    /* ---------- multijugador (experimental) ---------- */
+
+    /** Abre una conexión nueva (la pantalla de sala decide si crear o unirse). */
+    netOpen() {
+      if (this.net) this.net.close();
+      const net = new root.TrolinaNet.NetLink({ test: params.has('nettest') });
+      this.net = net;
+      this.netEarly = [];
+      net.on('msg', (m) => this.onNetMsg(m));
+      net.on('closed', () => { if (this.net === net) this.onNetClosed('Se ha cortado la conexión con tu rival'); });
+      return net;
+    },
+
+    onNetMsg(m) {
+      if (m.type === 'in' || m.type === 'hash') {
+        // Inputs que llegan antes de que la pelea arranque en este móvil: se guardan.
+        if (!this.lockstep) { this.netEarly.push(m); if (this.netEarly.length > 900) this.netEarly.shift(); }
+        return;
+      }
+      if (m.type === 'ready') { this.netTheirReady = m; this.netMaybeStart(); UI.netUpdate && UI.netUpdate(); }
+      else if (m.type === 'start' && !this.net.isHost) this.startNetMatch(m.cfg);
+      else if (m.type === 'again') { this.netTheirAgain = true; this.netMaybeAgain(); UI.netUpdate && UI.netUpdate(); }
+      else if (m.type === 'bye') this.onNetClosed('Tu rival ha salido de la sala');
+    },
+
+    /** Ya conectados: cada uno elige luchador y pide en la barra (gratis). */
+    netEnter() {
+      const s = this.session;
+      if (this.netMyChar) s.p1 = this.netMyChar;
+      Object.assign(s, { mode: 'online', wild: false, p2: null });
+      this.netMyReady = null; this.netTheirReady = null; this.netMyAgain = false; this.netTheirAgain = false;
+      this.match = null; this.lockstep = null;
+      UI.show('select', { step: 'p1' });
+    },
+
+    netReady(order) {
+      const s = this.session, d = Save.data, c = this.charById(s.p1);
+      const loadout = R.computeLoadout(c, order, d.upgrades, root.TROLINA_BAR_ITEMS, root.TROLINA_UPGRADES, {});
+      this.netMyChar = s.p1;
+      this.netMyReady = { type: 'ready', char: s.p1, order: loadout.order, loadout };
+      this.net.send(this.netMyReady);
+      UI.show('netwait', {});
+      this.netMaybeStart();
+    },
+
+    /** El anfitrión decide ambiente, fuente y semilla cuando los dos están listos. */
+    netMaybeStart() {
+      if (!this.net || !this.net.isHost || !this.netMyReady || !this.netTheirReady) return;
+      const st = Save.data.settings;
+      const cfg = {
+        seed: Math.floor(Math.random() * 2147483647),
+        stage: this.pickStage(),
+        fountain: R.pickFountain(st.fountain, st.fountainLight),
+        jardinera: !!st.jardinera,
+        p1: { char: this.netMyReady.char, order: this.netMyReady.order, loadout: this.netMyReady.loadout },
+        p2: { char: this.netTheirReady.char, order: this.netTheirReady.order, loadout: this.netTheirReady.loadout }
+      };
+      this.net.send({ type: 'start', cfg });
+      this.startNetMatch(cfg);
+    },
+
+    startNetMatch(cfg) {
+      const s = this.session;
+      this.netCfg = cfg; this.netMyReady = null; this.netTheirReady = null;
+      this.netEarly = (this.netEarly || []).filter((m) => m.g === cfg.seed);
+      Object.assign(s, { mode: 'online', p1: cfg.p1.char, p2: cfg.p2.char, order: cfg.p1.order, cpuOrder: cfg.p2.order, stage: cfg.stage, fountain: cfg.fountain, wild: false });
+      this.loadStage(cfg.stage).then(() => UI.show('vs', { onDone: () => this.beginNetFight() }));
+    },
+
+    beginNetFight() {
+      if (!this.net || !this.net.connected) return this.onNetClosed('Se ha cortado la conexión con tu rival');
+      const cfg = this.netCfg, d = Save.data, side = this.net.isHost ? 0 : 1;
+      const lo = (x) => { const l = JSON.parse(JSON.stringify(x.loadout)); if (cfg.jardinera) l.ammo += R.JARDINERA_AMMO; return l; };
+      const c1 = this.charById(cfg.p1.char), c2 = this.charById(cfg.p2.char);
+      this.match = new root.Match({
+        assets: this.assets,
+        // La info del ambiente (lluvia, nieve…) es la misma en los dos; si una imagen falla, se ve la noche.
+        stage: this.stageById(cfg.stage), stageImages: this.stageCache[cfg.stage] || this.assets.stage,
+        jardinera: cfg.jardinera,
+        p1: { character: c1, loadout: lo(cfg.p1) },
+        p2: { character: c2, loadout: lo(cfg.p2) },
+        wild: false, difficulty: 'normal',
+        input: null, sfx: Sfx, settings: d.settings,
+        police: false, fountain: cfg.fountain,
+        net: { side },
+        onEnd: (r) => this.endNetMatch(r)
+      });
+      this.lockstep = new root.TrolinaNet.Lockstep({ link: this.net, match: this.match, side, seed: cfg.seed, input: this.input, early: this.netEarly });
+      this.netEarly = [];
+      this.paused = false;
+      this.input.capture = true; this.input.releaseAll(); this.input.clear();
+      document.body.classList.add('fighting', 'online');
+      const me = side === 0 ? c1 : c2;
+      document.body.classList.toggle('no-special', !me.special);
+      document.body.classList.toggle('no-smoke', !this.match.viewer.loadout.cigs);
+      if (me.special) document.querySelector('#specialBtn span').textContent = me.special.short;
+      this.touchHud = {};
+      UI.hide();
+    },
+
+    endNetMatch(r) {
+      const side = this.net && this.net.isHost ? 0 : 1;
+      if (this.lockstep) this.lockstep.stop();
+      this.lockstep = null;
+      document.body.classList.remove('fighting');
+      this.input.capture = false;
+      if (this.match) this.match.banner = null;
+      const mine = r.wins[side], theirs = r.wins[1 - side];
+      const d = Save.data;
+      d.stats.online = d.stats.online || { wins: 0, losses: 0 };
+      if (mine > theirs) d.stats.online.wins++; else if (theirs > mine) d.stats.online.losses++;
+      Save.save();
+      UI.show('netresults', { mine, theirs, desync: this.match && this.match.netDesync });
+    },
+
+    netAgain() {
+      this.netMyAgain = true;
+      if (this.net) this.net.send({ type: 'again' });
+      this.netMaybeAgain();
+    },
+    netMaybeAgain() {
+      if (this.netMyAgain && this.netTheirAgain) this.netEnter();
+    },
+
+    /** Salir del multijugador (avisa al otro). */
+    netLeave() {
+      const net = this.net;
+      this.net = null;
+      if (net) { net.send({ type: 'bye' }); setTimeout(() => net.close(), 200); }
+      this.netCleanup();
+      UI.show('title');
+    },
+    netCleanup() {
+      if (this.lockstep) this.lockstep.stop();
+      this.lockstep = null;
+      if (this.session.mode === 'online') { this.match = null; this.session.mode = 'quick'; }
+      this.netMyChar = null; this.netCfg = null;
+      this.input.capture = false;
+      document.body.classList.remove('fighting', 'online');
+    },
+    onNetClosed(msg) {
+      const net = this.net;
+      this.net = null;
+      if (net) net.close();
+      this.netCleanup();
+      UI.show('title');
+      UI.toast(msg);
     },
 
     /* ---------- fondo animado de los menús ---------- */
@@ -348,7 +501,8 @@
       const dt = this.last === null ? 16 : Math.min(50, now - this.last);
       this.last = now;
       if (this.match) {
-        if (!this.paused) this.match.update(dt);
+        if (this.lockstep) this.lockstep.frame(dt);
+        else if (!this.paused) this.match.update(dt);
         this.match.draw(this.ctx);
         this.updateTouchHud();
         Sfx.setWater(!this.paused && !this.match.ended && this.match.fountain && this.match.fountain.on);

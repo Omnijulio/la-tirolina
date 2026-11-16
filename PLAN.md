@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.8** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.9** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -55,6 +55,10 @@ Estado: **v0.8** (16/11/2026). Un jugador contra la CPU, en navegador de escrito
 - **Cosas para fumar**: Marlboro, Ducados, tabaco de liar, puro, habano y chiflo, con distinto tiempo quieto, alivio del puntillo y efectos (el habano da fuerza; el chiflo deja flojo). **Fumar devuelve vida.**
 - **Jardinera llena**: +2 botellines para lanzar cada uno.
 - **Pantalla completa**: botón siempre visible mientras no lo esté (en iPhone, instrucciones para añadir a inicio).
+
+## Hecho en v0.9
+
+- **Multijugador (experimental)**: sala con código de 4 letras (o enlace), cada uno en su móvil, barra libre, todos los luchadores, revancha. Ver `MULTIJUGADOR.md`.
 
 ## Próximas fases propuestas
 

@@ -10,6 +10,7 @@ Lee `CONTEXTO_CODEX.md`, `PLAN.md`, `README.md` y `STAGE.md` antes de modificar 
 - Edita el motor base en `src/`, datos canónicos en los JSON y el Fighter Lab en `templates/index.template.html`.
 - Ejecuta `python3 tools/build_demo.py` después de modificar JSON, `src/` o la plantilla. Regenera los espejos `*-data.js` y `fighter-preview.html`. **No genera `index.html`**, que es el juego.
 - `python3 tools/build_characters.py` regenera los atlas de `assets/characters/` a partir de `assets/fighter.png`.
+- El multijugador experimental (`game/net/`, ver `MULTIJUGADOR.md`) es la única dependencia externa: PeerJS incluido en `game/vendor/` y su servidor público de señalización. La pelea en red es lockstep: no metas en `Match.update` nada que dependa de ajustes locales.
 - No uses `fetch` ni `getImageData` en el juego: debe seguir funcionando abriendo `index.html` directamente.
 - `references/` contiene fotos de personas reales y está excluida de git para no publicarlas.
 - La policía usa `src/police.js` y `assets/police/` sin modificar; la lógica de ruido/multas está en `game/core/rules.js` (`NOISE`, `POLICE`) y `game/combat/match.js`. Ver `POLICE.md`.

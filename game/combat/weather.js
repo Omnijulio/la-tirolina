@@ -2,6 +2,8 @@
  * esto añade movimiento). Coordenadas de pantalla 960×540. Sin imágenes.
  */
 (function (root) {
+  // Solo es decorado: usa siempre el azar real, también en el multijugador (que fija el del combate).
+  const rnd = Math.random;
   class Weather {
     constructor(kind, { reduce = false } = {}) {
       this.kind = kind;
@@ -12,9 +14,9 @@
     }
 
     spawn(anywhere) {
-      const y = anywhere ? Math.random() * 540 : -20 - Math.random() * 60;
-      if (this.kind === 'rain') return { x: Math.random() * 1060 - 50, y, v: 900 + Math.random() * 400, len: 10 + Math.random() * 12, a: 0.18 + Math.random() * 0.25, gy: 430 + Math.random() * 110 };
-      return { x: Math.random() * 1000 - 20, y, v: 35 + Math.random() * 55, r: Math.random() < 0.25 ? 3 : 2, ph: Math.random() * 6.28, a: 0.55 + Math.random() * 0.4, gy: 420 + Math.random() * 120 };
+      const y = anywhere ? rnd() * 540 : -20 - rnd() * 60;
+      if (this.kind === 'rain') return { x: rnd() * 1060 - 50, y, v: 900 + rnd() * 400, len: 10 + rnd() * 12, a: 0.18 + rnd() * 0.25, gy: 430 + rnd() * 110 };
+      return { x: rnd() * 1000 - 20, y, v: 35 + rnd() * 55, r: rnd() < 0.25 ? 3 : 2, ph: rnd() * 6.28, a: 0.55 + rnd() * 0.4, gy: 420 + rnd() * 120 };
     }
 
     update(dt) {
@@ -25,7 +27,7 @@
         if (this.kind === 'rain') {
           q.y += q.v * s; q.x -= q.v * 0.12 * s;
           if (q.y > q.gy) {
-            if (Math.random() < 0.35) this.splashes.push({ x: q.x, y: q.gy, t: 0 });
+            if (rnd() < 0.35) this.splashes.push({ x: q.x, y: q.gy, t: 0 });
             this.p[i] = this.spawn(false);
           }
         } else {

@@ -57,7 +57,7 @@
     },
 
     show(name, params) {
-      this.tickers = []; this.keyHandler = null;
+      this.tickers = []; this.keyHandler = null; this.onNet = null;
       this.root.innerHTML = '';
       this.root.className = 'on scr-' + name;
       this.current = name;
@@ -78,6 +78,12 @@
       node.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => (fn ? fn() : this.show(b.dataset.back))));
       this.keyHandler = (e) => { if (e.key === 'Escape') { const b = node.querySelector('[data-back]'); if (b) b.click(); } };
     },
+    /** Aviso suelto sobre la pantalla actual. */
+    toast(msg) {
+      const node = this.root.firstElementChild;
+      if (node && msg) this.flashError(node, msg);
+    },
+    netUpdate() { if (this.onNet) this.onNet(); },
     snarkToast(node, msg) {
       let t = node.querySelector('.toast');
       if (!t) { t = el('<div class="toast" role="status"></div>'); node.append(t); }
@@ -105,6 +111,7 @@
           <button data-go="story">Modo historia <small>${d.story.completed ? 'Completado · rejugar' : 'Combate ' + stage + ' / ' + root.TROLINA_STORY.length}</small></button>
           <button data-go="quick">Pelea rápida <small>Elige rival y dificultad</small></button>
           <button data-go="wild" class="wild">Modo salvaje <small>Experimental · desde el segundo 30, tú verás</small></button>
+          <button data-go="online" class="online">Multijugador <small>Experimental · contra un amigo en otro móvil</small></button>
           <button data-go="shop">Tienda <small>Personajes y mejoras</small></button>
           <button data-go="help">Cómo se juega</button>
           <button data-go="options">Opciones</button>
@@ -147,9 +154,10 @@
       </div>`);
       const roster = node.querySelector('.roster');
       let chosen = step === 'p1' ? s.p1 : (s.p2 || chars.find((c) => c.id !== s.p1).id);
-      if (step === 'p1' && !g.save.isUnlocked(chosen)) chosen = 'barbas';
+      if (step === 'p1' && !g.save.isUnlocked(chosen) && s.mode !== 'online') chosen = 'barbas';
       const jailLeft = (id) => g.save.jailLeft(id);
-      const canPick = (c) => (step === 'p2' || g.save.isUnlocked(c.id)) && !jailLeft(c.id);
+      const online = s.mode === 'online';
+      const canPick = (c) => online || ((step === 'p2' || g.save.isUnlocked(c.id)) && !jailLeft(c.id));
       const storyRival = story ? g.charById(root.TROLINA_STORY[d.story.stage]) : null;
       chars.forEach((c) => {
         const locked = !g.save.isUnlocked(c.id);
@@ -218,10 +226,11 @@
         if (step === 'p1') {
           s.p1 = chosen; d.selected = chosen; g.save.save();
           if (story) { s.p2 = root.TROLINA_STORY[d.story.stage]; this.show('barra'); }
+          else if (online) this.show('barra');
           else this.show('select', { step: 'p2' });
         } else { s.p2 = chosen; this.show('barra'); }
       });
-      this.bindBack(node, () => (step === 'p2' ? this.show('select', { step: 'p1' }) : this.show('title')));
+      this.bindBack(node, () => (online ? g.netLeave() : step === 'p2' ? this.show('select', { step: 'p1' }) : this.show('title')));
       const prevKey = this.keyHandler;
       this.keyHandler = (e) => {
         if (e.key === 'Enter' && document.activeElement === document.body) node.querySelector('[data-ok]').click();
@@ -234,16 +243,18 @@
     barra() {
       const g = this.game, d = g.save.data, s = g.session;
       const items = root.TROLINA_BAR_ITEMS;
-      const char = g.charById(s.p1), rival = g.charById(s.p2);
+      const online = s.mode === 'online';
+      const char = g.charById(s.p1), rival = online ? { name: 'tu rival', color: '#9ff0ff' } : g.charById(s.p2);
       const slots = R.slotsFor(d.upgrades, root.TROLINA_UPGRADES);
       let order = R.sanitizeOrder(d.lastOrder, items, slots);
-      while (R.orderCost(order, items) > d.coins) {
+      while (!online && R.orderCost(order, items) > d.coins) {
         const k = Object.keys(order).find((id) => order[id] > 0);
         if (!k) break;
         order[k]--; if (!order[k]) delete order[k];
       }
       const node = el(`<div class="scr barra">
         ${this.header('La Barra', 'back')}
+        ${online ? '<p class="intro wild-intro"><b>BARRA LIBRE.</b> En el multijugador no se paga: pide lo que quieras dentro de tus huecos y pulsa «¡Listo!».</p>' : ''}
         ${s.wild ? '<p class="intro wild-intro"><b>MODO SALVAJE.</b> Aquí todo pega más: lo bueno y lo malo. Los primeros 30 segundos son normales. Después, buena suerte. O no.</p>' : ''}
         <p class="intro">Antes de pelear contra <b style="color:${rival.color}">${esc(rival.name)}</b>, pide algo. Cada <b>botellín (2,90 €)</b> te da fuerza y un envase para lanzar, pero sube el <b>puntillo</b>: niebla, mareo, golpes al aire y controles lentos. Cuanto más dure la pelea, peor. <b>Fumar</b> lo baja; la <b>bolsa de azúcar</b> lo borra… un rato.</p>
         <div class="slots-bar"></div>
@@ -294,7 +305,7 @@
             for (const o of items) { if (o.kind === 'smoke' && o.id !== it.id) delete next[o.id]; }
           } else { this.flashError(node, 'Ya llevas ' + slots.smokes + ' cosas para fumar. Quita una antes'); return; }
         }
-        if (R.orderCost(next, items) > d.coins) { this.flashError(node, 'No te llega el dinero'); return; }
+        if (!online && R.orderCost(next, items) > d.coins) { this.flashError(node, 'No te llega el dinero'); return; }
         if (qty > (order[it.id] || 0)) {
           root.TrolinaSfx.play(['botellin', 'peterete', 'jager', 'licorcafe', 'tequila'].includes(it.id) ? 'gulp' : 'buy');
           if (s.wild && root.trolinaBarSnark) this.snarkToast(node, root.trolinaBarSnark(it.id));
@@ -312,7 +323,7 @@
           row.classList.toggle('picked', q > 0);
           row.classList.toggle('nofit', full && !q);
           row.querySelector('[data-d="-1"]').disabled = q <= 0;
-          row.querySelector('[data-d="1"]').disabled = q >= it.max || cost + it.price > d.coins || full;
+          row.querySelector('[data-d="1"]').disabled = q >= it.max || (!online && cost + it.price > d.coins) || full;
           row.querySelectorAll('[data-n]').forEach((b) => {
             const n = Number(b.dataset.n);
             b.classList.toggle('on', n <= q);
@@ -342,11 +353,12 @@
           <div class="kv"><span>Puntillo</span><b class="${i1 > 0.5 ? 'warn' : ''}">${Math.round(i0 * 100)} % → ${Math.round(i1 * 100)} % <em>(1 min)</em> → ${Math.round(i2 * 100)} %</b></div>
           <div class="meter"><i style="width:${Math.round(i1 * 100)}%"></i></div>
           <p class="muted">${lo.fogMult < 1 ? 'Gafas de sol: ves la mitad de niebla. ' : ''}${i1 > 0.6 ? 'Vas a ver doble.' : i1 > 0.3 ? 'Empezarás a notar la niebla.' : i1 > 0 ? 'Un puntillo controlado.' : 'Fresco como una lechuga.'}</p>`;
-        node.querySelector('.total').innerHTML = 'Total: <b>' + money(cost) + '</b><span class="muted"> · te quedarán ' + money(d.coins - cost) + '</span>';
-        node.querySelector('[data-ok]').textContent = cost ? '¡A pelear! (pagar ' + money(cost) + ')' : '¡A pelear!';
+        node.querySelector('.total').innerHTML = online ? '<b>Barra libre</b><span class="muted"> · multijugador</span>' : 'Total: <b>' + money(cost) + '</b><span class="muted"> · te quedarán ' + money(d.coins - cost) + '</span>';
+        node.querySelector('[data-ok]').textContent = online ? '¡Listo!' : cost ? '¡A pelear! (pagar ' + money(cost) + ')' : '¡A pelear!';
       };
       render();
       const go = (o) => {
+        if (online) { d.lastOrder = o; g.save.save(); g.netReady(o); return; }
         const preso = g.jailed(s.p1, s.p2);
         if (preso) { this.flashError(node, preso.name + ' está en el calabozo: sale en ' + clock(g.save.jailLeft(preso.id))); return; }
         const cost = R.orderCost(o, items);
@@ -358,7 +370,7 @@
       };
       node.querySelector('[data-ok]').addEventListener('click', () => go(order));
       node.querySelector('[data-none]').addEventListener('click', () => go({}));
-      this.bindBack(node, () => this.show('select', { step: g.session.mode === 'story' ? 'p1' : 'p2' }));
+      this.bindBack(node, () => this.show('select', { step: g.session.mode === 'story' || online ? 'p1' : 'p2' }));
       return node;
     },
 
@@ -422,13 +434,14 @@
 
     vs(p) {
       const g = this.game, s = g.session;
+      const online = s.mode === 'online', side = online && g.net && !g.net.isHost ? 1 : 0;
       const c1 = g.charById(s.p1), c2 = g.charById(s.p2);
       const items = root.TROLINA_BAR_ITEMS;
       const node = el(`<div class="scr vs">
-        <div class="side l" style="--c:${c1.color}"><canvas width="192" height="176"></canvas><h3>${esc(c1.name)}</h3><p>Tú · ${esc(R.describeOrder(s.order, items))}</p></div>
-        <div class="vs-mid"><b>VS</b>${s.wild ? '<span class="wild-badge">MODO SALVAJE</span>' : ''}<span>${esc(R.DIFFICULTIES[s.difficulty].name)}${s.mode === 'story' ? ' · Historia ' + (s.storyIndex + 1) + '/' + root.TROLINA_STORY.length : ''}</span>
-          ${(() => { const st = g.stageById(s.stage || 'noche'); return `<span class="stage-state">${st.icon || ''} ${esc(st.name)}</span>` + (g.jardinera() ? '<span class="stage-state jard">🪴 Jardinera llena: +2 botellines para lanzar cada uno</span>' : '') + (s.fountain ? `<span class="fountain-state">⛲ Fuente ${s.fountain.on ? 'encendida' : 'apagada'}${st.night !== false ? ' · ' + (s.fountain.lit ? 'con luz' : 'sin luz') : ''}${s.fountain.on ? ' — tapa el ruido de los botellines' : ''}</span>` : ''); })()}</div>
-        <div class="side r" style="--c:${c2.color}"><canvas width="192" height="176"></canvas><h3>${esc(c2.name)}</h3><p>CPU · ${esc(R.describeOrder(s.cpuOrder, items))}</p></div>
+        <div class="side l" style="--c:${c1.color}"><canvas width="192" height="176"></canvas><h3>${esc(c1.name)}</h3><p>${online && side === 1 ? 'Rival' : 'Tú'} · ${esc(R.describeOrder(s.order, items))}</p></div>
+        <div class="vs-mid"><b>VS</b>${s.wild ? '<span class="wild-badge">MODO SALVAJE</span>' : ''}${online ? '<span class="wild-badge exp">MULTIJUGADOR · EXPERIMENTAL</span>' : ''}<span>${online ? 'Al mejor de 3' : esc(R.DIFFICULTIES[s.difficulty].name)}${s.mode === 'story' ? ' · Historia ' + (s.storyIndex + 1) + '/' + root.TROLINA_STORY.length : ''}</span>
+          ${(() => { const st = g.stageById(s.stage || 'noche'); return `<span class="stage-state">${st.icon || ''} ${esc(st.name)}</span>` + (g.jardinera() ? '<span class="stage-state jard">🪴 Jardinera llena: +2 botellines para lanzar cada uno</span>' : '') + (s.fountain ? `<span class="fountain-state">⛲ Fuente ${s.fountain.on ? 'encendida' : 'apagada'}${st.night !== false ? ' · ' + (s.fountain.lit ? 'con luz' : 'sin luz') : ''}${s.fountain.on && !online ? ' — tapa el ruido de los botellines' : ''}</span>` : ''); })()}</div>
+        <div class="side r" style="--c:${c2.color}"><canvas width="192" height="176"></canvas><h3>${esc(c2.name)}</h3><p>${online ? (side === 1 ? 'Tú' : 'Rival') : 'CPU'} · ${esc(R.describeOrder(s.cpuOrder, items))}</p></div>
         <span class="hint">Toca para empezar</span>
       </div>`);
       const [a, b] = node.querySelectorAll('canvas');
@@ -651,6 +664,99 @@
       return node;
     },
 
+    /** Multijugador (experimental): crear sala o unirse con un código. */
+    online(p) {
+      const g = this.game;
+      const node = el(`<div class="scr online">
+        ${this.header('Multijugador <span class="wild-badge exp">EXPERIMENTAL</span>', 'title')}
+        <div class="online-box">
+          <p class="intro">Pelea contra un amigo en <b>otro móvil</b> (o en otro ordenador). Uno <b>crea la sala</b> y el otro <b>se une</b> con el código. Hace falta internet en los dos; mejor si estáis en la misma wifi.</p>
+          <div class="online-actions">
+            <button class="primary" data-host>Crear sala</button>
+            <div class="join"><input data-code maxlength="4" placeholder="CÓDIGO" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text"><button data-join>Unirse</button></div>
+          </div>
+          <div class="online-status" aria-live="polite"></div>
+          <p class="muted small">Experimental: si va a tirones o se queda «esperando», volved a crear la sala. Todos los luchadores están disponibles y la barra es libre. Sin policía ni modo salvaje.</p>
+        </div>
+      </div>`);
+      const status = node.querySelector('.online-status');
+      const hostBtn = node.querySelector('[data-host]'), joinBtn = node.querySelector('[data-join]'), input = node.querySelector('[data-code]');
+      const busy = (b) => { hostBtn.disabled = b; joinBtn.disabled = b; input.disabled = b; };
+      const link = (code) => root.location.origin + root.location.pathname + '?sala=' + code;
+      const render = (ev) => {
+        const st = ev.status, info = ev.info;
+        if (st === 'creating') status.innerHTML = '<p>Creando sala…</p>';
+        else if (st === 'waiting') {
+          status.innerHTML = `<p>Tu sala:</p><div class="room-code">${esc(info)}</div>
+            <p>En el otro móvil: abre el juego → <b>Multijugador</b> → escribe <b>${esc(info)}</b> → <b>Unirse</b>. O mándale el enlace:</p>
+            <button data-share>📤 Compartir enlace</button><p class="muted">Esperando a tu rival…</p>`;
+          status.querySelector('[data-share]').addEventListener('click', async () => {
+            const url = link(info);
+            try {
+              if (navigator.share) await navigator.share({ title: 'La Trolina Fighters', text: '¡Pelea conmigo! Sala ' + info, url });
+              else { await navigator.clipboard.writeText(url); this.flashError(node, 'Enlace copiado'); }
+            } catch (e) { /* cancelado */ }
+          });
+        } else if (st === 'joining') status.innerHTML = '<p>Conectando con la sala <b>' + esc(info) + '</b>…</p>';
+        else if (st === 'connected') { status.innerHTML = '<p class="ok">¡Conectados! Elegid luchador…</p>'; root.TrolinaSfx.play('ready'); setTimeout(() => { if (this.current === 'online') g.netEnter(); }, 700); }
+        else if (st === 'error') { status.innerHTML = '<p class="err">' + esc(info || 'Error de conexión') + '</p>'; busy(false); }
+      };
+      const start = (fn) => {
+        busy(true);
+        const net = g.netOpen();
+        net.on('status', render);
+        fn(net).catch((e) => render({ status: 'error', info: e.message }));
+      };
+      hostBtn.addEventListener('click', () => start((net) => net.host()));
+      const join = () => {
+        const code = input.value.toUpperCase().replace(/[^A-Z]/g, '');
+        if (code.length !== 4) { this.flashError(node, 'El código tiene 4 letras'); return; }
+        start((net) => net.join(code));
+      };
+      joinBtn.addEventListener('click', join);
+      input.addEventListener('input', () => { input.value = input.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4); });
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') join(); });
+      this.bindBack(node, () => g.netLeave());
+      if (p.join) { input.value = String(p.join).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4); setTimeout(join, 300); }
+      return node;
+    },
+
+    netwait() {
+      const g = this.game;
+      const node = el(`<div class="scr netwait">
+        <div class="online-box center">
+          <h2>¡Listo!</h2>
+          <p class="wait">Esperando a que tu rival elija luchador y pida en la barra…</p>
+          <button class="ghost" data-leave>Salir del multijugador</button>
+        </div>
+      </div>`);
+      node.querySelector('[data-leave]').addEventListener('click', () => g.netLeave());
+      this.onNet = () => { if (g.netTheirReady) node.querySelector('.wait').textContent = 'Tu rival también está listo. ¡Vamos!'; };
+      return node;
+    },
+
+    netresults(p) {
+      const g = this.game;
+      const won = p.mine > p.theirs, draw = p.mine === p.theirs;
+      const node = el(`<div class="scr results ${won ? 'win' : 'lose'}">
+        <h1>${draw ? 'EMPATE' : won ? '¡HAS GANADO!' : 'HAS PERDIDO'}</h1>
+        <p class="score">${p.mine} – ${p.theirs} · Multijugador (experimental)</p>
+        ${p.desync ? '<p class="muted">Aviso: las dos partidas se desincronizaron durante la pelea. Si lo ves a menudo, dímelo.</p>' : ''}
+        <p class="wait muted"></p>
+        <nav class="menu row"><button class="primary" data-again>Revancha</button><button data-leave>Salir</button></nav>
+      </div>`);
+      const wait = node.querySelector('.wait');
+      const paint = () => {
+        if (g.netMyAgain && !g.netTheirAgain) wait.textContent = 'Esperando a que tu rival quiera la revancha…';
+        else if (g.netTheirAgain && !g.netMyAgain) wait.textContent = 'Tu rival quiere la revancha.';
+      };
+      node.querySelector('[data-again]').addEventListener('click', () => { g.leaveMatch(); g.netAgain(); paint(); });
+      node.querySelector('[data-leave]').addEventListener('click', () => { g.leaveMatch(); g.netLeave(); });
+      this.onNet = paint;
+      paint();
+      return node;
+    },
+
     help(p) {
       const back = p.back || 'title';
       const node = el(`<div class="scr help">
@@ -665,6 +771,7 @@
           <p><b>Bolsa de azúcar (60 €)</b>: 30 s a toda velocidad y sin puntillo; luego se pasa y a los 45 s te quedas inconsciente unos segundos.</p></section>
           <section><h3>Modo salvaje (experimental)</h3><p>Una pelea rápida donde los objetos pegan más (para bien y para mal) y, <b>a partir del segundo 30</b>, todo se desmorona para los dos: controles que se invierten, golpes que cambian solos, pasos sin querer, caídas sin que nadie te toque, botellas hacia atrás, micro-siestas y una pantalla que no se está quieta.</p>
           <p>Cada fallo te lo recuerdan en grande, con todo el cariño. A cambio, cuando un golpe entra, pega más fuerte, y si ganas te llevas una prima.</p></section>
+          <section><h3>Multijugador (experimental)</h3><p>Contra un amigo en otro móvil: uno pulsa <b>Crear sala</b> y le pasa el código de 4 letras (o el enlace); el otro pulsa <b>Unirse</b> y lo escribe. Cada uno elige luchador y pide en la barra (gratis) y la pelea empieza cuando los dos están listos. Sin policía ni modo salvaje.</p></section>
           <section><h3>Ambientes</h3><p>La terraza cambia de una pelea a otra: noche, día, lluvia, nieve o Navidad (o el que fijes en Opciones). De día la luz de la fuente no se nota. Si la jardinera aparece llena de botellines (opción, y siempre en el modo salvaje), cada uno tiene 2 más para lanzar.</p></section>
           <section><h3>Huecos de La Barra</h3><p>Puedes tomar hasta <b>7 bebidas</b> por pelea (botellines, chupitos, Peterete, Red Bull, café, agua…) y llevar <b>1 cosa para fumar</b>. Más huecos en la Tienda: <b>Hígado de hierro</b> (+1 bebida por nivel, hasta 10) y <b>Pitillera de plata</b> (segundo hueco para fumar).</p>
           <p>Para fumar hay tabaco (Marlboro, Ducados, de liar), puros, habanos y chiflos. Cada uno tarda más o menos y hace más o menos efecto; todos bajan el puntillo (unos más que otros) y, irónicamente, <b>devuelven vida</b>.</p></section>

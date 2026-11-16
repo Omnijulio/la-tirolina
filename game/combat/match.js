@@ -65,8 +65,12 @@
       this.p1 = mk(0, opts.p1, !!opts.autoplay);
       this.p2 = mk(1, opts.p2, true);
       this.fighters = [this.p1, this.p2];
-      this.brain2 = new CpuBrain(this.p2, opts.difficulty, opts.p2.character.cpu && opts.p2.character.cpu.style);
-      this.brain1 = opts.autoplay ? new CpuBrain(this.p1, 'normal', 'balanced') : null;
+      // Multijugador (experimental): sin CPU; las entradas de los dos llegan por la red (netInputs).
+      this.net = opts.net || null;
+      this.brain2 = this.net ? null : new CpuBrain(this.p2, opts.difficulty, opts.p2.character.cpu && opts.p2.character.cpu.style);
+      this.brain1 = !this.net && opts.autoplay ? new CpuBrain(this.p1, 'normal', 'balanced') : null;
+      this.viewer = this.net && this.net.side === 1 ? this.p2 : this.p1;   // a quién «ve» esta pantalla
+      if (this.net) { this.p1.seed = 137; this.p2.seed = 731; this.netStall = 0; this.netDesync = false; }
       this.bottles = new MatchBottles(this.assets.bottle, root.BOTTLE_DATA,
         { groundY: C.GROUND, minX: -80, maxX: 1040, onHit: (h) => this.onBottleHit(h) }, this);
       // Ambiente (noche, día, lluvia, nieve, Navidad) y capa opcional de la jardinera.
@@ -111,7 +115,13 @@
       this.startRound();
     }
 
-    sfx(name) { if (this.o.sfx) this.o.sfx.play(name); }
+    sfx(name) {
+      if (!this.o.sfx) return;
+      // El sonido no debe gastar el azar con semilla del multijugador.
+      const r = Math.random;
+      if (root.__trolinaRealRandom) Math.random = root.__trolinaRealRandom;
+      try { this.o.sfx.play(name); } finally { Math.random = r; }
+    }
     intoxOf(c) { return R.intoxAt(c.loadout, this.matchTime, c.relief); }
     chaos() { return this.wild ? R.chaosAt(this.matchTime) : 0; }
     /** Torpeza efectiva: el puntillo, más el caos en el modo salvaje. */
@@ -435,6 +445,11 @@
     }
 
     controls(c, brain, opp, actions, dt) {
+      if (this.netInputs) {
+        const k = c === this.p1 ? 0 : 1, i = this.netInputs[k];
+        this.netConsumed[k] = true;
+        return { left: !!i.l, right: !!i.r, up: !!i.u, block: !!i.b, actions: this.phase === 'fight' ? i.a : [] };
+      }
       if (brain) return brain.think(dt, opp, this);
       const h = this.o.input ? this.o.input.held : {};
       return { left: !!h.left, right: !!h.right, up: !!h.up, block: !!h.block, actions: this.phase === 'fight' ? actions : [] };
@@ -657,6 +672,7 @@
     result() {
       return {
         won: this.wins[0] > this.wins[1],
+        wins: this.wins.slice(),
         roundsWon: this.wins[0], roundsLost: this.wins[1],
         perfectRounds: this.stats.perfectRounds,
         timeLeft: Math.round(this.stats.timeLeft),
@@ -672,7 +688,7 @@
     /* ---------- dibujo ---------- */
 
     draw(ctx) {
-      const I = this.levelOf(this.p1);
+      const I = this.levelOf(this.viewer);
       const W = this.wild ? 1.8 : 1;   // en el modo salvaje todo se mueve el doble
       const reduce = this.o.settings && this.o.settings.reduceMotion;
       ctx.save();
@@ -715,7 +731,7 @@
       });
       if (this.weather) this.weather.draw(ctx);
       ctx.restore();
-      this.drawFog(ctx, Math.min(1.4, I * this.p1.loadout.fogMult));
+      this.drawFog(ctx, Math.min(1.4, I * this.viewer.loadout.fogMult));
       this.drawPoliceLights(ctx, reduce);
       if (this.wild) this.drawChaos(ctx, reduce);
       ctx.save();
@@ -728,6 +744,23 @@
       ctx.restore();
       this.drawBanner(ctx);
       this.drawSnark(ctx);
+      if (this.net) this.drawNetStatus(ctx);
+    }
+
+    /** Multijugador: aviso si el otro no responde o si las dos partidas se separan. */
+    drawNetStatus(ctx) {
+      ctx.save();
+      ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = '#05070c';
+      if (this.netStall > 400) {
+        ctx.fillStyle = 'rgba(5,7,12,0.55)'; ctx.fillRect(0, 230, 960, 70);
+        ctx.font = 'bold 26px ' + FONT; ctx.fillStyle = '#f8ce73';
+        const dots = '.'.repeat(1 + Math.floor(this.netStall / 400) % 3);
+        ctx.strokeText('ESPERANDO A TU RIVAL' + dots, 480, 274); ctx.fillText('ESPERANDO A TU RIVAL' + dots, 480, 274);
+      }
+      ctx.font = 'bold 11px ' + FONT; ctx.fillStyle = this.netDesync ? '#ff6a5a' : '#8bf2ce';
+      const t = this.netDesync ? '⚠ DESINCRONIZADO' : 'MULTIJUGADOR · EXPERIMENTAL';
+      ctx.strokeText(t, 480, 150); ctx.fillText(t, 480, 150);
+      ctx.restore();
     }
 
     drawWaterFx(c) {
@@ -921,7 +954,7 @@
         ctx.font = 'bold 20px ' + FONT; ctx.textAlign = side === 1 ? 'left' : 'right';
         ctx.lineWidth = 4; ctx.strokeStyle = '#05070c'; ctx.fillStyle = '#fff';
         const nx = side === 1 ? x : x + w;
-        const label = c.char.name.toUpperCase() + (c === this.p2 ? '  · CPU' : '');
+        const label = c.char.name.toUpperCase() + (this.net ? (c === this.viewer ? '  · TÚ' : '  · RIVAL') : c === this.p2 ? '  · CPU' : '');
         ctx.strokeText(label, nx, y + h + 24); ctx.fillText(label, nx, y + h + 24);
         // asaltos ganados
         const wi = c === this.p1 ? 0 : 1;
