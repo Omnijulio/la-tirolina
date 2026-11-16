@@ -111,7 +111,7 @@
       this.blockstun = Math.max(0, this.blockstun - dt);
       this.stumble = Math.max(0, this.stumble - dt);
       this.wetT = Math.max(0, this.wetT - dt);
-      if (this.wetT > 0 && Math.random() < dt / 60 && match.drip) match.drip(this);
+      if (this.wetT > 0 && this.state === 'fight' && match.drip) match.drip(this);
 
       // Agarrado o dentro de la fuente: la posición la controla el combate.
       if (this.state === 'grabbed' || this.state === 'soaked') { this.sync(); return; }

@@ -5,7 +5,8 @@
 
   const Game = {
     params,
-    assets: { characters: {}, stage: {}, bottle: null },
+    assets: { characters: {}, stage: {}, bottle: null, fountain: null, jardinera: null },
+    stageCache: {},
     match: null, paused: false, last: null,
     session: { mode: 'quick', p1: 'barbas', p2: null, difficulty: 'normal', order: {}, cpuOrder: {}, storyIndex: 0 },
 
@@ -66,6 +67,11 @@
       for (const layer of root.TERRACE_STAGE_DATA.layers) jobs.push([layer.image, (img) => { this.assets.stage[layer.id] = img; }]);
       jobs.push([root.BOTTLE_DATA.image, (img) => { this.assets.bottle = img; }]);
       for (const c of root.TROLINA_CHARACTERS) jobs.push([c.atlas, (img) => { this.assets.characters[c.id] = img; }]);
+      if (root.TROLINA_FOUNTAIN_DATA) {
+        this.assets.fountain = {};
+        for (const [k, src] of Object.entries(root.TROLINA_FOUNTAIN_DATA.images)) jobs.push([src, (img) => { this.assets.fountain[k] = img; }]);
+      }
+      if (root.TROLINA_STAGE_EXTRAS) jobs.push([root.TROLINA_STAGE_EXTRAS.jardinera, (img) => { this.assets.jardinera = img; }]);
       if (root.POLICE_DATA) {
         this.assets.police = {};
         jobs.push([root.POLICE_DATA.officer.image, (img) => { this.assets.police.officer = img; }]);
@@ -73,6 +79,22 @@
       }
       let done = 0;
       await Promise.all(jobs.map(([src, set]) => this.loadImage(src).then((img) => { set(img); onProgress(++done / jobs.length); })));
+      this.stageCache.noche = this.assets.stage;
+    },
+
+    stageById(id) { return (root.TROLINA_STAGES || []).find((s) => s.id === id) || { id: 'noche', name: 'Noche', night: true, weather: null }; },
+
+    /** Carga (una vez) las tres capas de un ambiente. Si falla, se queda la noche. */
+    loadStage(id) {
+      if (this.stageCache[id]) return Promise.resolve(this.stageCache[id]);
+      const st = this.stageById(id), imgs = {};
+      const jobs = Object.entries(st.layers || {}).map(([k, src]) => this.loadImage(src).then((img) => { imgs[k] = img; }));
+      return Promise.all(jobs).then(() => (this.stageCache[id] = imgs)).catch(() => this.assets.stage);
+    },
+
+    pickStage() {
+      const ids = (root.TROLINA_STAGES || [{ id: 'noche' }]).map((s) => s.id);
+      return params.get('stage') && ids.includes(params.get('stage')) ? params.get('stage') : R.pickStage(Save.data.settings.stage, ids);
     },
 
     applySettings() {
@@ -132,9 +154,11 @@
       const s = this.session;
       s.cpuOrder = R.cpuOrder(s.difficulty, this.charById(s.p2));
       s.fountain = R.pickFountain(Save.data.settings.fountain, Save.data.settings.fountainLight);
+      s.stage = this.pickStage();
+      const loading = this.loadStage(s.stage);
       const cine = root.TROLINA_CINEMATICS || {};
       const scenes = (s.mode === 'story' && cine['story-' + s.storyIndex]) || cine['vs-' + s.p2];
-      const vs = () => UI.show('vs', { onDone: () => this.startMatch() });
+      const vs = () => loading.then(() => UI.show('vs', { onDone: () => this.startMatch() }));
       if (scenes && scenes.length) UI.show('cinematic', { scenes, onDone: vs });
       else vs();
     },
@@ -143,8 +167,13 @@
       const s = this.session, d = Save.data;
       const c1 = this.charById(s.p1), c2 = this.charById(s.p2);
       const items = root.TROLINA_BAR_ITEMS, ups = root.TROLINA_UPGRADES;
+      if (!s.stage) s.stage = 'noche';
+      const loaded = this.stageCache[s.stage];
+      const stage = loaded ? this.stageById(s.stage) : this.stageById('noche');
       this.match = new root.Match({
         assets: this.assets,
+        stage, stageImages: loaded || this.assets.stage,
+        jardinera: !!(d.settings.jardinera || s.wild),
         p1: { character: c1, loadout: R.computeLoadout(c1, s.order, d.upgrades, items, ups, { wild: s.wild }) },
         p2: { character: c2, loadout: R.computeLoadout(c2, s.cpuOrder, {}, items, ups, { wild: s.wild }) },
         wild: !!s.wild,
@@ -301,7 +330,9 @@
         wild: params.has('wild')
       });
       this.session.cpuOrder = R.cpuOrder(this.session.difficulty, this.charById(this.session.p2));
-      this.startMatch();
+      this.session.fountain = R.pickFountain(Save.data.settings.fountain, Save.data.settings.fountainLight);
+      this.session.stage = this.pickStage();
+      this.loadStage(this.session.stage).then(() => this.startMatch());
     },
 
     debugScreen(name) {
@@ -316,7 +347,9 @@
     debugQuickManual() {
       Object.assign(this.session, { mode: 'quick', wild: params.has('wild'), p1: params.get('p1') || 'barbas', p2: params.get('p2') || 'runner', order: { botellin: Number(params.get('bottles') || 3) } });
       this.session.cpuOrder = R.cpuOrder(this.session.difficulty, this.charById(this.session.p2));
-      this.startMatch();
+      this.session.fountain = R.pickFountain(Save.data.settings.fountain, Save.data.settings.fountainLight);
+      this.session.stage = this.pickStage();
+      this.loadStage(this.session.stage).then(() => this.startMatch());
     }
   };
 

@@ -69,7 +69,18 @@
       this.brain1 = opts.autoplay ? new CpuBrain(this.p1, 'normal', 'balanced') : null;
       this.bottles = new MatchBottles(this.assets.bottle, root.BOTTLE_DATA,
         { groundY: C.GROUND, minX: -80, maxX: 1040, onHit: (h) => this.onBottleHit(h) }, this);
-      this.terrace = new TerraceStage(this.assets.stage, root.TERRACE_STAGE_DATA);
+      // Ambiente (noche, día, lluvia, nieve, Navidad) y capa opcional de la jardinera.
+      this.stageInfo = opts.stage || { id: 'noche', night: true, weather: null };
+      let stageImgs = opts.stageImages || this.assets.stage, stageData = root.TERRACE_STAGE_DATA;
+      if (opts.jardinera && this.assets.jardinera) {
+        stageImgs = { ...stageImgs, jardinera: this.assets.jardinera };
+        const L = stageData.layers;
+        stageData = { ...stageData, layers: [L[0], L[1], { id: 'jardinera', name: 'Montón de la jardinera', parallax: L[1].parallax }, ...L.slice(2)] };
+      }
+      this.terrace = new TerraceStage(stageImgs, stageData);
+      const reduceFx = !!(opts.settings && opts.settings.reduceMotion);
+      this.weather = this.stageInfo.weather && root.TrolinaWeather ? new root.TrolinaWeather(this.stageInfo.weather, { reduce: reduceFx }) : null;
+      this.waterFx = [];
       this.round = 0; this.wins = [0, 0];
       this.matchTime = 0; this.t = 0;
       this.camera = 0; this.shake = 0; this.hitstop = 0; this.slowmo = 0;
@@ -81,7 +92,7 @@
       this.police = null; this.separate = null;
       // Fuente a la izquierda: encendida/apagada y con/sin luz.
       const fs = opts.fountain || { on: true, lit: true };
-      this.fountain = root.Fountain ? new root.Fountain({ on: fs.on, lit: fs.lit }) : null;
+      this.fountain = root.Fountain ? new root.Fountain({ on: fs.on, lit: fs.lit, night: this.stageInfo.night !== false, art: this.assets.fountain }) : null;
       this.grab = null; this.fountainNoted = false;
       // Modo salvaje (experimental): caos desde el segundo 30 y mensajes pasivo-agresivos.
       this.wild = !!opts.wild;
@@ -189,7 +200,22 @@
 
     /* ---------- ultimate de la fuente (El Peñista) ---------- */
 
+    /** Efecto de agua (mojado/goteo) pegado a un luchador. */
+    waterOn(c, kind) {
+      const D = root.TROLINA_FOUNTAIN_DATA, A = this.assets.fountain;
+      if (!D || !A) return;
+      const img = kind === 'mojado' ? A.wet : A.drip;
+      if (img) this.waterFx.push({ c, img, def: D.fx[kind], t: 0 });
+    }
+
     drip(c) {
+      // Goteo mientras está mojado: una tanda cada ~1,3 s.
+      if (this.assets.fountain && this.assets.fountain.drip) {
+        if (this.t - (c.dripAt || -1e9) < 1300) return;
+        c.dripAt = this.t;
+        return this.waterOn(c, 'goteo');
+      }
+      if (Math.random() > 0.27) return;
       const hb = c.f.getHurtbox();
       this.dusts.push({ drop: true, x: hb.x + Math.random() * hb.w, y: hb.y + Math.random() * hb.h * 0.7, vx: 0, vy: 60, r: 2, t: 0, life: 500 });
     }
@@ -249,7 +275,7 @@
           g.phase = 'throw'; g.t = 0;
           att.poseOverride = null; att.f.play('throwGrab', true);
           g.x0 = def.cx; g.y0 = def.y;
-          g.x1 = fo.x; g.y1 = fo.waterY - C.GROUND + 10;
+          g.x1 = fo.x; g.y1 = fo.waterY - C.GROUND + 50;
           g.dur = Math.min(1100, 600 + Math.abs(g.x0 - g.x1) * 0.6);
           this.sfx('swing');
         }
@@ -281,8 +307,10 @@
         return;
       }
       if (g.phase === 'soak') {
-        def.cx = fo.x; def.y = fo.waterY - C.GROUND + 18; def.sync();
+        def.cx = fo.x; def.y = fo.waterY - C.GROUND + 56 + Math.sin(g.t / 160) * 3; def.sync();
         if (!att.attacking) att.locked = false;
+        // Con los chorros encendidos le sigue cayendo agua encima.
+        if (fo.on && this.t - (g.sprayAt || -1e9) > 700) { g.sprayAt = this.t; fo.fx.push({ img: this.assets.fountain && this.assets.fountain.wet, def: root.TROLINA_FOUNTAIN_DATA && root.TROLINA_FOUNTAIN_DATA.fx.mojado, x: fo.x + (Math.random() - 0.5) * 50, y: fo.waterY + 30, t: 0, scale: 1.5 }); }
         if (g.t > 1100) {
           // Sale de la fuente de un salto, empapado.
           def.state = 'fight'; def.f.enabled = true;
@@ -290,6 +318,7 @@
           def.facing = Math.sign(att.cx - def.cx) || 1;
           def.hitstun = 250;
           fo.splash(fo.x + 40, 0.5);
+          this.waterOn(def, 'mojado');
           att.locked = false; att.poseOverride = null;
           this.grab = null;
         }
@@ -420,6 +449,9 @@
       const actions = this.o.input ? this.o.input.take() : [];
       if (this.superText) this.superText.t += real;
       if (this.fountain) this.fountain.update(real);
+      if (this.weather) this.weather.update(real);
+      for (const w of this.waterFx) w.t += real;
+      this.waterFx = this.waterFx.filter((w) => w.def && w.img && w.t < w.def.frames.length * w.def.ms);
       if (this.superFreeze > 0) {
         this.superFreeze -= real;
         if (actions.length && this.o.input) this.o.input.queue.unshift(...actions);
@@ -678,8 +710,10 @@
           if (this.fountain) { if (soaking) this.fountain.drawFront(c); else this.fountain.drawDrops(c); }
           if (this.police) this.police.drawFront(c);
           this.drawWorldFx(c);
+          this.drawWaterFx(c);
         }
       });
+      if (this.weather) this.weather.draw(ctx);
       ctx.restore();
       this.drawFog(ctx, Math.min(1.4, I * this.p1.loadout.fogMult));
       this.drawPoliceLights(ctx, reduce);
@@ -694,6 +728,16 @@
       ctx.restore();
       this.drawBanner(ctx);
       this.drawSnark(ctx);
+    }
+
+    drawWaterFx(c) {
+      const draw = root.trolinaDrawWaterFx;
+      if (!draw) return;
+      for (const w of this.waterFx) {
+        const f = w.c;
+        if (f.state === 'soaked' || f.state === 'grabbed') continue;
+        draw(c, w.img, w.def, Math.floor(w.t / w.def.ms), f.cx, C.GROUND + f.y, C.S, 0.9, f.facing < 0);
+      }
     }
 
     /** Modo salvaje: tintes que cambian, apagones y viñeta de mareo. */

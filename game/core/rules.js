@@ -68,6 +68,12 @@
     return { on, lit };
   }
 
+  /** Ambiente del combate: el fijado en Opciones o uno al azar de la lista. */
+  function pickStage(pref, ids, rng) {
+    if (ids.includes(pref)) return pref;
+    return ids[Math.floor((rng || Math.random)() * ids.length) % ids.length];
+  }
+
   /** Escalado dentro de un combo (n = número de golpe del combo, 1 = primero). */
   function comboScale(n) {
     const k = Math.max(0, (n || 1) - 1);
@@ -275,7 +281,7 @@
     BOTTLE_PRICE, MAX_BOTTLES, START_COINS, DIFFICULTIES, DIFFICULTY_ORDER, MOVES,
     ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX, NOISE, POLICE, WET, FOUNTAIN,
     WILD, chaosAt, wildLevel,
-    comboScale, meterGain, sugarPhase, bottleNoise, policeOutcome, pickFountain,
+    comboScale, meterGain, sugarPhase, bottleNoise, policeOutcome, pickFountain, pickStage,
     formatMoney, orderCost, sanitizeOrder, computeLoadout, intoxAt, impairment,
     damageFor, matchReward, cpuOrder, describeOrder, clampQty
   };

@@ -250,6 +250,7 @@ header.bar h2 { flex: 1; font-size: clamp(18px, 3.4vw, 28px); }
 .vs-mid { display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 1; }
 .vs-mid b { font: 900 clamp(48px, 9vw, 110px)/1 var(--display); color: #fff; text-shadow: 0 0 20px #ff2d55, 0 4px 0 #000; animation: pop .5s .2s both; }
 .vs-mid span { font-size: 13px; color: #fff; background: #000a; padding: 4px 10px; border-radius: 12px; }
+.vs-mid .stage-state { font-weight: 700; color: #f8ce73; }
 .vs-mid .fountain-state { color: #9ff0ff; max-width: 220px; text-align: center; font-size: 12px; }
 
 /* calabozo y policía */

@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.6** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.7** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -42,6 +42,12 @@ Estado: **v0.6** (16/11/2026). Un jugador contra la CPU, en navegador de escrito
 - Equilibrio: cuando un golpe entra pega más; los combates acaban. Prima del 50 % por ganar.
 - Pendiente de ajustar tras probarlo jugando: frecuencia de cada efecto y de los mensajes.
 
+## Hecho en v0.7
+
+- Fuente definitiva: chorros con arranque y bucle, salpicadura al caer, agua encima mientras está dentro, goteo al salir. Con luz / sin luz.
+- Cinco ambientes: noche, día, lluvia (con lluvia animada), nieve (con copos) y Navidad. Aleatorio o fijo en Opciones.
+- Montón de botellines, vasos y tabaco en la jardinera (opción; fijo en el Modo salvaje).
+
 ## Próximas fases propuestas
 
 ### Fase 1 — Publicar y probar con amigos
@@ -55,8 +61,9 @@ Estado: **v0.6** (16/11/2026). Un jugador contra la CPU, en navegador de escrito
 - [ ] Pose propia de fumar y de lanzar el dardo.
 
 ### Fase 2b — Fuente y fondos nocturnos (assets en camino)
-- [ ] Sustituir la fuente provisional por los assets definitivos (4 estados + murete delantero).
-- [ ] Nuevos fondos/escenarios nocturnos con el formato de tres planos.
+- [x] Fuente definitiva.
+- [x] Ambientes noche, día, lluvia, nieve y Navidad.
+- [ ] ¿Ambientes ligados a combates de la historia?
 
 ### Fase 3 — Cinemáticas
 - [ ] Ilustraciones o vídeos cortos por combate en `assets/cinematics/` y registrarlos en `game/data/cinematics.js` (ya admite `image` y `video`).

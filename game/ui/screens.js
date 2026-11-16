@@ -398,7 +398,7 @@
       const node = el(`<div class="scr vs">
         <div class="side l" style="--c:${c1.color}"><canvas width="192" height="176"></canvas><h3>${esc(c1.name)}</h3><p>Tú · ${esc(R.describeOrder(s.order, items))}</p></div>
         <div class="vs-mid"><b>VS</b>${s.wild ? '<span class="wild-badge">MODO SALVAJE</span>' : ''}<span>${esc(R.DIFFICULTIES[s.difficulty].name)}${s.mode === 'story' ? ' · Historia ' + (s.storyIndex + 1) + '/' + root.TROLINA_STORY.length : ''}</span>
-          ${s.fountain ? `<span class="fountain-state">⛲ Fuente ${s.fountain.on ? 'encendida' : 'apagada'} · ${s.fountain.lit ? 'con luz' : 'sin luz'}${s.fountain.on ? ' — tapa el ruido de los botellines' : ''}</span>` : ''}</div>
+          ${(() => { const st = g.stageById(s.stage || 'noche'); return `<span class="stage-state">${st.icon || ''} ${esc(st.name)}</span>` + (s.fountain ? `<span class="fountain-state">⛲ Fuente ${s.fountain.on ? 'encendida' : 'apagada'}${st.night !== false ? ' · ' + (s.fountain.lit ? 'con luz' : 'sin luz') : ''}${s.fountain.on ? ' — tapa el ruido de los botellines' : ''}</span>` : ''); })()}</div>
         <div class="side r" style="--c:${c2.color}"><canvas width="192" height="176"></canvas><h3>${esc(c2.name)}</h3><p>CPU · ${esc(R.describeOrder(s.cpuOrder, items))}</p></div>
         <span class="hint">Toca para empezar</span>
       </div>`);
@@ -541,6 +541,9 @@
             <select data-k="touch"><option value="auto">Automático</option><option value="always">Mostrar siempre</option><option value="never">Ocultar</option></select></label>
           <label class="row">Reducir mareo de pantalla <input type="checkbox" data-k="reduceMotion"></label>
           <label class="row">Policía Local (ruido, multas y calabozo) <input type="checkbox" data-k="police"></label>
+          <label>Ambiente
+            <select data-k="stage"><option value="random">Aleatorio en cada pelea</option>${(root.TROLINA_STAGES || []).map((st) => `<option value="${st.id}">${st.icon} ${esc(st.name)}</option>`).join('')}</select></label>
+          <label class="row">Botellines y vasos en la jardinera <input type="checkbox" data-k="jardinera"></label>
           <label>Fuente de la terraza
             <select data-k="fountain"><option value="random">Aleatoria en cada pelea</option><option value="on">Siempre encendida</option><option value="off">Siempre apagada</option></select></label>
           <label>Luz de la fuente
@@ -633,6 +636,7 @@
           <p><b>Bolsa de azúcar (60 €)</b>: 30 s a toda velocidad y sin puntillo; luego se pasa y a los 45 s te quedas inconsciente unos segundos.</p></section>
           <section><h3>Modo salvaje (experimental)</h3><p>Una pelea rápida donde los objetos pegan más (para bien y para mal) y, <b>a partir del segundo 30</b>, todo se desmorona para los dos: controles que se invierten, golpes que cambian solos, pasos sin querer, caídas sin que nadie te toque, botellas hacia atrás, micro-siestas y una pantalla que no se está quieta.</p>
           <p>Cada fallo te lo recuerdan en grande, con todo el cariño. A cambio, cuando un golpe entra, pega más fuerte, y si ganas te llevas una prima.</p></section>
+          <section><h3>Ambientes</h3><p>La terraza cambia de una pelea a otra: noche, día, lluvia, nieve o Navidad (o el que fijes en Opciones). De día la luz de la fuente no se nota. En el modo salvaje, la jardinera aparece llena de botellines, vasos y tabaco.</p></section>
           <section><h3>La fuente</h3><p>A la izquierda de la terraza hay una fuente, a veces <b>encendida</b> (con chorros) y a veces <b>apagada</b>, con o sin luz. Encendida hace tanto ruido que <b>los botellines no cuentan para la policía</b>.</p>
           <p><b>El Peñista</b> tiene el ultimate <b>¡Al pilón!</b>: se lanza a por el rival, lo agarra y lo tira a la fuente. Quita muchísima vida, no se puede bloquear y deja al rival <b>mojado</b> y más lento durante 12 s.</p></section>
           <section><h3>Policía Local</h3><p>Cada golpe, botella rota o KO hace <b>ruido</b> (barra bajo el reloj). Lo que más ruido hace es <b>lanzar muchos botellines seguidos</b>; el ruido baja solo si os calmáis, y el puntillo os hace más escandalosos.</p>

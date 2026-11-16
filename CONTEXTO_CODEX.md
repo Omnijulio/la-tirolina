@@ -1,6 +1,6 @@
 # Contexto para continuar en Codex
 
-Estado: **v0.6** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
+Estado: **v0.7** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
 
 ## Objetivo del usuario y decisiones aceptadas
 
@@ -22,6 +22,8 @@ Peticiones incorporadas, en orden:
 9. **v0.5 — La fuente**: ultimate de **El Peñista** «Al pilón» (lo tira a una fuente a la izquierda: mucho daño y queda mojado y más lento). La fuente puede estar encendida o apagada y con o sin luz; encendida, su ruido tapa el de los botellines y la policía no viene por ellos. La fuente es provisional (dibujada por código) hasta que lleguen los assets; formato esperado en `FUENTE.md`. Vendrán también fondos nocturnos nuevos.
 
 10. **v0.6 — Modo salvaje (experimental)**: pelea rápida aparte en la que los objetos pegan más y, desde el segundo 30 de partida, el juego se vuelve casi injugable para los dos; cada fallo sale en pantalla con un mensaje pasivo-agresivo.
+
+11. **v0.7 — Arte de la fuente y ambientes**: fuente definitiva con chorros animados, salpicadura, mojado y goteo; cinco ambientes (noche, día, lluvia, nieve, Navidad) y montón opcional en la jardinera. Ver `FUENTE.md`.
 
 El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
@@ -73,6 +75,10 @@ Flujo: Título → (Historia | Pelea rápida) → Selección (luchador; en pelea
 - **Bolsa de azúcar** (60 €): 0–30 s de combate sin puntillo, +40 % de velocidad y animaciones un 20 % más rápidas; 30–45 s vuelve el puntillo («¡BAJÓN DE AZÚCAR!»); a los 45 s el personaje se desmaya 6 s, tumbado e indefenso, y recibe un 50 % más de daño. Se puede cambiar a «pierde el asalto» en `faint()` de `combatant.js` si se prefiere más duro.
 - Objetos: café (−20 % puntillo, +4 % velocidad), agua (−10 % puntillo, +5 vida), tortilla (+12 vida, sube 30 % más lento), bocata (+25 vida, −8 % velocidad), orujo (+15 % fuerza, 2,5 de puntillo, sin envase), energética (+12 % velocidad, sube 20 % más rápido), gafas de sol (mitad de niebla visual).
 - La CPU también pide en la barra según dificultad y personalidad; se muestra en la pantalla VS.
+
+### Fuente y ambientes (v0.7)
+
+Ver `FUENTE.md`. `Fountain` (`game/combat/fountain.js`) usa `TROLINA_FOUNTAIN_DATA` y las imágenes de `Game.assets.fountain`; tintes de luz con lienzos auxiliares (sin `getImageData`). `Match` recibe `stage` (de `TROLINA_STAGES`), `stageImages` y `jardinera`; `Game.loadStage(id)` carga las capas bajo demanda y cae en la noche si fallan. `?stage=<id>` fuerza un ambiente en las URL de prueba.
 
 ### Modo salvaje (v0.6, experimental)
 
@@ -176,7 +182,7 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 - Las variantes de personaje son recoloreados con la misma cara; no hay arte propio por personaje.
 - No hay animaciones dedicadas de caminar, salto, recibir golpe, caída ni victoria (se simulan con poses existentes).
 - Solo El Barbas (dardo) y El Peñista (pilón) tienen ultimate; no hay agacharse ni especiales con comandos.
-- La fuente es provisional (dibujada por código) hasta recibir los assets.
+- Lluvia y nieve son visuales: no cambian la jugabilidad.
 - Cinemáticas: solo texto y retratos provisionales.
 - Sin música; los efectos de sonido son sintéticos.
 - Sin multijugador (ni local ni online).

@@ -1,25 +1,32 @@
-# La fuente y el ultimate «Al pilón» (v0.5)
+# La fuente, los ambientes y «Al pilón»
 
-## Qué hay ya
+## La fuente (arte definitivo, v0.7)
 
-- **Fuente a la izquierda de la terraza** (`game/combat/fountain.js`). Cuatro estados: encendida/apagada × con luz/sin luz. Por defecto es aleatoria en cada pelea; se fija en **Opciones → Fuente / Luz de la fuente**. La pantalla VS indica el estado.
-- **Ultimate de El Peñista — «Al pilón»** (`special.id = 'fuente'` en `game/data/characters.js`). Con la barra llena: congelado de pantalla, carga hacia el rival (hasta ~0,5 s), lo agarra, lo levanta por encima de la cabeza y lo lanza en parábola a la fuente. Chapuzón: **38 de daño base** × fuerza (no se puede bloquear), salpicadura, y el rival queda **mojado 12 s**: un 30 % más lento al moverse y un 15 % en sus animaciones, con brillo azulado y gotas (`TrolinaRules.WET`). Si la carga no llega, «¡SE LE ESCAPA!» y se pierde la barra. La CPU lo usa cuando está cerca.
-- **Fuente encendida = ruido de agua**: los botellines (lanzar y romper) **no suman ruido** para la Policía Local (`TrolinaRules.FOUNTAIN.masksBottleNoise`). El resto de ruidos sí cuentan. Suena un rumor de agua mientras está encendida.
+Del paquete `la-trolina-assets-clima-fuente` (integrado; el paquete original queda fuera de git):
 
-La fuente actual es **provisional**: se dibuja por código en pixel art (resolución nativa ×2,5) hasta que lleguen los assets definitivos.
+| En el juego | Original | Uso |
+| --- | --- | --- |
+| `assets/fountain/back.png` | `fuente/base-trasera.png` | Pila trasera y agua, detrás de quien cae dentro |
+| `assets/fountain/front.png` | `fuente/borde-delantero.png` | Borde delantero, encima de quien está dentro |
+| `assets/fountain/jets.png` | `fuente/chorros-atlas.png` | Chorros: arranque (6), bucle (6), apagado (6) |
+| `assets/fx/water-impact.png` | `efectos/impacto-agua-atlas.png` | Salpicadura al caer en la pila |
+| `assets/fx/water-wet.png` | `efectos/mojado-atlas.png` | Agua que le cae al que está dentro / al salir |
+| `assets/fx/water-drip.png` | `efectos/goteo-atlas.png` | Goteo mientras está mojado |
+| `assets/fountain/fountain-data.js` | `assets.json` | Celdas, anclas, boquillas, zona de agua y tiempos |
 
-## Assets que necesita la versión definitiva
+- Colocación: ancla (128,176) en x=172, y=474 del canvas 960×540 (un poco detrás de la línea de apoyo 486, para que los luchadores pasen por delante) a escala 1,4.
+- Encendida: los tres surtidores arrancan al empezar la pelea y siguen en bucle, desfasados. Apagada: agua quieta.
+- Luz: con luz, brillo azul sobre el agua y el suelo; sin luz, la fuente se oscurece. De día se ve al natural.
+- Orden de dibujo: pila trasera → chorros → (luchador dentro) → borde delantero → salpicadura y gotas.
 
-Para sustituir el dibujo provisional sin tocar la lógica, el formato más sencillo es el mismo que el del escenario:
+## Ambientes (v0.7)
 
-| Archivo | Contenido |
-| --- | --- |
-| `assets/fountain/back-off-dark.png`, `back-off-lit.png` | Fuente apagada (pilón trasero, agua quieta, columna) sin y con luz |
-| `assets/fountain/back-on-dark-00..05.png`, `back-on-lit-00..05.png` | Encendida: 4–6 fotogramas en bucle de los chorros |
-| `assets/fountain/front-dark.png`, `front-lit.png` | Murete delantero del pilón (se pinta encima del personaje que cae dentro) |
+`game/data/stages.js`: **noche** (el escenario original), **día**, **lluvia**, **nieve** y **Navidad**, con las mismas tres capas de 544×270 (`assets/stages/<id>/`). Aleatorio en cada pelea o fijo en Opciones; se cargan bajo demanda antes de la pantalla VS. Lluvia y nieve añaden partículas animadas (`game/combat/weather.js`).
 
-- PNG transparentes **alineados con el escenario** (lienzo 544×270, mismas coordenadas que `assets/stage/*.png`), o bien sprites sueltos indicando el punto de apoyo en el suelo.
-- Indicar la **línea del agua** (y nativa) y el centro del pilón para el punto de caída.
-- Si la fuente pasa a formar parte de nuevos fondos/escenarios nocturnos, cada escenario puede declarar su fuente (posición y estados) en su JSON.
+Extra: `assets/stages/extra-jardinera.png`, montón de botellines, vasos y tabaco sobre la jardinera central. Opción en Opciones; siempre visible en el Modo salvaje.
 
-Con eso, `Fountain.drawBack/drawFront` cargan las imágenes en lugar del dibujo procedural; el resto (agarre, daño, mojado, ruido) no cambia.
+## Ultimate de El Peñista — «Al pilón»
+
+Con la barra llena: carga hacia el rival, lo agarra, lo levanta y lo lanza a la fuente. **38 de daño base** × fuerza, imbloqueable, y queda **mojado 12 s** (30 % más lento, brillo azulado y goteo). Con la fuente encendida le sigue cayendo agua mientras está dentro.
+
+Fuente encendida = ruido de agua: los botellines no suman ruido para la Policía Local (`TrolinaRules.FOUNTAIN.masksBottleNoise`).
