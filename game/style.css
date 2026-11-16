@@ -178,6 +178,17 @@ header.bar h2 { flex: 1; font-size: clamp(18px, 3.4vw, 28px); }
 .item .ico { font-size: 26px; text-align: center; }
 .item .ico img { width: 24px; height: 32px; image-rendering: pixelated; transform: scale(1.2); }
 .item .ico img.drink { transform: scale(1.4); }
+.items h4.group { margin: 10px 2px 2px; font: 800 14px var(--display, inherit); letter-spacing: .5px; color: #f8ce73; }
+.items h4.group span { color: #c9d3df; font-weight: 600; }
+.item.nofit { opacity: .5; }
+.slots-bar { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 0 0 8px; font-size: 14px; }
+.slots-bar .slot-group { display: flex; align-items: center; gap: 8px; background: #0f1724cc; border: 1px solid #ffffff1f; border-radius: 10px; padding: 5px 10px; }
+.slots-bar .pips { display: flex; gap: 3px; }
+.slots-bar .pips i { width: 10px; height: 16px; border-radius: 3px; background: #ffffff1a; border: 1px solid #ffffff2a; }
+.slots-bar .pips i.on.drink { background: #e3a43a; border-color: #ffd27a; }
+.slots-bar .pips i.on.smoke { background: #c9d3df; border-color: #ffffff; }
+.crate button:disabled { opacity: .25; }
+.vs-mid .stage-state.jard { color: #b9f28a; font-weight: 600; font-size: 12px; max-width: 220px; text-align: center; }
 .item .txt b { font-size: 14px; }
 .item .price { color: var(--yellow); font-weight: 800; font-size: 13px; margin-left: 4px; }
 .item p { margin: 1px 0 0; font-size: 12px; }
@@ -297,8 +308,19 @@ header.bar h2 { flex: 1; font-size: clamp(18px, 3.4vw, 28px); }
 .scr.loading .progress { width: min(360px, 80%); height: 10px; background: #ffffff14; border-radius: 6px; overflow: hidden; }
 .scr.loading .progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--mint), var(--yellow)); transition: width .2s; }
 
+.fs-btn { position: fixed; z-index: 40; left: 50%; bottom: max(8px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; border: 2px solid #fff5;
+  background: #f8ce73; color: #1a1206; font: 800 14px system-ui, sans-serif; box-shadow: 0 4px 16px #000a; cursor: pointer;
+  animation: fsPulse 2.6s ease-in-out infinite; touch-action: manipulation; }
+.fs-btn[hidden] { display: none; }
+body.fighting .fs-btn { padding: 5px 11px; font-size: 12px; opacity: .88; }
+@keyframes fsPulse { 0%, 100% { box-shadow: 0 4px 16px #000a, 0 0 0 0 #f8ce7366; } 50% { box-shadow: 0 4px 16px #000a, 0 0 0 8px #f8ce7300; } }
+.fs-help { position: fixed; inset: 0; z-index: 50; background: #000b; display: grid; place-items: center; padding: 20px; }
+.fs-help > div { max-width: 420px; background: #121a28; border: 1px solid #ffffff2a; border-radius: 14px; padding: 18px; color: #fff; text-align: center; }
+.fs-help p { color: #c9d3df; line-height: 1.45; }
 .toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translate(-50%, 30px); opacity: 0; background: #3a0e16; border: 1px solid var(--red); color: #fff; padding: 10px 16px; border-radius: 8px; pointer-events: none; z-index: 20; text-align: center; max-width: 90vw; }
 .toast.show { animation: toast 2.2s both; }
+body:not(.is-fullscreen) .toast { bottom: max(58px, env(safe-area-inset-bottom)); }
 .toast.snarky { background: #1a1124; border-color: #f8ce73; font-style: italic; font-weight: 700; }
 .wild-badge { display: inline-block; vertical-align: middle; font: 800 12px var(--display); letter-spacing: 1px; color: #fff; background: linear-gradient(90deg, #7a2cff, #ff2c6a); padding: 4px 8px; border-radius: 6px; margin-left: 8px; }
 .menu button.wild { border-color: #ff2c6a88; background: linear-gradient(90deg, #2a0f2fdd, #101a2bdd); }

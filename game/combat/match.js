@@ -292,7 +292,7 @@
           fo.splash(def.cx, 1.2);
           this.sfx('splash'); this.shake = 14; this.hitstop = 160;
           this.addNoise(R.FOUNTAIN.splashNoise);
-          const dmg = R.damageFor('fountain', att.loadout.power, att === this.p2 ? this.diff.cpuDamage : 1);
+          const dmg = R.damageFor('fountain', att.powerNow, att === this.p2 ? this.diff.cpuDamage : 1);
           def.grabRot = 0;
           const res = def.splashHit(dmg);
           if (att === this.p1) this.stats.ultimates++;
@@ -583,7 +583,7 @@
       const sc = kind === 'dart' ? { damage: 1, knockback: 1, hitstun: 1 } : R.comboScale(n);
       const mv = R.MOVES[kind];
       const wildBonus = this.wild ? 1 + R.WILD.damageBonus * Math.min(1, this.chaos()) : 1;
-      const dmg = R.damageFor(kind, att.loadout.power, att === this.p2 ? this.diff.cpuDamage : 1) * sc.damage * wildBonus;
+      const dmg = R.damageFor(kind, att.powerNow, att === this.p2 ? this.diff.cpuDamage : 1) * sc.damage * wildBonus;
       if (this.wild && def === this.p1 && this.levelOf(def) > 0.6 && Math.random() < 0.25) this.say(def, 'gotHit');
       const res = def.takeHit(kind, dmg, att.cx, { hitstun: mv.hitstun * sc.hitstun, knockback: mv.knockback * sc.knockback });
       this.addNoise(res === 'block' ? R.NOISE.block : res === 'ko' ? R.NOISE.ko : kind === 'dart' ? R.NOISE.dart : R.NOISE.hit);
@@ -974,9 +974,11 @@
           ctx.fillStyle = '#f2efe6'; ctx.fillRect(ix, my + 19, 12, 4);
           ctx.fillStyle = '#ff7a2e'; ctx.fillRect(ix + (side === 1 ? 12 : -2), my + 19, 3, 4);
           sx += side * 20;
-          status('×' + c.cigs, c.smoking ? '#ffb347' : '#e8e6df');
+          const cur = c.currentSmoke, rest = cur ? c.cigs - cur.left : 0;
+          status(cur ? cur.short.toUpperCase() + ' ×' + cur.left + (rest ? ' (+' + rest + ')' : '') : '×0', c.smoking ? '#ffb347' : '#e8e6df');
         }
         if (c.wetT > 0) status('MOJADO ' + Math.ceil(c.wetT / 1000) + 's', '#9ff0ff');
+        for (const b of c.buffs || []) status(b.label + ' ' + Math.ceil((b.until - c.t) / 1000) + 's', b.powerPct > 0 ? '#ffd27a' : '#b7c4ff');
         if (c.invertT > 0) status('⇄ AL REVÉS', (this.t % 400) < 200 ? '#ff4d5e' : '#ffb3a8');
         if (c.loadout.sugar) {
           const ph = R.sugarPhase(c.loadout, this.matchTime);

@@ -34,6 +34,7 @@
         if (document.hidden && this.match && !this.match.ended && !this.paused) this.pause();
       });
       this.applySettings();
+      this.setupFullscreen();
       UI.init(this);
       UI.show('loading');
       try {
@@ -82,6 +83,9 @@
       this.stageCache.noche = this.assets.stage;
     },
 
+    /** ¿Sale el montón de botellines en la jardinera? (opción, o siempre en el Modo salvaje) */
+    jardinera() { return !!(Save.data.settings.jardinera || this.session.wild); },
+
     stageById(id) { return (root.TROLINA_STAGES || []).find((s) => s.id === id) || { id: 'noche', name: 'Noche', night: true, weather: null }; },
 
     /** Carga (una vez) las tres capas de un ambiente. Si falla, se queda la noche. */
@@ -112,6 +116,41 @@
       const mode = Save.data.settings.touch;
       const coarse = root.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in root;
       b.classList.toggle('touch', mode === 'always' || (mode === 'auto' && coarse));
+    },
+
+    /**
+     * Botón de pantalla completa siempre visible (en todas las pantallas, también peleando)
+     * mientras no esté a pantalla completa. En iPhone, el navegador no lo permite: explica
+     * cómo añadir el juego a la pantalla de inicio, que se abre a pantalla completa.
+     */
+    setupFullscreen() {
+      const btn = document.getElementById('fsBtn');
+      if (!btn) return;
+      const doc = document;
+      const canFs = !!(doc.fullscreenEnabled || doc.webkitFullscreenEnabled);
+      const standalone = () => (root.matchMedia && root.matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches) || root.navigator.standalone === true;
+      const update = () => {
+        const isFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement) || standalone();
+        btn.hidden = isFs;
+        doc.body.classList.toggle('is-fullscreen', isFs);
+      };
+      btn.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        Sfx.unlock();
+        if (canFs) this.toggleFullscreen(); else this.showFullscreenHelp();
+      });
+      for (const ev of ['fullscreenchange', 'webkitfullscreenchange']) doc.addEventListener(ev, () => { update(); this.layout(); });
+      root.addEventListener('resize', update);
+      update();
+    },
+
+    showFullscreenHelp() {
+      if (document.querySelector('.fs-help')) return;
+      const box = document.createElement('div');
+      box.className = 'fs-help';
+      box.innerHTML = '<div><b>Pantalla completa en iPhone</b><p>Safari no deja poner una web a pantalla completa. Pulsa <b>Compartir</b> (el cuadrado con la flecha) → <b>Añadir a pantalla de inicio</b> y abre La Trolina desde ese icono: se verá a pantalla completa y en horizontal.</p><button class="primary">Entendido</button></div>';
+      box.addEventListener('click', () => box.remove());
+      document.body.append(box);
     },
 
     toggleFullscreen() {
@@ -170,12 +209,13 @@
       if (!s.stage) s.stage = 'noche';
       const loaded = this.stageCache[s.stage];
       const stage = loaded ? this.stageById(s.stage) : this.stageById('noche');
+      const jardinera = this.jardinera();
       this.match = new root.Match({
         assets: this.assets,
         stage, stageImages: loaded || this.assets.stage,
-        jardinera: !!(d.settings.jardinera || s.wild),
-        p1: { character: c1, loadout: R.computeLoadout(c1, s.order, d.upgrades, items, ups, { wild: s.wild }) },
-        p2: { character: c2, loadout: R.computeLoadout(c2, s.cpuOrder, {}, items, ups, { wild: s.wild }) },
+        jardinera,
+        p1: { character: c1, loadout: R.computeLoadout(c1, s.order, d.upgrades, items, ups, { wild: s.wild, jardinera }) },
+        p2: { character: c2, loadout: R.computeLoadout(c2, s.cpuOrder, {}, items, ups, { wild: s.wild, jardinera, slots: R.cpuSlots(s.difficulty) }) },
         wild: !!s.wild,
         difficulty: s.difficulty,
         input: this.input, sfx: Sfx, settings: d.settings,

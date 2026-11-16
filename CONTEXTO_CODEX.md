@@ -1,6 +1,6 @@
 # Contexto para continuar en Codex
 
-Estado: **v0.7** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
+Estado: **v0.8** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
 
 ## Objetivo del usuario y decisiones aceptadas
 
@@ -24,6 +24,8 @@ Peticiones incorporadas, en orden:
 10. **v0.6 — Modo salvaje (experimental)**: pelea rápida aparte en la que los objetos pegan más y, desde el segundo 30 de partida, el juego se vuelve casi injugable para los dos; cada fallo sale en pantalla con un mensaje pasivo-agresivo.
 
 11. **v0.7 — Arte de la fuente y ambientes**: fuente definitiva con chorros animados, salpicadura, mojado y goteo; cinco ambientes (noche, día, lluvia, nieve, Navidad) y montón opcional en la jardinera. Ver `FUENTE.md`.
+
+12. **v0.8 — Huecos y tabacos**: máximo de 7 bebidas por pelea y 1 hueco para fumar; el Hígado de hierro da +1 bebida por nivel (hasta 10) y la Pitillera de plata un segundo hueco para fumar. Para fumar: Marlboro, Ducados, tabaco de liar, puro, habano y chiflo, cada uno con su tiempo y efectos; fumar devuelve vida. Con la jardinera llena, +2 botellines para lanzar cada uno. Botón de pantalla completa siempre visible.
 
 El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
@@ -75,6 +77,14 @@ Flujo: Título → (Historia | Pelea rápida) → Selección (luchador; en pelea
 - **Bolsa de azúcar** (60 €): 0–30 s de combate sin puntillo, +40 % de velocidad y animaciones un 20 % más rápidas; 30–45 s vuelve el puntillo («¡BAJÓN DE AZÚCAR!»); a los 45 s el personaje se desmaya 6 s, tumbado e indefenso, y recibe un 50 % más de daño. Se puede cambiar a «pierde el asalto» en `faint()` de `combatant.js` si se prefiere más duro.
 - Objetos (v0.7, solo bebida): Peterete (+9 % fuerza, 1,5 de puntillo, −15 % niebla), chupito de Jägermeister (+14 % fuerza, +4 % velocidad, 2,5 de puntillo, sube un 10 % más rápido), licor café (+10 % fuerza, +6 % velocidad, 2 de puntillo), tequila (+20 % fuerza, 3 de puntillo, +25 % niebla); los chupitos y el Peterete no dan envase. Red Bull (+12 % velocidad, sube 20 % más rápido), café (−20 % puntillo, +4 % velocidad), agua (−10 % puntillo, +5 vida), paquete de Marlboro (6,20 €, 10 cigarrillos), bolsa de azúcar y gafas de sol (mitad de niebla visual). Iconos de las bebidas nuevas: `tools/build_drink_icons.py` → `assets/icons/drinks/`.
 - La CPU también pide en la barra según dificultad y personalidad; se muestra en la pantalla VS.
+
+### Huecos, cosas para fumar y pantalla completa (v0.8)
+
+- `items.js`: cada objeto tiene `kind` (`drink`, `smoke`, `other`). Las cosas para fumar definen `smoke: { units, ms, relief, heal, coughFrom, look, buff? }`.
+- `rules.js`: `SLOTS` (7 bebidas, 1 para fumar), `slotsFor(upgrades)`, `orderUsage(order)`, `sanitizeOrder(order, items, slots)` recorta lo que no cabe; `computeLoadout` devuelve `smokes` y `slots`, y acepta `opts.slots` (CPU: `cpuSlots(dificultad)`) y `opts.jardinera` (+`JARDINERA_AMMO` = 2 botellines por asalto).
+- Mejoras: `higado` ya no da aguante, da huecos (`slots(sl, lvl)`); nueva `pitillera`.
+- `Combatant`: `smokeBag` (lo de cada hueco, en orden), `currentSmoke`, `cigs` (total), `buffs` temporales (`buffPct`, `powerNow`). Al fumar baja el puntillo y sube la vida poco a poco; al acabar aplica el efecto extra.
+- Pantalla completa: `#fsBtn` fijo, visible siempre que no se esté a pantalla completa (`Game.setupFullscreen`); en iPhone explica cómo añadir a la pantalla de inicio.
 
 ### Fuente y ambientes (v0.7)
 

@@ -1,7 +1,8 @@
-"""Iconos pixel art de las bebidas de La Barra (24x32, fondo transparente).
+"""Iconos pixel art de La Barra (24x32, fondo transparente).
 
-Uso: python3 tools/build_drink_icons.py  -> assets/icons/drinks/*.png
-Dibujados a mano por código: vaso de Peterete (verde lima con hielo) y chupitos.
+Uso: python3 tools/build_drink_icons.py  -> assets/icons/drinks/*.png y assets/icons/smokes/*.png
+Dibujados a mano por código: vaso de Peterete (verde lima con hielo), chupitos,
+puro, habano y chiflo.
 """
 from pathlib import Path
 from PIL import Image
@@ -74,13 +75,57 @@ def coffee_foam(im):
     rect(im, 8, 19, 15, 19, (196, 150, 98, 255))
 
 
+SMOKES = Path(__file__).resolve().parent.parent / 'assets' / 'icons' / 'smokes'
+
+
+def diagonal(im, x0, y0, length, width, color, step=1):
+    """Barra diagonal (de abajo-izquierda a arriba-derecha)."""
+    for i in range(length):
+        for w in range(width):
+            x, y = x0 + i, y0 - i + w
+            if 0 <= x < W and 0 <= y < H:
+                im.putpixel((x, y), color)
+
+
+def cigar(band, length=18, width=4, tip=(220, 80, 40, 255)):
+    im = canvas()
+    body, dark = (124, 74, 40, 255), (88, 50, 26, 255)
+    diagonal(im, 2, 26, length, width, body)
+    diagonal(im, 2, 26 + width - 1, length, 1, dark)
+    diagonal(im, 2, 26, 2, width, (70, 70, 70, 255))         # ceniza
+    diagonal(im, 4, 24, 1, width, tip)                         # brasa
+    if band:
+        diagonal(im, 2 + length - 6, 26 - (length - 6), 2, width, band)
+    for i in range(3):                                         # humo
+        im.putpixel((3 + i, 21 - 3 * i), (200, 200, 210, 200)); im.putpixel((2 + i, 19 - 3 * i), (200, 200, 210, 140))
+    return im
+
+
+def chiflo():
+    im = canvas()
+    paper, edge = (244, 240, 228, 255), (196, 188, 170, 255)
+    for i in range(16):                                        # cono: más ancho en la punta
+        w = 2 + i // 6
+        diagonal(im, 4 + i, 25 - i, 1, w, paper)
+        diagonal(im, 4 + i, 25 - i + w - 1, 1, 1, edge)
+    diagonal(im, 19, 10, 2, 4, (230, 120, 60, 255))           # punta encendida
+    diagonal(im, 3, 26, 2, 2, (200, 170, 120, 255))           # filtro de cartón
+    for i in range(3):
+        im.putpixel((21 + (i % 2), 8 - 3 * i), (205, 210, 200, 200))
+    return im
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     peterete().save(OUT / 'peterete.png')
     shot((60, 24, 14, 245), (110, 50, 26, 255)).save(OUT / 'jager.png')
     shot((52, 28, 12, 245), (120, 74, 36, 255), coffee_foam).save(OUT / 'licor-cafe.png')
     shot((232, 178, 72, 235), (250, 214, 130, 255), lime_wedge).save(OUT / 'tequila.png')
-    print('ok', sorted(p.name for p in OUT.glob('*.png')))
+    SMOKES.mkdir(parents=True, exist_ok=True)
+    cigar(None).save(SMOKES / 'puro.png')
+    cigar((200, 40, 40, 255), length=20, width=5).save(SMOKES / 'habano.png')
+    chiflo().save(SMOKES / 'chiflo.png')
+    print('ok', sorted(p.name for p in OUT.glob('*.png')), sorted(p.name for p in SMOKES.glob('*.png')))
 
 
 if __name__ == '__main__':

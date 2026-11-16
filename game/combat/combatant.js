@@ -49,8 +49,12 @@
       this.seed = Math.random() * 1000;
       // Lo que dura todo el combate (no se reinicia entre asaltos).
       this.meter = 0;                   // carga del ultimate (0..100)
-      this.cigs = loadout.cigs || 0;    // cigarrillos que quedan
-      this.smoked = 0;                  // cigarrillos fumados
+      // Lo que lleva para fumar (1 o 2 huecos): cada cosa con sus unidades, tiempo y efectos.
+      const bag = loadout.smokes && loadout.smokes.length ? loadout.smokes
+        : loadout.cigs ? [{ id: 'tabaco', short: 'Tabaco', units: loadout.cigs, ms: 1500, relief: 0.15, heal: 6, coughFrom: 3, look: 'cig' }] : [];
+      this.smokeBag = bag.map((x) => ({ ...x, left: x.units, done: 0 }));
+      this.smoked = 0;                  // cosas fumadas
+      this.cough = 0;                   // cuántas se ha fumado por encima de lo que aguanta sin toser
       this.relief = 0;                  // puntillo quitado fumando
       this.fainted = false;             // ya ha sufrido el bajón de azúcar
       this.notes = {};
@@ -71,7 +75,7 @@
       this.pending = [];
       this.whiff = false; this.lastHitAction = -1; this.hitConfirm = -1; this.chain = 0;
       this.combo = 0; this.noAmmoCooldown = 0;
-      this.smoking = null; this.faintT = 0; this.faintTotal = 0;
+      this.smoking = null; this.faintT = 0; this.faintTotal = 0; this.buffs = [];
       this.wetT = 0; this.locked = false; this.poseOverride = null; this.grabRot = 0;
       this.f.enabled = true;
       this.f.play('idle', true);
@@ -138,7 +142,8 @@
       if (sugar === 'fading' && !this.notes.fading) { this.notes.fading = true; match.popup(this, '¡BAJÓN DE AZÚCAR!', '#ffb37a'); match.sfx('faintWarn'); }
       if (sugar === 'crashed' && !this.fainted && !this.air) return this.faint(match);
       const wet = this.wetT > 0;
-      const speed = this.loadout.speed * (sugar === 'boost' ? rules.SUGAR.speedMult : 1) * (wet ? rules.WET.speedMult : 1);
+      if (this.buffs.length) this.buffs = this.buffs.filter((b) => b.until > this.t);
+      const speed = this.loadout.speed * (sugar === 'boost' ? rules.SUGAR.speedMult : 1) * (wet ? rules.WET.speedMult : 1) * (1 + this.buffPct('speedPct') / 100);
       const animMult = (sugar === 'boost' ? rules.SUGAR.animMult : 1) * (wet ? rules.WET.animMult : 1);
 
       const intox = match.levelOf ? match.levelOf(this) : match.intoxOf(this);
@@ -155,15 +160,21 @@
       const ready = readyItems.map((p) => p.a);
       const consume = (a) => { const i = this.pending.indexOf(readyItems[ready.indexOf(a)]); if (i >= 0) this.pending.splice(i, 1); };
 
-      // Fumando: quieto mientras se consume el cigarrillo.
+      // Fumando: quieto mientras se consume. Baja el puntillo y, irónicamente, cura.
       if (this.smoking) {
+        const it = this.smoking.item;
         this.smoking.t += dt;
-        this.relief += rules.SMOKE.relief * dt / rules.SMOKE.durationMs;
-        if (Math.random() < dt / 70) match.smokePuff(this);
+        this.relief += it.relief * dt / it.ms;
+        this.hp = Math.min(this.maxHp, this.hp + it.heal * dt / it.ms);
+        if (Math.random() < dt / (it.look === 'cig' ? 70 : 45)) match.smokePuff(this);
         this.guard = false; this.walking = false;
-        if (this.smoking.t >= rules.SMOKE.durationMs) {
+        if (this.smoking.t >= it.ms) {
           this.smoking = null;
-          match.popup(this, '−15 % PUNTILLO', '#c9d3df');
+          match.popup(this, (it.relief >= 0.1 ? '−' + Math.round(it.relief * 100) + ' % PUNTILLO · ' : '') + '+' + it.heal + ' VIDA', '#c9d3df');
+          if (it.buff) {
+            this.buffs = this.buffs.filter((b) => b.label !== it.buff.label);
+            this.buffs.push({ ...it.buff, until: this.t + it.buff.ms });
+          }
         }
         this.physics(s, false); this.sync(); this.f.update(dt); this.sync();
         return;
@@ -196,7 +207,7 @@
           this.stumble = 420 + Math.random() * 250;
           this.stumbleDir = Math.random() < 0.5 ? -1 : 1;
           if (!match.say(this, 'stumble')) match.popup(this, '¡HIC!', '#f8ce73');
-        } else if (this.smoked > rules.SMOKE.coughFrom && Math.random() < rules.SMOKE.coughPerSec * (this.smoked - rules.SMOKE.coughFrom) * s) {
+        } else if (this.cough > 0 && Math.random() < rules.SMOKE.coughPerSec * this.cough * s) {
           this.stumble = 320; this.stumbleDir = -this.facing;
           match.popup(this, '¡COF, COF!', '#c9d3df'); match.sfx('cough');
         }
@@ -334,17 +345,28 @@
 
     trySmoke(match) {
       if (this.air) return false;
-      if (this.cigs <= 0) {
+      const it = this.currentSmoke;
+      if (!it) {
         if (!this.noAmmoCooldown) { match.popup(this, '¡SIN TABACO!', '#ff8a7a'); match.sfx('error'); this.noAmmoCooldown = 900; }
         return false;
       }
-      this.cigs--; this.smoked++;
-      this.smoking = { t: 0 };
+      it.left--; it.done++; this.smoked++;
+      if (it.done > it.coughFrom) this.cough++;
+      this.smoking = { t: 0, item: it };
       match.say(this, 'smoke');
       this.vx = 0;
       match.sfx('lighter');
       return true;
     }
+
+    /** Cigarrillos (o lo que sea) que quedan en total. */
+    get cigs() { return this.smokeBag.reduce((n, x) => n + x.left, 0); }
+    /** Lo próximo que se va a fumar: lo del primer hueco hasta que se acabe. */
+    get currentSmoke() { return this.smokeBag.find((x) => x.left > 0) || null; }
+    /** Suma de un efecto temporal (habano, chiflo…). */
+    buffPct(key) { let v = 0; for (const b of this.buffs || []) if (b[key]) v += b[key]; return v; }
+    /** Fuerza en este momento (con los efectos temporales). */
+    get powerNow() { return this.loadout.power * (1 + this.buffPct('powerPct') / 100); }
 
     faint(match) {
       this.fainted = true; this.faintReason = 'sugar';
@@ -521,12 +543,29 @@
       }
       if (!o.ghost) {
         if (p.cig) {
-          // Cigarrillo en la boca (coordenadas locales de la celda).
+          // Lo que fuma, en la boca (coordenadas locales de la celda).
           const mx = C.MOUTH.x - a.x, my = C.MOUTH.y - a.y;
-          ctx.fillStyle = '#1b1414'; ctx.fillRect(mx - 1, my - 1, 12, 4);
-          ctx.fillStyle = '#f2efe6'; ctx.fillRect(mx, my, 9, 2);
-          ctx.fillStyle = '#c98a4a'; ctx.fillRect(mx, my, 3, 2);
-          ctx.fillStyle = Math.sin(this.t / 90) > 0 ? '#ff5a1e' : '#ffb347'; ctx.fillRect(mx + 9, my, 2, 2);
+          const look = (this.smoking && this.smoking.item.look) || 'cig';
+          const ember = Math.sin(this.t / 90) > 0 ? '#ff5a1e' : '#ffb347';
+          if (look === 'cigar' || look === 'habano') {
+            const len = look === 'habano' ? 15 : 12, h = look === 'habano' ? 4 : 3;
+            ctx.fillStyle = '#1b1414'; ctx.fillRect(mx - 1, my - 2, len + 4, h + 2);
+            ctx.fillStyle = '#7c4a28'; ctx.fillRect(mx, my - 1, len, h);
+            ctx.fillStyle = '#58321a'; ctx.fillRect(mx, my - 1 + h - 1, len, 1);
+            if (look === 'habano') { ctx.fillStyle = '#c82828'; ctx.fillRect(mx + 3, my - 1, 2, h); }
+            ctx.fillStyle = '#5a5a5a'; ctx.fillRect(mx + len, my - 1, 1, h);
+            ctx.fillStyle = ember; ctx.fillRect(mx + len + 1, my - 1, 2, h);
+          } else if (look === 'chiflo') {
+            ctx.fillStyle = '#1b1414'; ctx.fillRect(mx - 1, my - 2, 15, 5);
+            ctx.fillStyle = '#d8c39a'; ctx.fillRect(mx, my, 2, 2);
+            ctx.fillStyle = '#f4f0e4'; ctx.fillRect(mx + 2, my, 5, 2); ctx.fillRect(mx + 7, my - 1, 5, 3);
+            ctx.fillStyle = ember; ctx.fillRect(mx + 12, my - 1, 2, 3);
+          } else {
+            ctx.fillStyle = '#1b1414'; ctx.fillRect(mx - 1, my - 1, 12, 4);
+            ctx.fillStyle = '#f2efe6'; ctx.fillRect(mx, my, 9, 2);
+            ctx.fillStyle = '#c98a4a'; ctx.fillRect(mx, my, 3, 2);
+            ctx.fillStyle = ember; ctx.fillRect(mx + 9, my, 2, 2);
+          }
         }
         if (p.dart) {
           ctx.save();

@@ -69,7 +69,9 @@
         if (ok && (opp.hitstun > 0 || r() < 0.45)) { this.act('special'); return; }
       }
       const intox = match.intoxOf(me);
-      if (me.cigs > 0 && intox > 0.3 && dist > 400 && !match.incomingBottle(me) && r() < 0.4) { this.act('smoke'); return; }
+      // Fuma para bajar el puntillo… o para curarse. Lo largo (puros, habanos) solo si está lejos.
+      const sm = me.currentSmoke;
+      if (sm && (intox > 0.3 || me.hp < me.maxHp * 0.45) && dist > (sm.ms > 3000 ? 520 : 380) && !match.incomingBottle(me) && r() < 0.4) { this.act('smoke'); return; }
       const incoming = match.incomingBottle(me);
       const threat = (opp.attacking && opp.f.animation !== 'throwBottle' && dist < 380) || incoming;
       if (threat && r() < d.block) { this.set('block', 320 + r() * 160); return; }

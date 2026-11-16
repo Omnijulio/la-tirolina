@@ -36,24 +36,65 @@ test('el puntillo crece con el tiempo de combate', () => {
 });
 
 test('café, agua, Peterete y gafas contrarrestan al botellín', () => {
-  const base = R.computeLoadout(barbas, { botellin: 8 }, {}, BAR_ITEMS, UPGRADES);
-  const cafe = R.computeLoadout(barbas, { botellin: 8, cafe: 2 }, {}, BAR_ITEMS, UPGRADES);
-  const agua = R.computeLoadout(barbas, { botellin: 8, agua: 2 }, {}, BAR_ITEMS, UPGRADES);
-  const gafas = R.computeLoadout(barbas, { botellin: 8, gafas: 1 }, {}, BAR_ITEMS, UPGRADES);
+  const base = R.computeLoadout(barbas, { botellin: 5 }, {}, BAR_ITEMS, UPGRADES);
+  const cafe = R.computeLoadout(barbas, { botellin: 5, cafe: 2 }, {}, BAR_ITEMS, UPGRADES);
+  const agua = R.computeLoadout(barbas, { botellin: 5, agua: 2 }, {}, BAR_ITEMS, UPGRADES);
+  const gafas = R.computeLoadout(barbas, { botellin: 5, gafas: 1 }, {}, BAR_ITEMS, UPGRADES);
   assert.ok(cafe.intoxLevel < base.intoxLevel);
   assert.ok(R.intoxAt(agua, 30) < R.intoxAt(base, 30));
   assert.ok(agua.maxHp > base.maxHp);
   assert.ok(gafas.fogMult < base.fogMult);
 });
 
-test('el aguante del personaje y el hígado de hierro reducen el puntillo', () => {
+test('el aguante del personaje reduce el puntillo', () => {
   const penista = CHARACTERS.find((c) => c.id === 'penista');
   const runner = CHARACTERS.find((c) => c.id === 'runner');
   const p = R.computeLoadout(penista, { botellin: 6 }, {}, BAR_ITEMS, UPGRADES);
   const r = R.computeLoadout(runner, { botellin: 6 }, {}, BAR_ITEMS, UPGRADES);
-  const h = R.computeLoadout(runner, { botellin: 6 }, { higado: 3 }, BAR_ITEMS, UPGRADES);
   assert.ok(p.intoxLevel < r.intoxLevel);
-  assert.ok(h.intoxLevel < r.intoxLevel);
+});
+
+test('huecos: 7 bebidas y 1 para fumar; el Hígado de hierro y la Pitillera dan más', () => {
+  assert.deepEqual(R.slotsFor({}, UPGRADES), { drinks: 7, smokes: 1 });
+  assert.deepEqual(R.slotsFor({ higado: 3, pitillera: 1 }, UPGRADES), { drinks: 10, smokes: 2 });
+  const seven = R.computeLoadout(barbas, { botellin: 10 }, {}, BAR_ITEMS, UPGRADES);
+  const ten = R.computeLoadout(barbas, { botellin: 10 }, { higado: 3 }, BAR_ITEMS, UPGRADES);
+  assert.equal(seven.bottles, 7);
+  assert.equal(ten.bottles, 10);
+  // Las bebidas comparten huecos: 5 botellines + 3 chupitos = 8 > 7.
+  const mixed = R.computeLoadout(barbas, { botellin: 5, tequila: 3 }, {}, BAR_ITEMS, UPGRADES);
+  assert.equal(R.orderUsage(mixed.order, BAR_ITEMS).drinks, 7);
+  // Un solo hueco para fumar: con dos paquetes se queda el primero de la lista.
+  const one = R.computeLoadout(barbas, { tabaco: 1, puro: 1 }, {}, BAR_ITEMS, UPGRADES);
+  assert.deepEqual(one.smokes.map((x) => x.id), ['tabaco']);
+  const two = R.computeLoadout(barbas, { tabaco: 1, puro: 1 }, { pitillera: 1 }, BAR_ITEMS, UPGRADES);
+  assert.deepEqual(two.smokes.map((x) => x.id), ['tabaco', 'puro']);
+  assert.equal(two.cigs, 13);
+  // Gafas y azúcar no ocupan huecos.
+  assert.deepEqual(R.orderUsage({ gafas: 1, azucar: 1 }, BAR_ITEMS), { drinks: 0, smokes: 0 });
+  // La CPU también respeta sus huecos.
+  for (let i = 0; i < 50; i++) for (const d of R.DIFFICULTY_ORDER) {
+    const o = R.cpuOrder(d, barbas);
+    const u = R.orderUsage(o, BAR_ITEMS);
+    assert.ok(u.drinks <= R.cpuSlots(d).drinks && u.smokes <= 1, d + ' ' + JSON.stringify(o));
+  }
+});
+
+test('cada cosa para fumar tiene su tiempo y sus efectos; fumar cura', () => {
+  const smokes = BAR_ITEMS.filter((i) => i.kind === 'smoke');
+  assert.ok(['tabaco', 'ducados', 'liar', 'puro', 'habano', 'chiflo'].every((id) => smokes.some((s) => s.id === id)));
+  for (const s of smokes) assert.ok(s.smoke.heal > 0 && s.smoke.ms > 0 && s.smoke.units > 0, s.id);
+  const by = Object.fromEntries(smokes.map((s) => [s.id, s.smoke]));
+  assert.ok(by.habano.ms > by.puro.ms && by.puro.ms > by.tabaco.ms, 'el habano es lo más lento');
+  assert.ok(by.habano.relief > by.puro.relief && by.puro.relief > by.tabaco.relief);
+  assert.ok(by.chiflo.buff.speedPct < 0 && by.habano.buff.powerPct > 0);
+});
+
+test('con el montón de la jardinera, 2 botellines más para lanzar', () => {
+  const a = R.computeLoadout(barbas, { botellin: 3 }, {}, BAR_ITEMS, UPGRADES);
+  const b = R.computeLoadout(barbas, { botellin: 3 }, {}, BAR_ITEMS, UPGRADES, { jardinera: true });
+  assert.equal(b.ammo - a.ammo, R.JARDINERA_AMMO);
+  assert.equal(R.JARDINERA_AMMO, 2);
 });
 
 test('la imprecisión aumenta con el puntillo y la puntería la reduce', () => {
@@ -64,7 +105,10 @@ test('la imprecisión aumenta con el puntillo y la puntería la reduce', () => {
 });
 
 test('ganar da muchísimo más de lo que cuesta el pedido máximo', () => {
-  const maxOrder = BAR_ITEMS.reduce((s, it) => s + it.price * it.max, 0);
+  // El pedido más caro posible con todos los huecos comprados (10 bebidas, 2 para fumar y lo demás).
+  const units = (kind) => BAR_ITEMS.filter((i) => i.kind === kind).flatMap((i) => Array(i.max).fill(i.price)).sort((a, b) => b - a);
+  const maxOrder = units('drink').slice(0, 10).reduce((a, b) => a + b, 0) + units('smoke').slice(0, 2).reduce((a, b) => a + b, 0)
+    + BAR_ITEMS.filter((i) => i.kind === 'other').reduce((s, it) => s + it.price * it.max, 0);
   for (const difficulty of R.DIFFICULTY_ORDER) {
     const win = R.matchReward({ won: true, difficulty, roundsWon: 2, roundsLost: 1, perfectRounds: 0, timeLeft: 0, maxCombo: 0, bottles: 0 });
     assert.ok(win.total >= maxOrder, `${difficulty}: ${win.total} vs ${maxOrder}`);

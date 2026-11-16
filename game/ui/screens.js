@@ -99,7 +99,6 @@
     title() {
       const g = this.game, d = g.save.data;
       const stage = Math.min(d.story.stage + 1, root.TROLINA_STORY.length);
-      const canFs = document.fullscreenEnabled || document.webkitFullscreenEnabled;
       const node = el(`<div class="scr title">
         <div class="logo"><span class="neon">La Trolina</span><b>FIGHTERS</b><small>Peleas de terraza · 1 jugador contra la máquina</small></div>
         <nav class="menu">
@@ -110,8 +109,7 @@
           <button data-go="help">Cómo se juega</button>
           <button data-go="options">Opciones</button>
         </nav>
-        <div class="foot">${this.wallet()}<span class="muted">${d.unlocked.length}/${root.TROLINA_CHARACTERS.length} luchadores · ${d.stats.wins} victorias</span>
-        ${canFs ? '<button class="ghost" data-fs>⛶ Pantalla completa</button>' : ''}</div>
+        <div class="foot">${this.wallet()}<span class="muted">${d.unlocked.length}/${root.TROLINA_CHARACTERS.length} luchadores · ${d.stats.wins} victorias</span></div>
       </div>`);
       node.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => {
         const go = b.dataset.go;
@@ -237,7 +235,8 @@
       const g = this.game, d = g.save.data, s = g.session;
       const items = root.TROLINA_BAR_ITEMS;
       const char = g.charById(s.p1), rival = g.charById(s.p2);
-      let order = R.sanitizeOrder(d.lastOrder, items);
+      const slots = R.slotsFor(d.upgrades, root.TROLINA_UPGRADES);
+      let order = R.sanitizeOrder(d.lastOrder, items, slots);
       while (R.orderCost(order, items) > d.coins) {
         const k = Object.keys(order).find((id) => order[id] > 0);
         if (!k) break;
@@ -247,6 +246,7 @@
         ${this.header('La Barra', 'back')}
         ${s.wild ? '<p class="intro wild-intro"><b>MODO SALVAJE.</b> Aquí todo pega más: lo bueno y lo malo. Los primeros 30 segundos son normales. Después, buena suerte. O no.</p>' : ''}
         <p class="intro">Antes de pelear contra <b style="color:${rival.color}">${esc(rival.name)}</b>, pide algo. Cada <b>botellín (2,90 €)</b> te da fuerza y un envase para lanzar, pero sube el <b>puntillo</b>: niebla, mareo, golpes al aire y controles lentos. Cuanto más dure la pelea, peor. <b>Fumar</b> lo baja; la <b>bolsa de azúcar</b> lo borra… un rato.</p>
+        <div class="slots-bar"></div>
         <div class="barra-body">
           <div class="items"></div>
           <aside class="summary">
@@ -259,7 +259,10 @@
         </div>
       </div>`);
       const list = node.querySelector('.items');
+      const groups = { drink: '🍺 Bebidas', smoke: '🚬 Para fumar', other: '🛍️ Otros' };
+      let lastKind = null;
       for (const it of items) {
+        if (it.kind !== lastKind) { lastKind = it.kind; list.append(el(`<h4 class="group">${groups[it.kind] || ''}<span data-group="${it.kind}"></span></h4>`)); }
         const isBottle = it.id === 'botellin';
         const row = el(`<div class="item${isBottle ? ' main' : ''}" data-id="${it.id}">
           <div class="ico">${it.icon === 'bottle' ? '<img src="assets/bottle.png" alt="">' : it.icon.startsWith('img:') ? `<img class="drink" src="${it.icon.slice(4)}" alt="">` : it.icon}</div>
@@ -280,6 +283,17 @@
         qty = Math.max(0, Math.min(it.max, qty));
         const next = { ...order, [it.id]: qty };
         if (!qty) delete next[it.id];
+        const use = R.orderUsage(next, items);
+        if (it.kind === 'drink' && use.drinks > slots.drinks) {
+          this.flashError(node, s.wild ? 'No te cabe nada más. Ni aunque quisieras.' : 'No te caben más bebidas (' + slots.drinks + '). Más huecos: Hígado de hierro, en la Tienda');
+          return;
+        }
+        if (it.kind === 'smoke' && use.smokes > slots.smokes) {
+          // Con un solo hueco, elegir otra cosa para fumar la cambia por la anterior.
+          if (slots.smokes === 1) {
+            for (const o of items) { if (o.kind === 'smoke' && o.id !== it.id) delete next[o.id]; }
+          } else { this.flashError(node, 'Ya llevas ' + slots.smokes + ' cosas para fumar. Quita una antes'); return; }
+        }
         if (R.orderCost(next, items) > d.coins) { this.flashError(node, 'No te llega el dinero'); return; }
         if (qty > (order[it.id] || 0)) {
           root.TrolinaSfx.play(['botellin', 'peterete', 'jager', 'licorcafe', 'tequila'].includes(it.id) ? 'gulp' : 'buy');
@@ -289,17 +303,32 @@
       };
       const render = () => {
         const cost = R.orderCost(order, items);
+        const use = R.orderUsage(order, items);
         for (const it of items) {
           const row = list.querySelector(`[data-id="${it.id}"]`);
           const q = order[it.id] || 0;
+          const full = it.kind === 'drink' ? use.drinks >= slots.drinks : it.kind === 'smoke' ? use.smokes >= slots.smokes && slots.smokes > 1 && !q : false;
           row.querySelector('output').textContent = q + (it.max > 1 ? '/' + it.max : '');
           row.classList.toggle('picked', q > 0);
+          row.classList.toggle('nofit', full && !q);
           row.querySelector('[data-d="-1"]').disabled = q <= 0;
-          row.querySelector('[data-d="1"]').disabled = q >= it.max || cost + it.price > d.coins;
-          row.querySelectorAll('[data-n]').forEach((b) => b.classList.toggle('on', Number(b.dataset.n) <= q));
+          row.querySelector('[data-d="1"]').disabled = q >= it.max || cost + it.price > d.coins || full;
+          row.querySelectorAll('[data-n]').forEach((b) => {
+            const n = Number(b.dataset.n);
+            b.classList.toggle('on', n <= q);
+            b.disabled = n > q + (slots.drinks - use.drinks);
+          });
         }
-        const lo = R.computeLoadout(char, order, d.upgrades, items, root.TROLINA_UPGRADES, { wild: s.wild });
-        const base = R.computeLoadout(char, {}, d.upgrades, items, root.TROLINA_UPGRADES, { wild: s.wild });
+        const pips = (n, max, cls) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on ' + cls : ''}"></i>`).join('');
+        node.querySelector('.slots-bar').innerHTML = `
+          <div class="slot-group"><span>Bebidas</span><div class="pips">${pips(use.drinks, slots.drinks, 'drink')}</div><b>${use.drinks}/${slots.drinks}</b></div>
+          <div class="slot-group"><span>Para fumar</span><div class="pips">${pips(use.smokes, slots.smokes, 'smoke')}</div><b>${use.smokes}/${slots.smokes}</b></div>
+          ${slots.drinks < 10 || slots.smokes < 2 ? '<span class="muted">Más huecos en la Tienda: Hígado de hierro y Pitillera</span>' : ''}`;
+        list.querySelector('[data-group="drink"]').textContent = ' · ' + use.drinks + '/' + slots.drinks;
+        list.querySelector('[data-group="smoke"]').textContent = ' · ' + use.smokes + '/' + slots.smokes;
+        const jard = g.jardinera();
+        const lo = R.computeLoadout(char, order, d.upgrades, items, root.TROLINA_UPGRADES, { wild: s.wild, jardinera: jard });
+        const base = R.computeLoadout(char, {}, d.upgrades, items, root.TROLINA_UPGRADES, { wild: s.wild, jardinera: jard });
         const pct = (v) => (v >= 0 ? '+' : '') + Math.round(v * 100) + ' %';
         const i0 = R.intoxAt(lo, 0), i1 = R.intoxAt(lo, 60), i2 = R.intoxAt(lo, 120);
         node.querySelector('.sum-lines').innerHTML = `
@@ -307,8 +336,8 @@
           <div class="kv"><span>Vida</span><b>${lo.maxHp}${lo.maxHp !== base.maxHp ? ' <em>(+' + (lo.maxHp - base.maxHp) + ')</em>' : ''}</b></div>
           <div class="kv"><span>Fuerza</span><b>${pct(lo.power / base.power - 1)}</b></div>
           <div class="kv"><span>Velocidad</span><b>${pct(lo.speed / base.speed - 1)}</b></div>
-          <div class="kv"><span>Botellines para lanzar</span><b>${lo.ammo} por asalto</b></div>
-          ${lo.cigs ? `<div class="kv"><span>Cigarrillos (F)</span><b>${lo.cigs} · −15 % cada uno</b></div>` : ''}
+          <div class="kv"><span>Botellines para lanzar</span><b>${lo.ammo} por asalto${jard ? ' <em>(+2 de la jardinera)</em>' : ''}</b></div>
+          ${lo.smokes.map((sm) => `<div class="kv"><span>${esc(sm.short)} (F)</span><b>×${sm.units} · ${sm.relief >= 0.1 ? '−' + Math.round(sm.relief * 100) + ' % puntillo, ' : ''}+${sm.heal} vida · ${(sm.ms / 1000).toLocaleString('es-ES')} s</b></div>`).join('')}
           ${lo.sugar ? '<div class="kv"><span>Azúcar</span><b class="warn">+40 % vel. 30 s · desmayo a los 45 s</b></div>' : ''}
           <div class="kv"><span>Puntillo</span><b class="${i1 > 0.5 ? 'warn' : ''}">${Math.round(i0 * 100)} % → ${Math.round(i1 * 100)} % <em>(1 min)</em> → ${Math.round(i2 * 100)} %</b></div>
           <div class="meter"><i style="width:${Math.round(i1 * 100)}%"></i></div>
@@ -398,7 +427,7 @@
       const node = el(`<div class="scr vs">
         <div class="side l" style="--c:${c1.color}"><canvas width="192" height="176"></canvas><h3>${esc(c1.name)}</h3><p>Tú · ${esc(R.describeOrder(s.order, items))}</p></div>
         <div class="vs-mid"><b>VS</b>${s.wild ? '<span class="wild-badge">MODO SALVAJE</span>' : ''}<span>${esc(R.DIFFICULTIES[s.difficulty].name)}${s.mode === 'story' ? ' · Historia ' + (s.storyIndex + 1) + '/' + root.TROLINA_STORY.length : ''}</span>
-          ${(() => { const st = g.stageById(s.stage || 'noche'); return `<span class="stage-state">${st.icon || ''} ${esc(st.name)}</span>` + (s.fountain ? `<span class="fountain-state">⛲ Fuente ${s.fountain.on ? 'encendida' : 'apagada'}${st.night !== false ? ' · ' + (s.fountain.lit ? 'con luz' : 'sin luz') : ''}${s.fountain.on ? ' — tapa el ruido de los botellines' : ''}</span>` : ''); })()}</div>
+          ${(() => { const st = g.stageById(s.stage || 'noche'); return `<span class="stage-state">${st.icon || ''} ${esc(st.name)}</span>` + (g.jardinera() ? '<span class="stage-state jard">🪴 Jardinera llena: +2 botellines para lanzar cada uno</span>' : '') + (s.fountain ? `<span class="fountain-state">⛲ Fuente ${s.fountain.on ? 'encendida' : 'apagada'}${st.night !== false ? ' · ' + (s.fountain.lit ? 'con luz' : 'sin luz') : ''}${s.fountain.on ? ' — tapa el ruido de los botellines' : ''}</span>` : ''); })()}</div>
         <div class="side r" style="--c:${c2.color}"><canvas width="192" height="176"></canvas><h3>${esc(c2.name)}</h3><p>CPU · ${esc(R.describeOrder(s.cpuOrder, items))}</p></div>
         <span class="hint">Toca para empezar</span>
       </div>`);
@@ -543,7 +572,7 @@
           <label class="row">Policía Local (ruido, multas y calabozo) <input type="checkbox" data-k="police"></label>
           <label>Ambiente
             <select data-k="stage"><option value="random">Aleatorio en cada pelea</option>${(root.TROLINA_STAGES || []).map((st) => `<option value="${st.id}">${st.icon} ${esc(st.name)}</option>`).join('')}</select></label>
-          <label class="row">Botellines y vasos en la jardinera <input type="checkbox" data-k="jardinera"></label>
+          <label class="row">Botellines en la jardinera (+2 para lanzar cada uno) <input type="checkbox" data-k="jardinera"></label>
           <label>Fuente de la terraza
             <select data-k="fountain"><option value="random">Aleatoria en cada pelea</option><option value="on">Siempre encendida</option><option value="off">Siempre apagada</option></select></label>
           <label>Luz de la fuente
@@ -636,7 +665,9 @@
           <p><b>Bolsa de azúcar (60 €)</b>: 30 s a toda velocidad y sin puntillo; luego se pasa y a los 45 s te quedas inconsciente unos segundos.</p></section>
           <section><h3>Modo salvaje (experimental)</h3><p>Una pelea rápida donde los objetos pegan más (para bien y para mal) y, <b>a partir del segundo 30</b>, todo se desmorona para los dos: controles que se invierten, golpes que cambian solos, pasos sin querer, caídas sin que nadie te toque, botellas hacia atrás, micro-siestas y una pantalla que no se está quieta.</p>
           <p>Cada fallo te lo recuerdan en grande, con todo el cariño. A cambio, cuando un golpe entra, pega más fuerte, y si ganas te llevas una prima.</p></section>
-          <section><h3>Ambientes</h3><p>La terraza cambia de una pelea a otra: noche, día, lluvia, nieve o Navidad (o el que fijes en Opciones). De día la luz de la fuente no se nota. En el modo salvaje, la jardinera aparece llena de botellines, vasos y tabaco.</p></section>
+          <section><h3>Ambientes</h3><p>La terraza cambia de una pelea a otra: noche, día, lluvia, nieve o Navidad (o el que fijes en Opciones). De día la luz de la fuente no se nota. Si la jardinera aparece llena de botellines (opción, y siempre en el modo salvaje), cada uno tiene 2 más para lanzar.</p></section>
+          <section><h3>Huecos de La Barra</h3><p>Puedes tomar hasta <b>7 bebidas</b> por pelea (botellines, chupitos, Peterete, Red Bull, café, agua…) y llevar <b>1 cosa para fumar</b>. Más huecos en la Tienda: <b>Hígado de hierro</b> (+1 bebida por nivel, hasta 10) y <b>Pitillera de plata</b> (segundo hueco para fumar).</p>
+          <p>Para fumar hay tabaco (Marlboro, Ducados, de liar), puros, habanos y chiflos. Cada uno tarda más o menos y hace más o menos efecto; todos bajan el puntillo (unos más que otros) y, irónicamente, <b>devuelven vida</b>.</p></section>
           <section><h3>La fuente</h3><p>A la izquierda de la terraza hay una fuente, a veces <b>encendida</b> (con chorros) y a veces <b>apagada</b>, con o sin luz. Encendida hace tanto ruido que <b>los botellines no cuentan para la policía</b>.</p>
           <p><b>El Peñista</b> tiene el ultimate <b>¡Al pilón!</b>: se lanza a por el rival, lo agarra y lo tira a la fuente. Quita muchísima vida, no se puede bloquear y deja al rival <b>mojado</b> y más lento durante 12 s.</p></section>
           <section><h3>Policía Local</h3><p>Cada golpe, botella rota o KO hace <b>ruido</b> (barra bajo el reloj). Lo que más ruido hace es <b>lanzar muchos botellines seguidos</b>; el ruido baja solo si os calmáis, y el puntillo os hace más escandalosos.</p>

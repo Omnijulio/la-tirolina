@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.7** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.8** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -48,6 +48,13 @@ Estado: **v0.7** (16/11/2026). Un jugador contra la CPU, en navegador de escrito
 - Cinco ambientes: noche, día, lluvia (con lluvia animada), nieve (con copos) y Navidad. Aleatorio o fijo en Opciones.
 - Montón de botellines, vasos y tabaco en la jardinera (opción; fijo en el Modo salvaje).
 - La Barra solo sirve bebida: fuera tortilla, bocata y orujo; entran el **Peterete** (vaso verde lima con hielo), chupitos de **Jägermeister**, **licor café** y **tequila**; la energética es un **Red Bull** y el tabaco un **paquete de Marlboro** (6,20 €).
+
+## Hecho en v0.8
+
+- **Huecos en La Barra**: hasta 7 bebidas por pelea y 1 cosa para fumar. En la Tienda: **Hígado de hierro** (+1 bebida por nivel, hasta 10) y **Pitillera de plata** (segundo hueco para fumar).
+- **Cosas para fumar**: Marlboro, Ducados, tabaco de liar, puro, habano y chiflo, con distinto tiempo quieto, alivio del puntillo y efectos (el habano da fuerza; el chiflo deja flojo). **Fumar devuelve vida.**
+- **Jardinera llena**: +2 botellines para lanzar cada uno.
+- **Pantalla completa**: botón siempre visible mientras no lo esté (en iPhone, instrucciones para añadir a inicio).
 
 ## Próximas fases propuestas
 

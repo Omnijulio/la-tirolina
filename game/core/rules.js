@@ -91,7 +91,14 @@
   // Bolsa de azúcar: subidón, bajón y desmayo (segundos de combate desde el inicio).
   const SUGAR = { boostSec: 30, crashSec: 45, speedMult: 1.4, animMult: 1.2, faintMs: 6000, faintDamage: 1.5 };
   // Tabaco: cada cigarrillo tarda en fumarse y baja el puntillo.
-  const SMOKE = { durationMs: 1500, relief: 0.15, coughFrom: 3, coughPerSec: 0.05 };
+  const SMOKE = { durationMs: 1500, relief: 0.15, heal: 6, coughFrom: 3, coughPerSec: 0.05 };
+  const SMOKE_DEFAULTS = { units: 10, ms: 1500, relief: 0.15, heal: 6, coughFrom: 3, look: 'cig' };
+  /** Huecos de La Barra: bebidas (cada unidad cuenta) y cosas para fumar (cada paquete cuenta). */
+  const SLOTS = { drinks: 7, smokes: 1 };
+  /** La CPU también tiene hígado: huecos de bebida según la dificultad. */
+  const CPU_DRINK_SLOTS = { facil: 7, normal: 7, dificil: 8, pesadilla: 10 };
+  /** Con el montón de botellines en la jardinera, cada uno tiene 2 más para lanzar por asalto. */
+  const JARDINERA_AMMO = 2;
 
   // Ruido de la terraza (0..100). Al llegar a 100 se avisa a la Policía Local.
   // Sobre todo lo provocan muchos botellines seguidos: cada lanzamiento dentro de
@@ -143,10 +150,47 @@
     return Math.max(0, Math.min(max, Math.floor(Number(qty) || 0)));
   }
 
-  function sanitizeOrder(order, items) {
+  /** Huecos disponibles con las mejoras compradas. */
+  function slotsFor(upgradesLevels, upgrades) {
+    const sl = { ...SLOTS };
+    for (const up of upgrades || []) {
+      const lvl = (upgradesLevels || {})[up.id] || 0;
+      if (lvl && up.slots) up.slots(sl, lvl);
+    }
+    return sl;
+  }
+
+  /** Huecos que ocupa un pedido. */
+  function orderUsage(order, items) {
+    const map = itemsById(items), u = { drinks: 0, smokes: 0 };
+    for (const [id, qty] of Object.entries(order || {})) {
+      const it = map[id];
+      if (!it || !qty) continue;
+      if (it.kind === 'drink') u.drinks += qty;
+      else if (it.kind === 'smoke') u.smokes += qty;
+    }
+    return u;
+  }
+
+  /**
+   * Limpia un pedido: quita lo que ya no existe, respeta el máximo de cada objeto y,
+   * si se pasan `slots`, recorta lo que no cabe (por el final de la lista de la barra).
+   */
+  function sanitizeOrder(order, items, slots) {
     const map = itemsById(items), out = {};
     for (const [id, qty] of Object.entries(order || {})) {
       if (map[id]) { const q = clampQty(qty, map[id].max); if (q) out[id] = q; }
+    }
+    if (slots) {
+      const room = { drinks: slots.drinks, smokes: slots.smokes };
+      for (const it of items) {
+        const q = out[it.id];
+        if (!q || (it.kind !== 'drink' && it.kind !== 'smoke')) continue;
+        const key = it.kind === 'drink' ? 'drinks' : 'smokes';
+        const keep = Math.max(0, Math.min(q, room[key]));
+        room[key] -= keep;
+        if (keep) out[it.id] = keep; else delete out[it.id];
+      }
     }
     return out;
   }
@@ -160,10 +204,16 @@
     }
     const m = { hp: 0, powerPct: 0, speedPct: 0, intox: 0, intoxMult: 1, riseMult: 1, fogMult: 1, ammo: 0, cigs: 0, sugar: false };
     const map = itemsById(items);
-    const clean = sanitizeOrder(order, items);
-    for (const [id, qty] of Object.entries(clean)) {
-      for (let i = 0; i < qty; i++) map[id].effect(m);
+    const slots = (opts && opts.slots) || slotsFor(upgradesLevels, upgrades);
+    const clean = sanitizeOrder(order, items, slots);
+    const smokes = [];
+    for (const it of items) {
+      const qty = clean[it.id];
+      if (!qty) continue;
+      for (let i = 0; i < qty; i++) it.effect(m);
+      if (it.kind === 'smoke' && it.smoke) smokes.push({ id: it.id, short: it.short, ...SMOKE_DEFAULTS, ...it.smoke });
     }
+    if (opts && opts.jardinera) m.ammo += JARDINERA_AMMO;
     if (opts && opts.wild) { m.intox *= WILD.intoxMult; m.powerPct *= WILD.powerMult; }
     const tolerance = Math.max(-0.3, Math.min(0.8, base.tolerance));
     // 10 botellines equivalen a puntillo 1,0 (máximo) para alguien sin aguante extra.
@@ -178,7 +228,9 @@
       intoxLevel,
       riseMult: m.riseMult,
       fogMult: m.fogMult,
-      cigs: m.cigs,
+      cigs: m.cigs + smokes.reduce((n, sm) => n + sm.units, 0),
+      smokes,
+      slots,
       sugar: !!m.sugar,
       bottles: clean.botellin || 0,
       order: clean
@@ -256,15 +308,24 @@
     const r = rng || Math.random;
     const [lo, hi] = d.cpuBottles;
     let bottles = lo + Math.floor(r() * (hi - lo + 1)) + ((character.cpu && character.cpu.bottles) || 0);
-    bottles = Math.max(0, Math.min(MAX_BOTTLES, bottles));
+    const room = cpuSlots(difficulty).drinks;
+    bottles = Math.max(0, Math.min(MAX_BOTTLES, room, bottles));
     const order = { botellin: bottles };
-    if (bottles >= 5 && r() < 0.5) order.cafe = 1;
-    if (bottles >= 3 && r() < 0.5) order.tabaco = 1;
-    if (r() < 0.3) order.peterete = 1;
-    if (difficulty === 'dificil' && r() < 0.3) order.licorcafe = 1;
-    if (difficulty === 'pesadilla' && r() < 0.5) order[r() < 0.5 ? 'jager' : 'tequila'] = 1;
+    let left = room - bottles;
+    const add = (id) => { if (left > 0) { order[id] = (order[id] || 0) + 1; left--; } };
+    if (bottles >= 5 && r() < 0.5) add('cafe');
+    if (r() < 0.3) add('peterete');
+    if (difficulty === 'dificil' && r() < 0.3) add('licorcafe');
+    if (difficulty === 'pesadilla' && r() < 0.5) add(r() < 0.5 ? 'jager' : 'tequila');
+    // Algo para fumar (un hueco): lo normal es tabaco; en difícil, a veces puro o habano.
+    if (bottles >= 3 && r() < 0.6) {
+      const k = r();
+      order[difficulty === 'pesadilla' && k < 0.4 ? 'habano' : (difficulty === 'dificil' || difficulty === 'pesadilla') && k < 0.7 ? 'puro' : k < 0.5 ? 'tabaco' : k < 0.75 ? 'ducados' : 'liar'] = 1;
+    }
     return order;
   }
+
+  function cpuSlots(difficulty) { return { drinks: CPU_DRINK_SLOTS[difficulty] || SLOTS.drinks, smokes: 1 }; }
 
   function describeOrder(order, items) {
     const map = itemsById(items), parts = [];
@@ -283,6 +344,7 @@
     ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX, NOISE, POLICE, WET, FOUNTAIN,
     WILD, chaosAt, wildLevel,
     comboScale, meterGain, sugarPhase, bottleNoise, policeOutcome, pickFountain, pickStage,
+    SLOTS, JARDINERA_AMMO, slotsFor, orderUsage, cpuSlots,
     formatMoney, orderCost, sanitizeOrder, computeLoadout, intoxAt, impairment,
     damageFor, matchReward, cpuOrder, describeOrder, clampQty
   };
