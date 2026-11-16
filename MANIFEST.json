@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "snapshot": "v1.3-codex-handoff",
-  "created_on": "2026-11-15",
-  "note": "Snapshot lists every packaged file except MANIFEST.json itself. Build intermediates and caches are excluded.",
+  "snapshot": "v1.4-police-intervention",
+  "created_on": "2026-11-16",
+  "note": "Every packaged file except MANIFEST.json. Build intermediates and caches excluded. Includes the entire previous project plus police assets, logic and docs.",
   "files": [
     {
       "path": ".gitignore",
@@ -11,48 +11,53 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 2647,
-      "sha256": "7ed2aa5eea4f1acb83f1caa54547d1965cdd5c29d4acf298255c37e281eb8174"
+      "bytes": 2914,
+      "sha256": "8e03aafb372bb51da9df7c6eb135ea0d4fc19791fc511c9d1bd5ad20062c21d5"
     },
     {
       "path": "ART_DIRECTION.txt",
-      "bytes": 3835,
-      "sha256": "e26729a61b31a4027f2b75e5046aecc2658c0ed41080835551e90b7c226e0276"
+      "bytes": 5070,
+      "sha256": "42bd1417730a7a76612c6e1414d40afde216fdb51374e2c7a15b377c7f922bac"
     },
     {
       "path": "CONTEXTO_CODEX.md",
-      "bytes": 11686,
-      "sha256": "f13d285de4820c8aa6c491e69c3daa2b6f9e3d2bff590b6d979234e5240cfe31"
+      "bytes": 14473,
+      "sha256": "02232304cdcc248ac7261354519b06be0cd786ad64d85ccf415d8496c8facf61"
     },
     {
       "path": "EMPEZAR_AQUI.md",
-      "bytes": 1066,
-      "sha256": "0189834e56c4688113532905dfb492b4045ffc4636f56125d9be8e1ce5ffd9f8"
+      "bytes": 1310,
+      "sha256": "04cf26334294df21d79a4a208b6dd36410f5a4891817c76e780b3cb6dac718e6"
+    },
+    {
+      "path": "POLICE.md",
+      "bytes": 9364,
+      "sha256": "721a60346b9438f9eb5fb225dec7d93030f3c8f2256c7d91b8c0a58a0eaf9256"
     },
     {
       "path": "PROMPT_PARA_CODEX.txt",
-      "bytes": 1142,
-      "sha256": "1b3fad08a7e07f6d682d74c735ade95b4166a4cd4a756177424bb931a4819cac"
+      "bytes": 1418,
+      "sha256": "9981a757018f730e6d3e5b5b8ad78cda602f4f899af3a7c51b377de0c50405ef"
     },
     {
       "path": "README.md",
-      "bytes": 9902,
-      "sha256": "411e6ae225bf38e5703d64831430e9bdf64ad7e6f36ecf7e36bb07625a36b8b9"
+      "bytes": 10556,
+      "sha256": "57b06f9817ad6610395a2ed49cdb8d312e1b839e4f09657b080767c241cdd571"
     },
     {
       "path": "STAGE.md",
-      "bytes": 4797,
-      "sha256": "a0344d1cc0a02aabfccda41d9f4f2fd0a429887d3ea2cc4424e515287e5723e4"
+      "bytes": 5177,
+      "sha256": "ce870c31cc7b7304d019c6ec40b70dae2a160aa5e066d07cd961bd5ca6c653fb"
     },
     {
       "path": "VALIDACION.txt",
-      "bytes": 1232,
-      "sha256": "cc28d06e2d6e908570d3f0caf0bfc47b3d25c9b77f5fdb4748fa3be17baa6c29"
+      "bytes": 1742,
+      "sha256": "7a4c056cb9a6d70e7dd72405e16a969fb0dc5158370401f0a785ebcb65d745eb"
     },
     {
       "path": "VERIFICACION_TRASPASO.md",
-      "bytes": 1660,
-      "sha256": "8888d6478af229cd02d3c9689e646abaa8b33076ce417b0dd592a1f494a25323"
+      "bytes": 2033,
+      "sha256": "c6db08441fdf88ff1101986347c00d133bb6899d413254ca538274fa7e7c26f3"
     },
     {
       "path": "assets/bottle-data.js",
@@ -210,6 +215,181 @@
       "sha256": "9e8792a06628bde4e9f6bb802c6fb15b5709e6a11dcbf90a8a25780331fdac07"
     },
     {
+      "path": "assets/police/frames/idle-00.png",
+      "bytes": 17538,
+      "sha256": "458c93f46789ee67d01c49a7d1e225afb966bc6c8da1613cdba6d3b80dbf65ed"
+    },
+    {
+      "path": "assets/police/frames/idle-01.png",
+      "bytes": 17286,
+      "sha256": "ad6a71d288d5a60ac3136e63d967327ed94ee6b4b0ced4132b20be0b6f882697"
+    },
+    {
+      "path": "assets/police/frames/idle-02.png",
+      "bytes": 17483,
+      "sha256": "99c39d2e50df2a45f79a963b04b9d29e1885faeb46cdb0b3b57cbcf3e0842f9d"
+    },
+    {
+      "path": "assets/police/frames/idle-03.png",
+      "bytes": 17585,
+      "sha256": "76b451e1947a4188db86850d609ff43fa96c115f8d5ad2d01a500d7b4fe9268a"
+    },
+    {
+      "path": "assets/police/frames/idle-04.png",
+      "bytes": 17499,
+      "sha256": "22e4e3276a55fb19ad893fbbc2289fd2b59eef2be89e0751c6a1c1ed028b42a5"
+    },
+    {
+      "path": "assets/police/frames/idle-05.png",
+      "bytes": 17446,
+      "sha256": "aac1d47c009b0ac68434c652250c4e8ee77541686ea93240fccd234d8fa38140"
+    },
+    {
+      "path": "assets/police/frames/patrol-00.png",
+      "bytes": 58308,
+      "sha256": "29f10e2c88f84286b27c459e8b6708fa7c4c90108084ffd84e725857cda1b8d0"
+    },
+    {
+      "path": "assets/police/frames/patrol-01.png",
+      "bytes": 58076,
+      "sha256": "2aa8a2a3c4d88220be098706bf6082c582423f0c12fe82f628a2cbf609109cd0"
+    },
+    {
+      "path": "assets/police/frames/patrol-02.png",
+      "bytes": 58308,
+      "sha256": "29f10e2c88f84286b27c459e8b6708fa7c4c90108084ffd84e725857cda1b8d0"
+    },
+    {
+      "path": "assets/police/frames/patrol-03.png",
+      "bytes": 58090,
+      "sha256": "9d38abe105b2ed1092a65b4f78b386ccbc8ee309ca3e356c975ab964fbca3685"
+    },
+    {
+      "path": "assets/police/frames/radio-00.png",
+      "bytes": 17304,
+      "sha256": "fa71e388bffeea9bebf63038ab14ae5eb0da28764f7425591a18aaff945815e8"
+    },
+    {
+      "path": "assets/police/frames/radio-01.png",
+      "bytes": 16714,
+      "sha256": "4f347677c0fb785dfc9d62816afd70215287eeacd738256c2728fa629a791fb2"
+    },
+    {
+      "path": "assets/police/frames/radio-02.png",
+      "bytes": 16805,
+      "sha256": "8212a08f0df7e5f71f1f834081a62a67399e43b2f160a3172f3a45493758eff7"
+    },
+    {
+      "path": "assets/police/frames/radio-03.png",
+      "bytes": 16790,
+      "sha256": "32f6880e7115cef14d857233b81f6f46e0619f7f1f67f42387c7d3141b008d4a"
+    },
+    {
+      "path": "assets/police/frames/radio-04.png",
+      "bytes": 17298,
+      "sha256": "de8ea9ee0b8d8c6811c0af0d22d35104e10c5b432becc49ecf6ab8fea1ca3c97"
+    },
+    {
+      "path": "assets/police/frames/radio-05.png",
+      "bytes": 17173,
+      "sha256": "cbed6e938ef913bfa2e8d690a05041351be707d36e048af968c384cc388fe40a"
+    },
+    {
+      "path": "assets/police/frames/stop-00.png",
+      "bytes": 17306,
+      "sha256": "936f4087416a1803bf88eecce0707f74a6706e67ef1c8a19cbb2b8e2cb505fce"
+    },
+    {
+      "path": "assets/police/frames/stop-01.png",
+      "bytes": 17324,
+      "sha256": "4b8d83b9f808167647a469aaa9c04eeb5ffe7d725a8aa279c213f9f27f7c8ac4"
+    },
+    {
+      "path": "assets/police/frames/stop-02.png",
+      "bytes": 17785,
+      "sha256": "4165bba65cde7ef17d2c1a327f1901e60a5405a3e686eb7bcf7813f988bbec38"
+    },
+    {
+      "path": "assets/police/frames/stop-03.png",
+      "bytes": 17787,
+      "sha256": "f8f8adafff5d27e780555a6c985f16e0c6a6bef7a279c4fdc863b4375c84c645"
+    },
+    {
+      "path": "assets/police/frames/stop-04.png",
+      "bytes": 17852,
+      "sha256": "b15c8b84dfc5f81629f7236631dae18379fc0c8475ffe7dccaac1cc5a60f4379"
+    },
+    {
+      "path": "assets/police/frames/stop-05.png",
+      "bytes": 17778,
+      "sha256": "32a643d3485deffd1b4097ac926a1b7453968a5520758dbcd675f057de5312fd"
+    },
+    {
+      "path": "assets/police/frames/walk-00.png",
+      "bytes": 17265,
+      "sha256": "e3d9537c8fa52d5971a7b788c19d0f76a52761423ceea45c2e624b7ebef59ff9"
+    },
+    {
+      "path": "assets/police/frames/walk-01.png",
+      "bytes": 15755,
+      "sha256": "206a055997b6dd7f942d56a067e246266f0a4d00260da39116a501bca95cd889"
+    },
+    {
+      "path": "assets/police/frames/walk-02.png",
+      "bytes": 13443,
+      "sha256": "f60d4c4f6245fb5666bb5f89ca1726387c1066d0548e522e292d934a3b4a2e85"
+    },
+    {
+      "path": "assets/police/frames/walk-03.png",
+      "bytes": 15399,
+      "sha256": "eedda64606104c5924ac239c1d5b023904ae3bad0bd4429f371a7697ae0d21df"
+    },
+    {
+      "path": "assets/police/frames/walk-04.png",
+      "bytes": 14667,
+      "sha256": "1ac2df375e98340a16b6357e1055466f1a2bbe8b28706c90e6040e125fc64986"
+    },
+    {
+      "path": "assets/police/frames/walk-05.png",
+      "bytes": 14381,
+      "sha256": "f8208a709e2c1d77c3fced4554906f131b631dfb290428473739903bdcfc7569"
+    },
+    {
+      "path": "assets/police/intervention-preview.png",
+      "bytes": 365800,
+      "sha256": "2851702e21924574376fb4e2b841c22b0d6cdbe688b6021bb5e98f20a7f00a10"
+    },
+    {
+      "path": "assets/police/officer.png",
+      "bytes": 387458,
+      "sha256": "23cb5948e68f14153b2e81d179c9c92500467e84cc896b79b4a8ff6c1d53cd88"
+    },
+    {
+      "path": "assets/police/patrol-lights.png",
+      "bytes": 63674,
+      "sha256": "bbebbdd2e13b0a7655e854e2fe8cbf8d35a50363336054714a8e61df75d1796a"
+    },
+    {
+      "path": "assets/police/patrol.png",
+      "bytes": 58308,
+      "sha256": "29f10e2c88f84286b27c459e8b6708fa7c4c90108084ffd84e725857cda1b8d0"
+    },
+    {
+      "path": "assets/police/police-data.js",
+      "bytes": 3925,
+      "sha256": "308182fdfff4604e0206c032c52aaa291725b77bcfef686cc79cdfe5ea4943eb"
+    },
+    {
+      "path": "assets/police/police.json",
+      "bytes": 9730,
+      "sha256": "5538ab8783537a2e4df325dc48d08842a952bdfa91016ebbf4fd855dbcbe430a"
+    },
+    {
+      "path": "assets/police/sprites-guide.png",
+      "bytes": 366999,
+      "sha256": "ed1d848c080f9e4c0ff3e55f500a2d0ca8aacb1e837c4b0ee72540128145d5ca"
+    },
+    {
       "path": "assets/stage/01-wall.png",
       "bytes": 290143,
       "sha256": "64da888885283296840ff713d189be12d0357e22e4b0fa8fefdd139b8b0a740a"
@@ -261,23 +441,33 @@
     },
     {
       "path": "fighter-preview.html",
-      "bytes": 1481330,
-      "sha256": "9dc6477e57094cfcbd792b042b9532798025c107bbd4ba0cab013b494272ce66"
+      "bytes": 2095327,
+      "sha256": "3773afdba5199a34619e49fbf2da3bb6dafdaaab3edb1bc56ae718e1a9b6c459"
     },
     {
       "path": "index.html",
-      "bytes": 1481330,
-      "sha256": "9dc6477e57094cfcbd792b042b9532798025c107bbd4ba0cab013b494272ce66"
+      "bytes": 2095327,
+      "sha256": "3773afdba5199a34619e49fbf2da3bb6dafdaaab3edb1bc56ae718e1a9b6c459"
     },
     {
       "path": "package.json",
-      "bytes": 497,
-      "sha256": "5624c20cd3d0c20f396d61c38a8eb5d4acd64de55e5eca628d042080a2ece3dd"
+      "bytes": 603,
+      "sha256": "3878fdfb6dcac107ca9da844260c360c337e840f3f1253867beca80a61f52287"
+    },
+    {
+      "path": "police-intervention.gif",
+      "bytes": 4740103,
+      "sha256": "2ed61626d0665bdecd1e3945841b4d3ac59bdd9662a46e9bf6da3bb9deca365e"
+    },
+    {
+      "path": "police-preview.html",
+      "bytes": 2095327,
+      "sha256": "3773afdba5199a34619e49fbf2da3bb6dafdaaab3edb1bc56ae718e1a9b6c459"
     },
     {
       "path": "references/README.md",
-      "bytes": 598,
-      "sha256": "d1cf4e22fac7a91bbfe4142dda2849ff783ed6ec0094b2fe35797cfa464a34e1"
+      "bytes": 859,
+      "sha256": "b4d82a1848b967cf39e38d8654655f6fcdb347e625d5c7cbcd412d5232426678"
     },
     {
       "path": "references/botellin-estrella-galicia.png",
@@ -293,6 +483,16 @@
       "path": "references/personaje-rostro.jpg",
       "bytes": 303890,
       "sha256": "91df893a195c067bcb7d6fbde2820ff5ca6790c7423eab9b4870db5732df841a"
+    },
+    {
+      "path": "references/policia-agente.png",
+      "bytes": 143997,
+      "sha256": "429509fc1c31ab7c2636afeb4cdc37c84038ea3db2511d4b49dcfc3d3f2113c5"
+    },
+    {
+      "path": "references/policia-patrullas.jpg",
+      "bytes": 352923,
+      "sha256": "95f65967a3a2607c14ebf0ed77a27e2003a2d8acf6a8af8b21174c95966a512e"
     },
     {
       "path": "references/terraza-frontal.jpg",
@@ -311,8 +511,8 @@
     },
     {
       "path": "source-art/README.md",
-      "bytes": 822,
-      "sha256": "da7d63f65b8d48b16cfe9a6ef4161060ea97e801df46c0830b53375ea5b2d748"
+      "bytes": 1187,
+      "sha256": "7d759fac5fde8aad77dad689193c065514c9da50cd1e6ca33314620af27a334e"
     },
     {
       "path": "source-art/bottle-estrella-galicia.png",
@@ -328,6 +528,16 @@
       "path": "source-art/fighter-throw.png",
       "bytes": 1866674,
       "sha256": "254db255dc7b285932061e87017864934065a57fac614976a41a37c7caeafea8"
+    },
+    {
+      "path": "source-art/police-officer.png",
+      "bytes": 1921789,
+      "sha256": "bd2791c2555e38b66f58958b1c98d8d8db627bb7c606e4e1293b8cd5be75416b"
+    },
+    {
+      "path": "source-art/police-patrol.png",
+      "bytes": 1063749,
+      "sha256": "f7d34fe607720f36f2ed564066b5afb66cca6aebbe8114e57b9da9493e2b0b54"
     },
     {
       "path": "source-art/stage-tables.png",
@@ -350,19 +560,34 @@
       "sha256": "0255b443398f76ae90bdc5550709d4673fedb4083aba69aa2d47a90e4c7ae81f"
     },
     {
+      "path": "src/police.js",
+      "bytes": 5860,
+      "sha256": "48a47be28e46550e7433f2df32ed71892e03af378ee4409000d970871ce6ecd0"
+    },
+    {
       "path": "src/stage.js",
       "bytes": 1499,
       "sha256": "87023d1819038afb20d7bcdead75a8110dd7bfd5a7034c5e194d6855aa8785c1"
     },
     {
       "path": "templates/index.template.html",
-      "bytes": 13806,
-      "sha256": "a3169bd48fb1eb06b6bd87538a67308ecda85d950439946e9c70640371eeb4ed"
+      "bytes": 16558,
+      "sha256": "fd56cf3775abc1919ceba620a5605d67d85ed29bb7b415485450c38158037426"
     },
     {
       "path": "tests/bottle.test.cjs",
       "bytes": 3999,
       "sha256": "eeb6547259987ec166213d8ca56303a1e9b3ffe6a73dcb550fe5d84327fad890"
+    },
+    {
+      "path": "tests/demo.test.cjs",
+      "bytes": 3551,
+      "sha256": "eec6a7c328ae34896c7b68a994ed5682c31558e2d8bb730417276d4ffbfcd03e"
+    },
+    {
+      "path": "tests/police.test.cjs",
+      "bytes": 3307,
+      "sha256": "876144ac2ac58fc8859715af6922a0b1e05ffd92310adad2318226019daca472"
     },
     {
       "path": "tests/stage.test.cjs",
@@ -376,8 +601,8 @@
     },
     {
       "path": "tools/build_demo.py",
-      "bytes": 1724,
-      "sha256": "889f73c0ee61557e6bbec094e1d463d61432831791836c40f42d74abb6abd8b7"
+      "bytes": 2009,
+      "sha256": "288ab310ca8b70e041167819a0cac4116038e761847850671a8ac988fc4fcbff"
     },
     {
       "path": "tools/build_fighter_base.py",
@@ -390,14 +615,29 @@
       "sha256": "e0fbe7dc72923ade60a61eaa6e742234c7dfe7281f9f71014f09dd145961a9c1"
     },
     {
+      "path": "tools/build_police.py",
+      "bytes": 3998,
+      "sha256": "df725f0fdae4b467ca42034f96dd4d7aa9824bb0288aa58987b8acffecde591e"
+    },
+    {
       "path": "tools/build_stage.py",
       "bytes": 4037,
       "sha256": "cc0f929ad14041a85c2ff4d2540720e23589236bac52cc54a24384156c761a7e"
     },
     {
       "path": "tools/rebuild_assets.py",
-      "bytes": 572,
-      "sha256": "5bea5fb772d7cf1b3f41fd8b7cce2d0798eceb3964f563f9af6e434a80674d75"
+      "bytes": 590,
+      "sha256": "21262c5260793f1b0442193a79f598d370bbc60053da7f33822de14ea5010704"
+    },
+    {
+      "path": "tools/render_police_preview.py",
+      "bytes": 5163,
+      "sha256": "0cb2fd90ce1bb93727b42e0b001b5ea1514135a2684589e697283adb24935588"
+    },
+    {
+      "path": "tools/render_police_states.cjs",
+      "bytes": 1876,
+      "sha256": "49d440e7dee3f9e11c705824d4a8ec5c6c25007d6470759fbb97ba5b3ad61534"
     },
     {
       "path": "tools/render_preview.cjs",

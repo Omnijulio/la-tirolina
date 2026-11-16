@@ -12,6 +12,7 @@ Lee `CONTEXTO_CODEX.md`, `PLAN.md`, `README.md` y `STAGE.md` antes de modificar 
 - `python3 tools/build_characters.py` regenera los atlas de `assets/characters/` a partir de `assets/fighter.png`.
 - No uses `fetch` ni `getImageData` en el juego: debe seguir funcionando abriendo `index.html` directamente.
 - `references/` contiene fotos de personas reales y está excluida de git para no publicarlas.
+- La policía usa `src/police.js` y `assets/police/` sin modificar; la lógica de ruido/multas está en `game/core/rules.js` (`NOISE`, `POLICE`) y `game/combat/match.js`. Ver `POLICE.md`.
 - `example.html` es el ejemplo modular editable. No depende de un empaquetador.
 - Para reconstruir arte desde los originales proporcionados, usa `python3 tools/rebuild_assets.py`, no solo uno de sus pasos intermedios. Requiere `requirements-art.txt`.
 - No se necesita generar de nuevo las imágenes con IA ni disponer de claves para ejecutar o reconstruir lo entregado.

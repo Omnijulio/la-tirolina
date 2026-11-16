@@ -7,3 +7,6 @@ build/
 
 # Fotos originales de personas reales: no publicar
 references/
+
+# Paquetes de trabajo descomprimidos dentro de la carpeta (ya integrados)
+la-trolina-codex-policia/

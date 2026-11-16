@@ -66,6 +66,11 @@
       for (const layer of root.TERRACE_STAGE_DATA.layers) jobs.push([layer.image, (img) => { this.assets.stage[layer.id] = img; }]);
       jobs.push([root.BOTTLE_DATA.image, (img) => { this.assets.bottle = img; }]);
       for (const c of root.TROLINA_CHARACTERS) jobs.push([c.atlas, (img) => { this.assets.characters[c.id] = img; }]);
+      if (root.POLICE_DATA) {
+        this.assets.police = {};
+        jobs.push([root.POLICE_DATA.officer.image, (img) => { this.assets.police.officer = img; }]);
+        jobs.push([root.POLICE_DATA.patrol.image, (img) => { this.assets.police.patrol = img; }]);
+      }
       let done = 0;
       await Promise.all(jobs.map(([src, set]) => this.loadImage(src).then((img) => { set(img); onProgress(++done / jobs.length); })));
     },
@@ -113,6 +118,9 @@
       UI.show('select', { step: 'p1' });
     },
 
+    /** Personaje en el calabozo (devuelve el que lo esté, o null). */
+    jailed(...ids) { return ids.map((id) => this.charById(id)).find((c) => c && Save.jailLeft(c.id) > 0) || null; },
+
     /** Tras pagar en la barra: pedido de la CPU, cinemática (si hay) y pantalla VS. */
     preFight() {
       const s = this.session;
@@ -136,7 +144,9 @@
         input: this.input, sfx: Sfx, settings: d.settings,
         autoplay: params.has('autoplay'),
         timeScale: Number(params.get('fast')) || 1,
-        onEnd: (r) => this.endMatch(r)
+        police: d.settings.police !== false,
+        onEnd: (r) => this.endMatch(r),
+        onPolice: (info) => this.onPolice(info)
       });
       this.paused = false;
       this.input.capture = true;
@@ -162,6 +172,7 @@
       const reward = R.matchReward({ ...result, boss: story && rival.boss, firstClear });
       Save.earn(reward.total);
       if (result.won) d.stats.wins++; else d.stats.losses++;
+      d.police.strikes = 0; // terminar una pelea corta la racha de intervenciones
       let unlocked = null, storyFinished = false;
       if (story && result.won) {
         if (Save.unlock(rival.id)) unlocked = rival.id;
@@ -172,6 +183,27 @@
       Save.save();
       this.lastResult = { result, reward, unlocked, storyFinished };
       UI.show('results', this.lastResult);
+    },
+
+    /** La Policía Local ha parado la pelea: multa o calabozo. */
+    onPolice(info) {
+      const d = Save.data;
+      document.body.classList.remove('fighting');
+      this.input.capture = false;
+      if (this.match) this.match.banner = null;
+      const outcome = R.policeOutcome((d.police.strikes || 0) + 1);
+      let paid = 0;
+      if (outcome.jail) {
+        d.police.strikes = 0;
+        d.stats.nightsInJail++;
+        Save.jail([...new Set([info.p1.id, info.p2.id])], outcome.jailMs);
+      } else {
+        d.police.strikes = outcome.strike;
+        paid = Save.payFine(outcome.fine);
+      }
+      Save.save();
+      this.lastPolice = { outcome, paid, p1: info.p1, p2: info.p2 };
+      UI.show('police', this.lastPolice);
     },
 
     leaveMatch() {

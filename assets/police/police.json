@@ -1,0 +1,476 @@
+{
+  "version": "1.4",
+  "officer": {
+    "name": "Agente de Policia Local",
+    "image": "assets/police/officer.png",
+    "frameWidth": 192,
+    "frameHeight": 176,
+    "columns": 6,
+    "rows": 4,
+    "anchor": {
+      "x": 80,
+      "y": 160
+    },
+    "facing": "right",
+    "animations": {
+      "idle": {
+        "loop": true,
+        "next": "idle",
+        "frames": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 192,
+            "h": 176,
+            "duration": 170,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 192,
+            "y": 0,
+            "w": 192,
+            "h": 176,
+            "duration": 170,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 384,
+            "y": 0,
+            "w": 192,
+            "h": 176,
+            "duration": 170,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 576,
+            "y": 0,
+            "w": 192,
+            "h": 176,
+            "duration": 170,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 768,
+            "y": 0,
+            "w": 192,
+            "h": 176,
+            "duration": 170,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 960,
+            "y": 0,
+            "w": 192,
+            "h": 176,
+            "duration": 170,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          }
+        ]
+      },
+      "walk": {
+        "loop": true,
+        "next": "idle",
+        "frames": [
+          {
+            "x": 0,
+            "y": 176,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 192,
+            "y": 176,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 384,
+            "y": 176,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 576,
+            "y": 176,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 768,
+            "y": 176,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 960,
+            "y": 176,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          }
+        ]
+      },
+      "stop": {
+        "loop": false,
+        "next": "hold",
+        "frames": [
+          {
+            "x": 0,
+            "y": 352,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 192,
+            "y": 352,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 384,
+            "y": 352,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 576,
+            "y": 352,
+            "w": 192,
+            "h": 176,
+            "duration": 180,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 768,
+            "y": 352,
+            "w": 192,
+            "h": 176,
+            "duration": 220,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 960,
+            "y": 352,
+            "w": 192,
+            "h": 176,
+            "duration": 140,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          }
+        ]
+      },
+      "radio": {
+        "loop": false,
+        "next": "idle",
+        "frames": [
+          {
+            "x": 0,
+            "y": 528,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 192,
+            "y": 528,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 384,
+            "y": 528,
+            "w": 192,
+            "h": 176,
+            "duration": 180,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 576,
+            "y": 528,
+            "w": 192,
+            "h": 176,
+            "duration": 240,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 768,
+            "y": 528,
+            "w": 192,
+            "h": 176,
+            "duration": 100,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          },
+          {
+            "x": 960,
+            "y": 528,
+            "w": 192,
+            "h": 176,
+            "duration": 140,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          }
+        ]
+      },
+      "hold": {
+        "loop": true,
+        "next": "hold",
+        "frames": [
+          {
+            "x": 576,
+            "y": 352,
+            "w": 192,
+            "h": 176,
+            "duration": 200,
+            "hitboxes": [],
+            "hurtbox": {
+              "x": 49,
+              "y": 18,
+              "w": 65,
+              "h": 142
+            }
+          }
+        ]
+      }
+    }
+  },
+  "patrol": {
+    "image": "assets/police/patrol-lights.png",
+    "frameWidth": 320,
+    "frameHeight": 160,
+    "anchor": {
+      "x": 160,
+      "y": 148
+    },
+    "frames": [
+      {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 160,
+        "duration": 200
+      },
+      {
+        "x": 320,
+        "y": 0,
+        "w": 320,
+        "h": 160,
+        "duration": 200
+      },
+      {
+        "x": 640,
+        "y": 0,
+        "w": 320,
+        "h": 160,
+        "duration": 200
+      },
+      {
+        "x": 960,
+        "y": 0,
+        "w": 320,
+        "h": 160,
+        "duration": 200
+      }
+    ],
+    "facing": "left"
+  },
+  "settings": {
+    "incidentThreshold": 5,
+    "weights": {
+      "punch": 1,
+      "kick": 1,
+      "throwBottle": 2
+    },
+    "fightTimeoutMs": 20000,
+    "warningMs": 1200,
+    "arrivalMs": 2200,
+    "deployMs": 2600,
+    "stopMs": 1600,
+    "radioMs": 1800,
+    "groundY": 486,
+    "officerScale": 2,
+    "officerSpawnX": [
+      930,
+      1050
+    ],
+    "officerTargetX": [
+      450,
+      550
+    ],
+    "patrolStartX": 1300,
+    "patrolTargetX": 780,
+    "patrolGroundY": 426,
+    "patrolScale": 1.6
+  },
+  "states": [
+    "idle",
+    "warning",
+    "arriving",
+    "deploying",
+    "stopping",
+    "radio",
+    "resolved"
+  ],
+  "units": "View-world pixels for a 960x540 canvas; time in milliseconds. Stage camera transform is applied by the caller."
+}

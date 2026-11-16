@@ -22,7 +22,7 @@
         }
       }
     }
-    breakBottle(p) { super.breakBottle(p); this.match.sfx('glass'); }
+    breakBottle(p) { super.breakBottle(p); this.match.sfx('glass'); this.match.addNoise(R.NOISE.bottleBreak); }
   }
 
   class Match {
@@ -54,6 +54,18 @@
       this.sparks = []; this.popups = []; this.dusts = []; this.smokes = []; this.darts = [];
       this.superFreeze = 0; this.superOwner = null;
       this.stats = { perfectRounds: 0, timeLeft: 0, maxCombo: 0, ultimates: 0 };
+      // Policía Local: aparece si el ruido llega a 100 (ver TrolinaRules.NOISE).
+      this.noise = 0; this.bottleStreak = -1; this.lastBottleAt = -1e9; this.noiseWarned = false;
+      this.police = null; this.separate = null;
+      if (opts.police && this.assets.police && root.PoliceIntervention && root.POLICE_DATA) {
+        this.policeData = JSON.parse(JSON.stringify(root.POLICE_DATA));
+        this.police = new PoliceIntervention(this.assets.police, this.policeData, {
+          onStateChange: (e) => this.onPoliceState(e),
+          onStop: () => this.onPoliceStop(),
+          onResolved: () => this.onPoliceResolved()
+        });
+        this.police.automatic = false; // la dispara el ruido del juego, no los contadores de la demo
+      }
       this.banner = null;
       this.ended = false;
       this.startRound();
@@ -91,6 +103,61 @@
     smokePuff(c) {
       const p = c.cigTip();
       this.smokes.push({ x: p.x, y: p.y, vx: (Math.random() - 0.5) * 24 + c.facing * 14, r: 4 + Math.random() * 4, t: 0, life: 1300 });
+    }
+
+    /* ---------- ruido y Policía Local ---------- */
+
+    addNoise(n) {
+      if (!this.police || this.police.active || this.phase !== 'fight') return;
+      this.noise = Math.max(0, Math.min(R.NOISE.max, this.noise + n));
+      if (this.noise >= 70 && !this.noiseWarned) {
+        this.noiseWarned = true;
+        this.popups.push({ x: 480 + this.camera * 2, y: 250, text: '¡QUÉ ESCÁNDALO! LOS VECINOS SE QUEJAN', color: '#8fd6ff', t: 0, life: 1600 });
+      }
+      if (this.noise >= R.NOISE.max) this.callPolice();
+    }
+
+    onBottleThrown() {
+      this.bottleStreak = this.t - this.lastBottleAt < R.NOISE.streakWindowMs ? this.bottleStreak + 1 : 0;
+      this.lastBottleAt = this.t;
+      this.addNoise(R.bottleNoise(this.bottleStreak));
+    }
+
+    callPolice() {
+      if (!this.police || this.police.active) return;
+      // Los agentes se colocan entre los dos luchadores.
+      const mid = Math.max(230, Math.min(730, (this.p1.cx + this.p2.cx) / 2));
+      this.policeData.settings.officerTargetX = [mid - 50, mid + 50];
+      this.noise = R.NOISE.max;
+      if (this.police.trigger('noise')) this.sfx('siren');
+    }
+
+    onPoliceState(e) {
+      if (e.state === 'arriving') this.sfx('siren');
+      if (e.state === 'radio') this.sfx('radio');
+    }
+
+    onPoliceStop() {
+      if (this.phase === 'matchEnd' || this.ended) return;
+      this.phase = 'police'; this.phaseT = 0;
+      this.setBanner('¡ALTO!', '#8fd6ff', 'POLICÍA LOCAL');
+      this.sfx('whistle');
+      for (const f of this.fighters) {
+        if (f.state !== 'ko') { f.state = 'ready'; f.f.play('idle', true); }
+        f.smoking = null; f.faintT = 0; f.pending = [];
+      }
+      this.bottles.reset(); this.darts = []; this.superFreeze = 0; this.slowmo = 0;
+      const [ax, bx] = this.policeData.settings.officerTargetX;
+      const mid = (ax + bx) / 2;
+      const [l, r] = this.p1.cx <= this.p2.cx ? [this.p1, this.p2] : [this.p2, this.p1];
+      this.separate = [[l, Math.max(C.MIN_X, mid - 200)], [r, Math.min(C.MAX_X, mid + 200)]];
+      if (this.o.input) this.o.input.clear();
+    }
+
+    onPoliceResolved() {
+      if (this.ended) return;
+      this.ended = true;
+      this.o.onPolice && this.o.onPolice({ p1: this.p1.char, p2: this.p2.char });
     }
 
     /** Congelado de pantalla al activar el ultimate (como un "super" arcade). */
@@ -202,7 +269,20 @@
         }
         if (this.phaseT > 3300) this.endRound();
       } else if (this.phase === 'matchEnd') {
+        // Si la pelea acaba antes de que den el alto, la patrulla llega tarde y se va.
+        if (this.police && this.police.active && !this.police.blocksCombat) this.police.reset();
         if (this.phaseT > 2600 && !this.ended) { this.ended = true; this.o.onEnd && this.o.onEnd(this.result()); }
+      }
+      if (this.police) {
+        if (this.phase === 'fight' && !this.police.active) {
+          const drunk = this.intoxOf(this.p1) + this.intoxOf(this.p2);
+          this.noise = Math.max(0, this.noise + (R.NOISE.drunkPerSec * drunk - R.NOISE.decayPerSec) * dt / 1000);
+          if (this.noise >= R.NOISE.max) this.callPolice();
+        }
+        this.police.update(dt);
+      }
+      if (this.separate) {
+        for (const [f, x] of this.separate) { f.cx += (x - f.cx) * Math.min(1, dt * 0.004); f.sync(); }
       }
 
       const c1 = this.controls(this.p1, this.brain1, this.p2, actions, dt);
@@ -286,6 +366,7 @@
       const mv = R.MOVES[kind];
       const dmg = R.damageFor(kind, att.loadout.power, att === this.p2 ? this.diff.cpuDamage : 1) * sc.damage;
       const res = def.takeHit(kind, dmg, att.cx, { hitstun: mv.hitstun * sc.hitstun, knockback: mv.knockback * sc.knockback });
+      this.addNoise(res === 'block' ? R.NOISE.block : res === 'ko' ? R.NOISE.ko : kind === 'dart' ? R.NOISE.dart : R.NOISE.hit);
       if (res === 'block') {
         this.spark(x, y, 'block'); this.sfx('block'); this.hitstop = 45;
         att.combo = 0;
@@ -385,6 +466,7 @@
       this.terrace.draw(ctx, {
         cameraX: this.camera, drawActors: (c) => {
           if (this.superFreeze > 0 && this.superOwner) this.drawSuperBack(c);
+          if (this.police) this.police.drawBack(c, { flashes: !reduce });
           for (const f of this.fighters) f.drawShadow(c);
           if (I > 0.15) {
             const g = { ghost: true, alpha: Math.min(0.4, 0.32 * I), dx: Math.sin(this.t / 420) * 22 * I, dy: Math.cos(this.t / 610) * 6 * I };
@@ -400,13 +482,29 @@
           }
           this.bottles.draw(c, [this.p1.f, this.p2.f]);
           this.drawDarts(c);
+          if (this.police) this.police.drawFront(c);
           this.drawWorldFx(c);
         }
       });
       ctx.restore();
       this.drawFog(ctx, I * this.p1.loadout.fogMult);
+      this.drawPoliceLights(ctx, reduce);
       this.drawHud(ctx, I);
       this.drawBanner(ctx);
+    }
+
+    /** Destellos azules/rojos de la patrulla sobre la escena (se desactivan con «Reducir mareo»). */
+    drawPoliceLights(ctx, reduce) {
+      if (!this.police || reduce) return;
+      const st = this.police.state;
+      if (st === 'idle' || st === 'warning') return;
+      const on = Math.floor(this.t / 180) % 2;
+      ctx.save();
+      const g = ctx.createRadialGradient(on ? 860 : 700, 300, 40, on ? 860 : 700, 300, 520);
+      g.addColorStop(0, on ? 'rgba(40,110,255,0.22)' : 'rgba(255,40,70,0.14)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, 960, 540);
+      ctx.restore();
     }
 
     drawSuperBack(c) {
@@ -611,10 +709,28 @@
       ctx.font = 'bold 34px ' + FONT; ctx.textAlign = 'center';
       ctx.fillStyle = this.timer <= 10 ? '#ff4d5e' : '#fff';
       ctx.fillText(String(Math.ceil(this.timer)).padStart(2, '0'), 480, 52);
-      if (playerIntox > 0.55) {
-        ctx.font = 'bold 13px ' + FONT; ctx.fillStyle = '#f8ce73';
+      if (this.police) {
+        // Medidor de ruido bajo el reloj.
+        const nw = 120, nx = 420, ny = 108, k = this.noise / R.NOISE.max;
+        ctx.fillStyle = 'rgba(5,7,12,0.8)'; ctx.fillRect(nx - 2, ny - 2, nw + 4, 12);
+        ctx.fillStyle = k > 0.7 ? ((this.t % 400) < 200 ? '#ff4d5e' : '#ff9a6a') : k > 0.4 ? '#f8ce73' : '#7fd88f';
+        ctx.fillRect(nx, ny, nw * k, 8);
+        ctx.font = 'bold 11px ' + FONT; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#05070c';
+        ctx.fillStyle = '#dfe7f0';
+        ctx.strokeText('RUIDO', 480, ny + 22); ctx.fillText('RUIDO', 480, ny + 22);
+        if (this.police.active && this.phase !== 'police') {
+          const label = this.police.getStatus().label.toUpperCase();
+          ctx.font = 'bold 16px ' + FONT;
+          const tw = ctx.measureText(label).width + 30;
+          ctx.fillStyle = 'rgba(7,24,40,0.9)'; ctx.fillRect(480 - tw / 2, 150, tw, 30);
+          ctx.strokeStyle = (this.t % 360) < 180 ? '#3d8bff' : '#ff4d5e'; ctx.lineWidth = 2; ctx.strokeRect(480 - tw / 2, 150, tw, 30);
+          ctx.fillStyle = '#cfe8ff'; ctx.fillText('🚨 ' + label, 480, 171);
+        }
+      }
+      if (playerIntox > 0.55 && !(this.police && this.police.active)) {
+        ctx.font = 'bold 13px ' + FONT; ctx.fillStyle = '#f8ce73'; ctx.textAlign = 'center';
         ctx.globalAlpha = 0.6 + 0.4 * Math.sin(this.t / 200);
-        ctx.fillText('VAS FINO…', 480, 140);
+        ctx.fillText('VAS FINO…', 480, 152);
       }
       ctx.restore();
     }

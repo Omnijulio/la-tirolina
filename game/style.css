@@ -251,6 +251,31 @@ header.bar h2 { flex: 1; font-size: clamp(18px, 3.4vw, 28px); }
 .vs-mid b { font: 900 clamp(48px, 9vw, 110px)/1 var(--display); color: #fff; text-shadow: 0 0 20px #ff2d55, 0 4px 0 #000; animation: pop .5s .2s both; }
 .vs-mid span { font-size: 13px; color: #fff; background: #000a; padding: 4px 10px; border-radius: 12px; }
 
+/* calabozo y policía */
+.card .jailtag { position: absolute; left: 4px; right: 4px; bottom: 26px; font: 700 11px var(--display); color: #cfe8ff; background: #071828e6; border-radius: 4px; padding: 2px 0; }
+.card .jailtag:empty { display: none; }
+.card.jailed canvas { filter: grayscale(1) brightness(.6); }
+.card.jailed::after, .cell::after { content: ""; position: absolute; inset: 6px 6px 26px; border-radius: 6px; pointer-events: none;
+  background: repeating-linear-gradient(90deg, transparent 0 12px, #9aa1abcc 12px 16px); }
+.cell::after { inset: 0 0 22px; opacity: 0; }
+.scr.police.jail .cell::after { opacity: 1; }
+#ui.scr-police { background: linear-gradient(180deg, #050a18e6, #04060cf5); }
+.scr.police h1 { font-size: clamp(32px, 6vw, 64px); color: #9fd2ff; text-shadow: 0 0 22px #3d8bff88, 0 4px 0 #000; animation: pop .4s both; text-align: center; }
+.scr.police.jail h1 { color: #ffd0c8; text-shadow: 0 0 22px #ff4d5e88, 0 4px 0 #000; }
+.scr.police .lead { max-width: 640px; text-align: center; margin: 0; color: #dfe7f0; }
+.scr.police .lights { display: flex; gap: 8px; }
+.scr.police .lights i { width: 46px; height: 14px; border-radius: 7px; background: #3d8bff; box-shadow: 0 0 18px #3d8bff; animation: blink .5s infinite; }
+.scr.police .lights i + i { background: #ff4d5e; box-shadow: 0 0 18px #ff4d5e; animation-delay: .25s; }
+.scr.police .cells { display: flex; gap: 16px; }
+.scr.police .cell { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--display); color: var(--c); }
+.scr.police .cell canvas { width: 96px; height: 96px; image-rendering: pixelated; background: #0d1522; border: 2px solid var(--c); border-radius: 8px; }
+.scr.police .fine { font-size: 17px; background: #0d1522e6; border: 1px solid #3d8bff66; border-radius: 10px; padding: 10px 16px; text-align: center; }
+.scr.police .fine b { color: var(--yellow); }
+.scr.police .strikes { display: flex; align-items: center; gap: 6px; max-width: 640px; font-size: 13px; color: var(--muted); }
+.scr.police .strikes i { flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #3d8bff; }
+.scr.police .strikes i.on { background: #ff4d5e; border-color: #ff4d5e; }
+.scr.police .strikes span { margin-left: 6px; }
+
 /* resultados */
 .scr.results h1 { font-size: clamp(40px, 8vw, 84px); animation: pop .4s both; }
 .scr.results.win h1 { color: var(--mint); text-shadow: 0 0 24px #8bf2ce66, 0 4px 0 #000; }
@@ -305,5 +330,12 @@ header.bar h2 { flex: 1; font-size: clamp(18px, 3.4vw, 28px); }
   .item p { font-size: 11px; }
   .cine-portrait { width: min(30vw, 260px); bottom: 26%; }
   .scr.vs .side canvas { width: min(30vw, 50vh * 1.1, 300px); }
+  .scr.police { gap: 8px; }
+  .scr.police h1 { font-size: 30px; }
+  .scr.police .lead { font-size: 13px; }
+  .scr.police .lights { display: none; }
+  .scr.police .cell canvas { width: 60px; height: 60px; }
+  .scr.police .fine { font-size: 14px; padding: 6px 12px; }
+  .scr.police .strikes { font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition: none !important; } }

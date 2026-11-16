@@ -141,3 +141,16 @@ test('peleas más largas: más vida y asaltos de 99 s', () => {
   assert.equal(lo.maxHp, Math.round(barbas.stats.hp * R.HP_SCALE));
   assert.equal(R.ROUND_SECONDS, 99);
 });
+
+test('policía: el ruido de botellines seguidos crece y a la tercera, calabozo', () => {
+  assert.ok(R.bottleNoise(3) > R.bottleNoise(1) && R.bottleNoise(1) > R.bottleNoise(0));
+  // Cinco botellines seguidos superan el umbral aunque el ruido baje con el tiempo.
+  let n = 0; for (let i = 0; i < 5; i++) n += R.bottleNoise(i) + R.NOISE.bottleBreak;
+  assert.ok(n - R.NOISE.decayPerSec * 15 >= R.NOISE.max);
+  // Un botellín suelto cada 10 s no la llama nunca.
+  assert.ok(R.bottleNoise(0) + R.NOISE.bottleBreak < R.NOISE.decayPerSec * 10);
+  const a = R.policeOutcome(1), b = R.policeOutcome(2), c = R.policeOutcome(3);
+  assert.ok(a.fine > 0 && !a.jail);
+  assert.ok(b.fine >= a.fine && !b.jail);
+  assert.ok(c.jail && c.jailMs === 60000);
+});

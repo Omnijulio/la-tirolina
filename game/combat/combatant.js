@@ -260,7 +260,7 @@
         }
         return false;
       }
-      if (match.bottles.throw(this.f)) { this.ammo--; match.sfx('throw'); return true; }
+      if (match.bottles.throw(this.f)) { this.ammo--; match.sfx('throw'); if (match.onBottleThrown) match.onBottleThrown(this); return true; }
       return false;
     }
 

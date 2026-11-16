@@ -18,6 +18,7 @@ INCLUDE = [
     'assets/bottle-estrella-galicia-4x.png', 'assets/characters', 'assets/icons',
     'assets/stage/stage-data.js', 'assets/stage/01-wall.png',
     'assets/stage/02-tables.png', 'assets/stage/03-arena-floor.png',
+    'assets/police/police-data.js', 'assets/police/officer.png', 'assets/police/patrol-lights.png',
 ]
 
 

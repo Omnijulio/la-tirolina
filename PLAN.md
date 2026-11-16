@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.3** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.4** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -24,6 +24,10 @@ Estado: **v0.3** (16/11/2026). Un jugador contra la CPU, en navegador de escrito
 - **Joystick táctil** flotante: moverse, saltar (también en diagonal) y cubrirse sin levantar el pulgar.
 - **Bolsa de azúcar** (60 €): 30 s de velocidad sin puntillo, bajón y desmayo a los 45 s.
 - **Paquete de tabaco**: fumar en combate baja el puntillo (te deja quieto y da tos si abusas).
+
+## Hecho en v0.4
+
+- **Policía Local**: barra de ruido (sobre todo muchos botellines seguidos); si se llena llega la patrulla, para la pelea, multa a los dos y la pelea se reinicia. A la tercera seguida, **noche en el calabozo**: esos luchadores no se pueden usar durante 1 minuto. Se puede desactivar en Opciones.
 
 ## Próximas fases propuestas
 

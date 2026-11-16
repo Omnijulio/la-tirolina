@@ -73,8 +73,13 @@ El módulo conserva el contexto Canvas y aplica el desplazamiento de cámara a l
 - `assets/stage/stage-layers-guide.png`: guía visual de los tres PNG.
 - `fighter-animation.gif`: previsualización de los movimientos en el nuevo escenario.
 
-Las imágenes de revisión son composiciones de las capas reales que se entregan. Las fotografías originales no se incluyen en este paquete.
+Las imágenes de revisión son composiciones de las capas reales que se entregan. Las fotografías de referencia están en `references/` en la carpeta local (excluida de git para no publicarlas).
 
 ## Verificación
 
 Ejecuta `node tests/stage.test.cjs` desde la carpeta del paquete. Comprueba orden de capas, personajes delante, aislamiento, línea de suelo, límites de cámara y cobertura horizontal. También se verificaron dimensiones, transparencia y composición sin huecos. La vista HTML no pudo comprobarse en el navegador de este entorno.
+
+
+## Elementos policiales de v1.4
+
+El coche y los agentes son elementos dinámicos del plano delantero. Orden recomendado: pared, mesas, suelo frontal, patrulla, luchadores/proyectiles, agentes. El mensaje policial se dibuja fuera del desplazamiento de cámara. Ningún elemento policial se incrusta en los tres PNG de fondo. Consulta `POLICE.md`.

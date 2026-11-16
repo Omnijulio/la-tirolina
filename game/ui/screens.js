@@ -4,6 +4,7 @@
 (function (root) {
   const R = root.TrolinaRules;
   const money = (c) => R.formatMoney(c);
+  const clock = (ms) => { const t = Math.ceil(ms / 1000); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
   const esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
 
   function el(html) {
@@ -142,13 +143,16 @@
       const roster = node.querySelector('.roster');
       let chosen = step === 'p1' ? s.p1 : (s.p2 || chars.find((c) => c.id !== s.p1).id);
       if (step === 'p1' && !g.save.isUnlocked(chosen)) chosen = 'barbas';
-      const canPick = (c) => step === 'p2' || g.save.isUnlocked(c.id);
+      const jailLeft = (id) => g.save.jailLeft(id);
+      const canPick = (c) => (step === 'p2' || g.save.isUnlocked(c.id)) && !jailLeft(c.id);
+      const storyRival = story ? g.charById(root.TROLINA_STORY[d.story.stage]) : null;
       chars.forEach((c) => {
         const locked = !g.save.isUnlocked(c.id);
-        const card = el(`<button class="card${locked ? ' locked' : ''}" data-id="${c.id}" style="--c:${c.color}"><canvas width="96" height="96"></canvas><span>${esc(c.name)}</span>${locked ? '<em>🔒</em>' : ''}</button>`);
+        const card = el(`<button class="card${locked ? ' locked' : ''}" data-id="${c.id}" style="--c:${c.color}"><canvas width="96" height="96"></canvas><span>${esc(c.name)}</span>${locked ? '<em>🔒</em>' : ''}<b class="jailtag"></b></button>`);
         drawPortrait(card.querySelector('canvas'), g.assets.characters[c.id], { silhouette: locked && step === 'p1' });
         if (step === 'p2' && c.id === s.p1) card.classList.add('mirror');
         card.addEventListener('click', () => {
+          if (jailLeft(c.id)) { chosen = c.id; refresh(); this.flashError(node, c.name + ' está en el calabozo: sale en ' + clock(jailLeft(c.id))); return; }
           if (!canPick(c)) { chosen = c.id; refresh(); this.flashError(node, 'Bloqueado: gánalo en el modo historia o cómpralo en la tienda'); return; }
           chosen = c.id; refresh();
         });
@@ -156,7 +160,20 @@
         roster.append(card);
       });
       const big = node.querySelector('canvas.big');
-      let animT = 0;
+      let animT = 0, jailT = 1000;
+      // Cuenta atrás del calabozo en las fichas.
+      const paintJail = () => {
+        node.querySelectorAll('.card').forEach((b) => {
+          const left = jailLeft(b.dataset.id);
+          b.classList.toggle('jailed', left > 0);
+          b.querySelector('.jailtag').textContent = left > 0 ? '🚔 ' + clock(left) : '';
+        });
+      };
+      paintJail();
+      this.tickers.push((dt) => {
+        jailT -= dt;
+        if (jailT <= 0) { jailT = 1000; paintJail(); refresh(); }
+      });
       this.tickers.push((dt) => {
         animT += dt;
         const frames = root.FIGHTER_DATA.animations.idle.frames;
@@ -181,11 +198,14 @@
         const locked = !g.save.isUnlocked(c.id);
         const lockTxt = locked ? (c.unlock.story !== undefined ? 'Se desbloquea al ganar el combate ' + (c.unlock.story + 1) + ' de la historia · o en la tienda por ' + money(c.unlock.price) : '') : '';
         node.querySelector('.lock').textContent = step === 'p1' ? lockTxt : (locked ? 'Como rival puedes elegirlo aunque esté bloqueado.' : '');
-        node.querySelector('[data-ok]').disabled = !canPick(c);
+        const rivalJailed = story && jailLeft(storyRival.id);
+        node.querySelector('[data-ok]').disabled = !canPick(c) || !!rivalJailed;
+        if (jailLeft(c.id)) node.querySelector('.lock').textContent = '🚔 En el calabozo: podrá pelear dentro de ' + clock(jailLeft(c.id)) + '.';
         if (story) {
           const idx = d.story.stage;
-          const rival = g.charById(root.TROLINA_STORY[idx]);
-          node.querySelector('.next-rival').innerHTML = 'Combate <b>' + (idx + 1) + '/' + root.TROLINA_STORY.length + '</b> · rival: <b style="color:' + rival.color + '">' + esc(rival.name) + '</b>';
+          const rival = storyRival;
+          node.querySelector('.next-rival').innerHTML = 'Combate <b>' + (idx + 1) + '/' + root.TROLINA_STORY.length + '</b> · rival: <b style="color:' + rival.color + '">' + esc(rival.name) + '</b>' +
+            (rivalJailed ? ' <span class="muted">· en el calabozo, sale en ' + clock(rivalJailed) + '</span>' : '');
         }
       };
       refresh();
@@ -288,6 +308,8 @@
       };
       render();
       const go = (o) => {
+        const preso = g.jailed(s.p1, s.p2);
+        if (preso) { this.flashError(node, preso.name + ' está en el calabozo: sale en ' + clock(g.save.jailLeft(preso.id))); return; }
         const cost = R.orderCost(o, items);
         if (!g.save.spend(cost)) { this.flashError(node, 'No te llega el dinero'); return; }
         d.lastOrder = o; d.stats.bottles += o.botellin || 0; g.save.save();
@@ -506,6 +528,7 @@
           <label>Controles táctiles
             <select data-k="touch"><option value="auto">Automático</option><option value="always">Mostrar siempre</option><option value="never">Ocultar</option></select></label>
           <label class="row">Reducir mareo de pantalla <input type="checkbox" data-k="reduceMotion"></label>
+          <label class="row">Policía Local (ruido, multas y calabozo) <input type="checkbox" data-k="police"></label>
           <p class="muted">${g.save.persistent ? 'El progreso se guarda en este navegador.' : 'Este navegador no permite guardar: el progreso se perderá al cerrar.'}</p>
           <button class="danger" data-reset>Borrar progreso</button>
         </div>
@@ -533,6 +556,53 @@
       return node;
     },
 
+    /** La Policía Local ha parado la pelea: multa y reinicio, o calabozo a la tercera. */
+    police(p) {
+      const g = this.game;
+      const { outcome, paid, p1, p2 } = p;
+      const same = p1.id === p2.id;
+      const names = same ? esc(p1.name) : esc(p1.name) + ' y ' + esc(p2.name);
+      const jail = outcome.jail;
+      const node = el(`<div class="scr police${jail ? ' jail' : ''}">
+        <div class="lights"><i></i><i></i></div>
+        <h1>${jail ? 'NOCHE EN EL CALABOZO' : '¡POLICÍA LOCAL!'}</h1>
+        <p class="lead">${jail
+          ? 'Tercera vez seguida que viene la patrulla. ' + names + (same ? ' pasa' : ' pasan') + ' la noche en el calabozo.'
+          : 'Demasiado ruido en la terraza: los agentes han parado la pelea y multan a ' + names + '.'}</p>
+        <div class="cells">${[p1, ...(same ? [] : [p2])].map((c) => `<div class="cell" style="--c:${c.color}"><canvas width="96" height="96" data-id="${c.id}"></canvas><span>${esc(c.name)}</span></div>`).join('')}</div>
+        ${jail
+          ? '<div class="fine">No podrán pelear durante <b class="countdown">1:00</b></div>'
+          : `<div class="fine">Multa: <b>${money(outcome.fine)}</b> para cada uno · pagas <b>${money(paid)}</b>${paid < outcome.fine ? ' (no te llegaba para más)' : ''}</div>`}
+        <div class="strikes">${[1, 2, 3].map((i) => `<i class="${i <= outcome.strike ? 'on' : ''}"></i>`).join('')}
+          <span>${jail ? 'Los avisos vuelven a cero.' : 'Aviso ' + outcome.strike + ' de 3. A la tercera seguida: noche en el calabozo (1 minuto sin poder usar a estos luchadores).'}</span></div>
+        <nav class="menu row"></nav>
+      </div>`);
+      node.querySelectorAll('.cells canvas').forEach((cv) => drawPortrait(cv, g.assets.characters[cv.dataset.id]));
+      const nav = node.querySelector('nav');
+      const add = (label, fn, primary) => {
+        const b = el(`<button class="${primary ? 'primary' : ''}">${label}</button>`);
+        b.addEventListener('click', fn); nav.append(b); return b;
+      };
+      root.TrolinaSfx.play(jail ? 'jail' : 'error');
+      if (jail) {
+        add('Elegir otro luchador', () => { g.leaveMatch(); g.session.mode === 'story' ? g.beginStory() : g.beginQuick(); }, true);
+        add('Menú', () => { g.leaveMatch(); this.show('title'); });
+        const cd = node.querySelector('.countdown');
+        this.tickers.push(() => { cd.textContent = clock(g.save.jailLeft(p1.id)); });
+      } else {
+        // La pelea se reinicia sola (con lo mismo pedido en la barra) salvo que abandones.
+        let left = 8000;
+        const again = add('Reiniciar la pelea (8)', () => g.startMatch(), true);
+        add('Abandonar', () => { g.leaveMatch(); this.show('title'); });
+        this.tickers.push((dt) => {
+          left -= dt;
+          again.textContent = 'Reiniciar la pelea (' + Math.max(0, Math.ceil(left / 1000)) + ')';
+          if (left <= 0 && this.current === 'police') { left = Infinity; g.startMatch(); }
+        });
+      }
+      return node;
+    },
+
     help(p) {
       const back = p.back || 'title';
       const node = el(`<div class="scr help">
@@ -545,6 +615,8 @@
           <section><h3>La Barra y el puntillo</h3><p>Antes de cada combate puedes pedir hasta <b>10 botellines a 2,90 €</b>. Cada uno da <b>+7 % de fuerza</b> y un envase para lanzar por asalto, pero sube tu <b>puntillo</b>: niebla que crece con el tiempo, visión doble, pantalla que se balancea, tropiezos, golpes al aire y controles con retraso.</p>
           <p><b>Tabaco</b>: cada cigarrillo que fumas (botón FUMAR) quita un 15 % de puntillo, pero te quedas quieto 1,5 s y, si te pegan, se te cae. A partir del cuarto, tos.</p>
           <p><b>Bolsa de azúcar (60 €)</b>: 30 s a toda velocidad y sin puntillo; luego se pasa y a los 45 s te quedas inconsciente unos segundos.</p></section>
+          <section><h3>Policía Local</h3><p>Cada golpe, botella rota o KO hace <b>ruido</b> (barra bajo el reloj). Lo que más ruido hace es <b>lanzar muchos botellines seguidos</b>; el ruido baja solo si os calmáis, y el puntillo os hace más escandalosos.</p>
+          <p>Si llega al máximo, viene la patrulla: para la pelea, <b>multa</b> a los dos y la pelea se reinicia. Si pasa <b>3 veces seguidas</b>, noche en el <b>calabozo</b>: esos luchadores no se pueden usar durante 1 minuto. Se puede desactivar en Opciones.</p></section>
           <section><h3>Teclado</h3><table>
             <tr><td>← → / A D</td><td>Andar (atrás = cubrirse)</td></tr>
             <tr><td>↑ / W</td><td>Saltar (mantener = seguir saltando)</td></tr>

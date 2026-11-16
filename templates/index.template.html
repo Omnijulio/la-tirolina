@@ -1,24 +1,26 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>El Barbas — Fighter Lab</title>
+<title>La Trolina — Intervención policial</title>
 <style>
 :root{color-scheme:dark;--bg:#090e17;--panel:#101a28;--line:#253344;--ink:#ecf0e7;--muted:#93a2b4;--mint:#8bf2ce;--yellow:#f8ce73}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,sans-serif}main{max-width:1240px;margin:0 auto;padding:30px 34px 24px}header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.brand{font-size:12px;letter-spacing:3px;font-weight:800}.brand b{color:var(--mint)}.pill{font:11px monospace;border:1px solid var(--line);padding:8px 12px;border-radius:20px;color:var(--muted)}.heading{display:flex;align-items:end;justify-content:space-between;margin-bottom:22px}h1{font-size:clamp(32px,4.2vw,58px);line-height:1;letter-spacing:-2px;margin:7px 0 13px}h1 em{font-style:normal;color:var(--mint)}.eyebrow{font-size:11px;letter-spacing:2px;color:var(--yellow)}p{color:var(--muted);margin:0;line-height:1.6}.count{font:12px monospace;color:var(--muted);text-align:right}.count strong{display:block;color:var(--ink);font-size:28px;margin-bottom:6px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px}.stage{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#101a28}canvas{display:block;width:100%;height:auto;image-rendering:pixelated}.stage:after{content:"";pointer-events:none;position:absolute;inset:0;background:repeating-linear-gradient(transparent 0 3px,#0002 3px 4px);opacity:.22}.stagebar{position:absolute;top:17px;left:19px;right:19px;display:flex;justify-content:space-between;font:11px monospace;letter-spacing:1px;color:#b6cbd0}.led{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--mint);margin-right:7px;box-shadow:0 0 8px var(--mint)}.caption{position:absolute;bottom:16px;left:19px;right:19px;display:flex;justify-content:space-between;color:#a9c0c6;font:10px monospace}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:19px;display:flex;flex-direction:column;gap:15px}.label{font-size:10px;letter-spacing:1.7px;color:var(--muted)}button,select{font:inherit;color:inherit}button{cursor:pointer;transition:background .15s;border:1px solid #334354;background:#192637;border-radius:5px;padding:12px 13px;text-align:left}button:hover{background:#263b4b}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--mint);outline-offset:3px}button.action{display:flex;justify-content:space-between;align-items:center;font-weight:700}button.action small{font:10px monospace;color:var(--muted);border:1px solid #435363;padding:3px 6px;border-radius:3px}button.active{background:var(--mint);border-color:var(--mint);color:#0a2522}button.active small{color:#143d34;border-color:#143d3466}.divider{height:1px;background:var(--line)}.toggle{display:flex;justify-content:space-between;font-size:12px;color:#bac5d1;align-items:center;cursor:pointer}.toggle input{accent-color:var(--mint);width:17px;height:17px}.speed{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#bac5d1}select{background:#0c1420;border:1px solid #334354;padding:5px;border-radius:4px}.smallbtn{padding:9px;text-align:center;font-size:12px}.transport{display:grid;grid-template-columns:1fr 1fr;gap:8px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;padding:19px 0}.meta div{border-left:2px solid #304351;padding-left:12px;font-size:12px}.meta b{display:block;font-size:14px;margin:5px 0}.meta span{color:var(--muted);font-size:11px}.strip{border:1px solid var(--line);border-radius:8px;padding:16px;background:#0e1723}.striphead{display:flex;justify-content:space-between;margin-bottom:12px;font:11px monospace;color:var(--muted)}.frames{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.frame{padding:3px;border:1px solid #293b4c;background:repeating-conic-gradient(#142030 0% 25%,#192638 0% 50%) 0/16px 16px;min-width:0;text-align:center}.frame.current{border-color:var(--mint)}.frame canvas{width:100%;height:auto}.frame span{display:block;font:10px monospace;color:#a6b8c7;padding:4px;background:#111d2b}footer{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:17px;margin-top:22px;font-size:11px;color:var(--muted)}.hint{font-size:10px;color:var(--muted);line-height:1.65}#error{color:#ff9e97;padding:12px;display:none}@media(max-width:850px){main{padding:20px 16px}.layout{grid-template-columns:1fr}.panel{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.panel .label,.divider,.hint{display:none}.toggle,.speed{font-size:11px}.heading .count{display:none}.frames{gap:4px}.meta{gap:5px}.meta div{font-size:10px}.meta b{font-size:11px}footer{gap:18px}}@media(prefers-reduced-motion:reduce){*{transition:none}}
-</style></head><body><main>
+.police-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px;border:1px solid var(--line);border-radius:7px;margin-top:12px;background:#0e1927}.police-controls button{font-size:12px;padding:9px}.police-controls label{font-size:11px;display:flex;align-items:center;gap:5px}.police-controls input{accent-color:var(--mint)}#policeState{font:11px monospace;flex-basis:100%;color:#9ed6ff}button:disabled{opacity:.45;cursor:default}</style></head><body><main>
 <header><div class="brand"><b>◈</b> FIGHTER LAB</div><span class="pill">CHARACTER ASSET / 001</span></header>
-<div class="heading"><div><span class="eyebrow">PERSONAJE ORIGINAL · ARCADE 2D</span><h1>EL <em>BARBAS.</em></h1><p>La Trolina: fachada, terraza y combate en tres planos.</p></div><div class="count"><strong>24</strong>SPRITES / 4 SECUENCIAS</div></div>
-<div class="layout"><div><div class="stage"><canvas id="game" width="960" height="540" aria-label="Previsualización del personaje animado" role="img"></canvas><div class="stagebar"><span><i class="led"></i>LA TROLINA / NOCHE</span><span id="mode">GUARDIA</span></div><div class="caption"><span>← → · J PUÑO · K PATADA · L BOTELLÍN</span><span id="status">CARGANDO</span></div></div><div id="error" role="alert"></div>
-<div class="meta"><div class="label">FORMATO<b>PNG transparente</b><span>Atlas + fotogramas individuales</span></div><div class="label">CELDA<b>192 × 176 px</b><span>Escalado sin suavizado</span></div><div class="label">INTEGRACIÓN<b>Canvas 2D · JavaScript</b><span>Sin librerías ni conexión</span></div></div></div>
+<div class="heading"><div><span class="eyebrow">PERSONAJE ORIGINAL · ARCADE 2D</span><h1>EL <em>BARBAS.</em></h1><p>Nueva mecánica: llega la Policía Local e interrumpe la pelea.</p></div><div class="count"><strong>52</strong>SPRITES / LUCHA + POLICÍA</div></div>
+<div class="layout"><div><div class="stage"><canvas id="game" width="960" height="540" aria-label="Previsualización del personaje animado" role="img"></canvas><div class="stagebar"><span><i class="led"></i>LA TROLINA / NOCHE</span><span id="mode">GUARDIA</span></div><div class="caption"><span>J PUÑO · K PATADA · L BOTELLÍN · I POLICÍA</span><span id="status">CARGANDO</span></div></div><div id="error" role="alert"></div>
+<div class="police-controls"><button id="callPolice">I · Intervención policial</button><button id="resetScene">R · Reiniciar pelea</button><label><input id="autoPolice" type="checkbox" checked>Intervención automática</label><label><input id="blueLights" type="checkbox" checked>Destellos azules</label><output id="policeState" aria-live="polite">Incidentes 0 / 5 · Sin intervención</output></div><div class="meta"><div class="label">FORMATO<b>PNG transparente</b><span>Atlas + fotogramas individuales</span></div><div class="label">CELDA<b>192 × 176 px</b><span>Escalado sin suavizado</span></div><div class="label">INTEGRACIÓN<b>Canvas 2D · JavaScript</b><span>Sin librerías ni conexión</span></div></div></div>
 <aside class="panel" aria-label="Controles de animación"><div class="label">MOVIMIENTOS</div><button class="action active" data-action="idle">Guardia <small>G</small></button><button class="action" data-action="punch">Puñetazo <small>J</small></button><button class="action" data-action="kick">Patada <small>K</small></button><button class="action" data-action="throwBottle">Lanzar botellín <small>L</small></button><div class="divider"></div><label class="toggle">Secuencia automática<input id="auto" type="checkbox" checked></label><label class="speed">Velocidad<select id="speed"><option value="0.25">0,25×</option><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option></select></label><label class="toggle">Mostrar hitboxes<input type="checkbox" id="debug"></label><div class="transport"><button id="pause" class="smallbtn">Pausar</button><button id="step" class="smallbtn">+ Fotograma</button></div><button id="flip" class="smallbtn">↔ Cambiar orientación</button><label class="speed">Vista de capas<select id="layerView"><option value="all">Todas</option><option value="wall">1 · Pared</option><option value="tables">2 · Mesas</option><option value="arena">3 · Personajes</option></select></label><label class="toggle">Cámara<input id="camera" type="range" min="-24" max="24" value="0" aria-label="Desplazar cámara para ver profundidad" style="width:100px"></label><div class="hint">Cian: zona vulnerable.<br>Rojo: zona de impacto activa.<br>Pulsa una miniatura para inspeccionarla.</div></aside></div>
 <section class="strip"><div class="striphead"><span id="sequence">01 / GUARDIA</span><span id="framecount">FRAME 01 / 06</span></div><div class="frames" id="frames"></div></section>
-<footer><span>EL BARBAS / KIT DE PERSONAJE V1.3</span><span>Guardia · Puñetazo · Patada · Botellín compartido</span></footer>
+<footer><span>EL BARBAS / KIT DE PERSONAJE V1.4</span><span>Patrulla · Agentes · Alto · Radio · Interrupción</span></footer>
 </main>
-<script>/*__DATA__*/</script><script>/*__BOTTLE_DATA__*/</script><script>/*__ENGINE__*/</script><script>/*__BOTTLE_ENGINE__*/</script><script>/*__STAGE_DATA__*/</script><script>/*__STAGE_ENGINE__*/</script>
+<script>/*__DATA__*/</script><script>/*__BOTTLE_DATA__*/</script><script>/*__ENGINE__*/</script><script>/*__BOTTLE_ENGINE__*/</script><script>/*__STAGE_DATA__*/</script><script>/*__STAGE_ENGINE__*/</script><script>/*__POLICE_DATA__*/</script><script>/*__POLICE_ENGINE__*/</script>
 <script>
 const image=new Image();image.src='/*__IMAGE__*/';
 const bottleImage=new Image();bottleImage.src='/*__BOTTLE_IMAGE__*/';
 const stageImages={};
 for(const layer of TERRACE_STAGE_DATA.layers){const img=new Image();img.src=layer.image;stageImages[layer.id]=img;}
-let terrace;
+const policeImages={officer:new Image(),patrol:new Image()};
+policeImages.officer.src=POLICE_DATA.officer.image;policeImages.patrol.src=POLICE_DATA.patrol.image;
+let terrace,police;
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 const $=id=>document.getElementById(id),auto=$('auto'),speed=$('speed'),debug=$('debug');
 const labels={idle:'GUARDIA',punch:'PUÑETAZO',kick:'PATADA',throwBottle:'BOTELLÍN'};
@@ -32,27 +34,38 @@ for(let i=0;i<6;i++){
  b.onclick=()=>{if(!fighter)return;paused=true;auto.checked=false;fighter.frameIndex=i;fighter.elapsed=0;fighter.events=[];bottles.reset();$('pause').textContent='Reanudar';};
  $('frames').append(b);mini.push({b,c,label});
 }
-function playMove(name){if(name==='throwBottle')bottles.throw(fighter,{force:true});else fighter.play(name,true);}
-function select(name){if(!fighter)return;auto.checked=false;autoElapsed=0;paused=false;bottles.reset();$('pause').textContent='Pausar';playMove(name);}
+function playMove(name){
+ if(police.blocksCombat&&name!=='idle')return false;
+ const played=name==='throwBottle'?bottles.throw(fighter,{force:true}):fighter.play(name,true);
+ if(played)police.notifyAction(name);return played;
+}
+function select(name){if(!fighter||(police.blocksCombat&&name!=='idle'))return;auto.checked=false;autoElapsed=0;paused=false;bottles.reset();$('pause').textContent='Pausar';playMove(name);}
 document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>select(b.dataset.action));
 $('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'Reanudar':'Pausar';};
 $('flip').onclick=()=>{if(fighter)fighter.facing*=-1;};
-$('step').onclick=()=>{if(!fighter)return;paused=true;auto.checked=false;const delta=fighter.frame.duration-fighter.elapsed;fighter.update(delta);opponent.update(delta);bottles.update(delta,[fighter],[opponent]);$('pause').textContent='Reanudar';};
-auto.onchange=()=>{autoElapsed=0;};
+$('step').onclick=()=>{if(!fighter)return;paused=true;auto.checked=false;advance(fighter.frame.duration-fighter.elapsed);$('pause').textContent='Reanudar';};
+auto.onchange=()=>{autoElapsed=0;if(police?.blocksCombat)auto.checked=false;};
+function restart(){if(!fighter)return;police.reset();bottles.reset();fighter.play('idle',true);opponent.play('idle',true);fighter.facing=1;opponent.facing=-1;dummyFlash=0;clock=0;autoElapsed=0;attackIndex=0;auto.checked=true;paused=false;$('pause').textContent='Pausar';}
+$('callPolice').onclick=()=>{if(!police)return;auto.checked=false;paused=false;$('pause').textContent='Pausar';police.trigger();};
+$('resetScene').onclick=restart;
+$('autoPolice').onchange=()=>{if(police)police.automatic=$('autoPolice').checked;};
+if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)$('blueLights').checked=false;
 window.addEventListener('keydown',e=>{if(['INPUT','SELECT'].includes(document.activeElement.tagName))return;
  if(document.activeElement.tagName==='BUTTON'&&e.code==='Space')return;
- if(e.repeat)return;const k=e.key.toLowerCase();if(k==='j')select('punch');if(k==='k')select('kick');if(k==='g')select('idle');if(k==='l')select('throwBottle');
+ if(e.repeat)return;const k=e.key.toLowerCase();if(k==='j')select('punch');if(k==='k')select('kick');if(k==='g')select('idle');if(k==='l')select('throwBottle');if(k==='i')$('callPolice').click();if(k==='r')restart();
  if(e.key==='ArrowLeft'){e.preventDefault();if(fighter)fighter.facing=-1;}if(e.key==='ArrowRight'){e.preventDefault();if(fighter)fighter.facing=1;}
  if(e.code==='Space'){e.preventDefault();$('pause').click();}
 });
 function stage(){
  terrace.draw(ctx,{cameraX:Number($('camera').value),view:$('layerView').value,drawActors:c=>{
+  police.drawBack(c,{flashes:$('blueLights').checked});
   c.fillStyle='#120c14aa';
   for(const actor of [fighter,opponent]){c.beginPath();c.ellipse(actor.x+12,actor.y+2,70,9,0,0,Math.PI*2);c.fill();}
   fighter.draw(c,debug.checked);
   c.save();if(dummyFlash>0)c.globalAlpha=.55+.45*Math.sin(clock/15)**2;opponent.draw(c,debug.checked);c.restore();
-  bottles.draw(c,[fighter,opponent],debug.checked);
+  bottles.draw(c,[fighter,opponent],debug.checked);police.drawFront(c);
  }});
+ if(['all','arena'].includes($('layerView').value))police.drawOverlay(ctx,{flashes:$('blueLights').checked});
 }
 function syncUI(){
  const name=fighter.animation,frames=FIGHTER_DATA.animations[name].frames;
@@ -63,25 +76,37 @@ function syncUI(){
   document.querySelectorAll('[data-action]').forEach(b=>b.classList.toggle('active',b.dataset.action===name));
  }
  mini.forEach((m,i)=>m.b.classList.toggle('current',i===fighter.frameIndex));
+ const ps=police.getStatus(),summary='Incidentes '+Math.min(ps.incidents,ps.threshold)+' / '+ps.threshold+' · '+ps.label;
+ if($('policeState').textContent!==summary)$('policeState').textContent=summary;
+ $('callPolice').disabled=police.active;
+}
+function advance(delta){
+ clock+=delta;dummyFlash=Math.max(0,dummyFlash-delta);police.update(delta);
+ fighter.update(delta);opponent.update(delta);bottles.update(delta,[fighter],[opponent]);
+ if(auto.checked&&!police.blocksCombat&&fighter.animation==='idle'){
+  autoElapsed+=delta;if(autoElapsed>1200){playMove(attacks[attackIndex%attacks.length]);attackIndex++;autoElapsed=0;}
+ }
 }
 function tick(now){
  const dt=previous===null?0:Math.min(now-previous,100);previous=now;
- if(!paused){const delta=dt*Number(speed.value);clock+=delta;dummyFlash=Math.max(0,dummyFlash-delta);fighter.update(delta);opponent.update(delta);bottles.update(delta,[fighter],[opponent]);
-  if(auto.checked&&fighter.animation==='idle'){autoElapsed+=delta;if(autoElapsed>1200){playMove(attacks[attackIndex%attacks.length]);attackIndex++;autoElapsed=0;}}
- }
+ if(!paused)advance(dt*Number(speed.value));
  stage();syncUI();requestAnimationFrame(tick);
 }
-function start(){if(fighter||![image,bottleImage,...Object.values(stageImages)].every(img=>img.complete&&img.naturalWidth))return;
+function start(){if(fighter||![image,bottleImage,...Object.values(stageImages),...Object.values(policeImages)].every(img=>img.complete&&img.naturalWidth))return;
  terrace=new TerraceStage(stageImages,TERRACE_STAGE_DATA);
  const data=BottleAttack.install(FIGHTER_DATA);
  fighter=new Fighter(image,data,{x:280,y:486,scale:2});
  opponent=new Fighter(image,data,{x:710,y:486,scale:2,facing:-1});
  bottles=new BottleSystem(bottleImage,BOTTLE_DATA,{groundY:486,onHit:()=>{dummyFlash=220;}});
+ police=new PoliceIntervention(policeImages,POLICE_DATA,{onStop:()=>{
+  auto.checked=false;autoElapsed=0;fighter.play('idle',true);opponent.play('idle',true);bottles.reset();
+ }});police.automatic=$('autoPolice').checked;
+ window.demoPolice=police;
  window.demoFighter=fighter;window.demoBottles=bottles;requestAnimationFrame(tick);
 }
-image.onload=start;bottleImage.onload=start;for(const img of Object.values(stageImages))img.onload=start;start();
+image.onload=start;bottleImage.onload=start;for(const img of [...Object.values(stageImages),...Object.values(policeImages)])img.onload=start;start();
 image.onerror=()=>{$('error').style.display='block';$('error').textContent='No se pudo cargar el atlas de sprites.';};
 bottleImage.onerror=()=>{$('error').style.display='block';$('error').textContent='No se pudo cargar el botellín.';};
-for(const img of Object.values(stageImages))img.onerror=()=>{$('error').style.display='block';$('error').textContent='No se pudo cargar una capa del escenario.';};
+for(const img of [...Object.values(stageImages),...Object.values(policeImages)])img.onerror=()=>{$('error').style.display='block';$('error').textContent='No se pudo cargar un recurso del juego.';};
 document.addEventListener('visibilitychange',()=>{previous=null;});
 </script></body></html>

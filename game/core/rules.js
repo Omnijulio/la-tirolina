@@ -44,6 +44,28 @@
   // Tabaco: cada cigarrillo tarda en fumarse y baja el puntillo.
   const SMOKE = { durationMs: 1500, relief: 0.15, coughFrom: 3, coughPerSec: 0.05 };
 
+  // Ruido de la terraza (0..100). Al llegar a 100 se avisa a la Policía Local.
+  // Sobre todo lo provocan muchos botellines seguidos: cada lanzamiento dentro de
+  // `streakWindowMs` del anterior suma `bottleStreak` más que el previo.
+  const NOISE = {
+    max: 100, decayPerSec: 4,
+    bottleThrow: 10, bottleBreak: 8, bottleStreak: 8, streakWindowMs: 6000,
+    hit: 1.5, block: 0.5, dart: 10, ko: 15,
+    drunkPerSec: 2            // × (puntillo de los dos luchadores)
+  };
+  // Intervención policial: multa a los dos y se reinicia la pelea. A la tercera
+  // seguida, noche en el calabozo: esos personajes no se pueden usar durante 1 minuto.
+  const POLICE = { fines: [3000, 6000], strikesToJail: 3, jailMs: 60000 };
+
+  /** Ruido que añade un botellín lanzado, según cuántos van seguidos (0 = el primero). */
+  function bottleNoise(streak) { return NOISE.bottleThrow + NOISE.bottleStreak * Math.max(0, streak); }
+
+  /** Consecuencia de la intervención número `strike` (1, 2, 3…) sin terminar ninguna pelea. */
+  function policeOutcome(strike) {
+    const jail = strike >= POLICE.strikesToJail;
+    return { strike, jail, fine: jail ? 0 : POLICE.fines[Math.min(strike, POLICE.fines.length) - 1], jailMs: jail ? POLICE.jailMs : 0 };
+  }
+
   function formatMoney(cents) {
     const v = (cents / 100).toFixed(2).replace('.', ',');
     const [ent, dec] = v.split(',');
@@ -202,8 +224,8 @@
 
   const Rules = {
     BOTTLE_PRICE, MAX_BOTTLES, START_COINS, DIFFICULTIES, DIFFICULTY_ORDER, MOVES,
-    ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX,
-    comboScale, meterGain, sugarPhase,
+    ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX, NOISE, POLICE,
+    comboScale, meterGain, sugarPhase, bottleNoise, policeOutcome,
     formatMoney, orderCost, sanitizeOrder, computeLoadout, intoxAt, impairment,
     damageFor, matchReward, cpuOrder, describeOrder, clampQty
   };

@@ -87,7 +87,9 @@
         else this.set('idle', 220);
       } else {
         const x = r();
-        const throwP = me.ammo > 0 && dist < 720 ? 0.3 + (lowHp ? 0.2 : 0) + (this.style === 'zoner' ? 0.2 : 0) : 0;
+        let throwP = me.ammo > 0 && dist < 720 ? 0.3 + (lowHp ? 0.2 : 0) + (this.style === 'zoner' ? 0.2 : 0) : 0;
+        // Con mucho ruido la CPU lista se corta con los botellines para no llamar a la policía.
+        if (match.police && match.noise > 60 && this.d.id !== 'facil') throwP *= 0.3;
         if (x < throwP) this.act('bottle');
         else if (x < throwP + 0.12 * aggr) { this.act('jump'); this.set('approach', 520); }
         else this.set('approach', 300 + r() * 400);

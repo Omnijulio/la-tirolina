@@ -1,15 +1,16 @@
-# Verificación del paquete para Codex
+# Verificación del proyecto v1.4 con policía
 
-Comprobaciones ejecutadas al preparar esta entrega:
+Entrega actualizada el 16 de noviembre de 2026.
 
-- El HTML adjunto por el usuario coincide byte por byte con la última demo del proyecto.
-- `python3 tools/rebuild_assets.py` reconstruye los PNG, el atlas, los datos y la demo desde las fuentes portátiles.
-- La reconstrucción conserva exactamente los archivos del kit original, incluido el HTML, el atlas y las tres capas. Se modificó únicamente la documentación de entrada para el traslado.
-- `python3 tools/render_preview.py` reconstruye el GIF con un resultado idéntico al entregado.
-- `npm test` pasa las dos suites: botellín/personaje y escenario.
-- Se comprobaron la sintaxis de los scripts de ambas páginas y de las herramientas Python, y la ausencia de rutas absolutas al entorno de creación en herramientas, plantilla y módulos.
-- `MANIFEST.json` enumera los archivos, tamaños y hashes del paquete. `python3 tools/verify_manifest.py` permite revisar su integridad antes de editarlo; después de cambios deliberados, los hashes del snapshot dejarán de coincidir.
+- El paquete conserva el luchador, el botellín Estrella Galicia y el escenario de tres planos, y añade la intervención policial.
+- Se incluyen 24 PNG individuales de agente, cuatro estados de luces del patrulla, tres PNG de atlas/base policial, JSON, controlador, referencias y originales gráficos.
+- `python3 tools/rebuild_assets.py` reconstruye los assets a partir de los originales locales y vuelve a crear las tres demos autónomas.
+- `npm test` ejecuta cuatro suites: luchador/botellín, escenario, policía e integración de la demo.
+- Las comprobaciones policiales cubren actividad y temporizador, activación manual, ausencia de avisos sin actividad, orden de fases, entrada de agentes, bloqueo, una sola resolución, reinicio y equivalencia con pasos de tiempo grandes.
+- El test de integración ejecuta los scripts reales del HTML con un adaptador DOM/Canvas de Node: comprueba carga de imágenes incrustadas, teclas, limpieza de proyectiles, bloqueo de nuevos ataques, reinicio y selección de capas. No es una prueba de distribución visual en navegador.
+- Se verifican dimensiones, alfa, anclas y transparencia de sprites, sintaxis Python/JavaScript y la integridad del ZIP mediante CRC y hashes de todos sus archivos.
+- `police-intervention.gif` y las imágenes de revisión proceden de los mismos estados del controlador entregado. Se inspeccionó visualmente la composición.
 
-Entorno usado para estas comprobaciones: Python 3.12.14, Node 24.22.1, Pillow 13.0.0, NumPy 2.3.5 y SciPy 1.17.0. Las dependencias gráficas están en `requirements-art.txt`. Ejecutar el juego solo requiere un navegador; las pruebas requieren Node 18 o posterior.
+La interfaz HTML todavía necesita revisión visual y de controles en un navegador disponible en el entorno de destino. Este entorno no permitió completar esa revisión. No confundir el adaptador de Node ni el GIF con una prueba de navegador.
 
-La interfaz HTML no pudo verificarse visualmente en un navegador en el entorno original. Continúa pendiente esa comprobación en el proyecto de destino. Las imágenes y el GIF se revisaron como composiciones generadas a partir de los recursos y estados reales; no equivalen a una prueba de la interfaz en navegador.
+`MANIFEST.json` corresponde a esta entrega. `python3 tools/verify_manifest.py` permite comprobarla antes de editar; después de cambios deliberados, el snapshot dejará de coincidir. Las dependencias opcionales para arte/GIF están en `requirements-art.txt`; el juego no requiere paquetes npm.

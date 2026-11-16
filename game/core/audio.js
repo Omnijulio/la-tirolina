@@ -71,6 +71,12 @@
           case 'lighter': this.hiss(0.05, 0.3, 'highpass', 6000); this.hiss(0.35, 0.12, 'bandpass', 1200, 900, 0.06); break;
           case 'cough': this.hiss(0.12, 0.4, 'bandpass', 700, 400); this.hiss(0.12, 0.35, 'bandpass', 650, 380, 0.2); break;
           case 'faintWarn': this.tone('sine', 600, 300, 0.4, 0.2); break;
+          case 'siren':
+            for (let i = 0; i < 3; i++) { this.tone('sawtooth', 620, 920, 0.4, 0.07, i * 0.8); this.tone('sawtooth', 920, 620, 0.4, 0.07, i * 0.8 + 0.4); }
+            break;
+          case 'whistle': this.tone('square', 2900, 3000, 0.18, 0.12); this.tone('square', 3000, 2950, 0.5, 0.12, 0.22); break;
+          case 'radio': this.hiss(0.25, 0.18, 'bandpass', 1800, 2400); this.tone('square', 1200, 1200, 0.05, 0.08, 0.28); break;
+          case 'jail': [330, 247, 196].forEach((f, i) => this.tone('square', f, f * 0.98, 0.3, 0.14, i * 0.28)); this.tone('sine', 80, 60, 0.4, 0.5, 0.9); break;
           case 'faint': this.tone('triangle', 500, 80, 1.0, 0.3); this.tone('sine', 120, 40, 0.6, 0.5, 0.3); break;
         }
       } catch (e) { /* audio opcional */ }
