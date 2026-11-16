@@ -318,14 +318,14 @@
 
       if (!this.air) {
         if (this.stumble > 0) {
-          this.vx = this.stumbleDir * 110 + Math.sin(this.t / 70) * 40;
+          this.vx = this.stumbleDir * 110 + R().dsin(this.t / 70) * 40;   // dsin: igual en todos los móviles (multijugador)
         } else if (this.dashT > 0) {
           // Deslizándose: la velocidad la puso startDash.
         } else if (!this.busy && !this.attacking) {
           if (ctl.block) this.vx = 0;
           else if (dir) {
             this.vx = dir * (dir === this.facing ? C.WALK_F : C.WALK_B) * speed;
-            if (intox > 0.1) this.vx += Math.sin(this.t / 170 + this.seed) * 80 * intox;
+            if (intox > 0.1) this.vx += R().dsin(this.t / 170 + this.seed) * 80 * intox;
             this.walking = true;
           } else this.vx = 0;
           let acted = false;

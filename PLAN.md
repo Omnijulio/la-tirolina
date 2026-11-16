@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.12** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.12.2** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -93,6 +93,18 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - **«Cómo se pelea»** en el menú y en Pausa, y avisos grandes en pelea.
 - **Pruebas del diseño** en `tests/combat.test.cjs`.
 - **Arte provisional** para los golpes nuevos (poses giradas). El encargo del arte definitivo está en `ASSETS_COMBATE.md`.
+
+## Hecho en v0.12.2 — Multijugador: diagnóstico y arreglos de sincronía
+
+- **Registro** de cada partida en red. Se puede ver, copiar o compartir desde los resultados o desde la pantalla de Multijugador. Guarda:
+  - versión, huella, semilla y móvil;
+  - esperas y errores;
+  - la primera desincronización, con las **diferencias campo a campo** entre los dos móviles;
+  - las últimas instantáneas y entradas.
+- **Comprobación** de una instantánea detallada cada 0,5 s (antes eran cuatro números cada 2 s), con el contador de tiradas de azar.
+- **Misma versión obligatoria**: los móviles comparan versión y huella del código al conectar. Archivos con `?v=` para no mezclar caché vieja y nueva.
+- **Nadie se queda «esperando a tu rival»** si las partidas se separan: el que termina avisa y el otro cierra con su resultado. Sin respuesta en 20 s, se cancela.
+- **Trigonometría determinista** en todo lo que mueve la pelea (tropiezos, bamboleo del puntillo, dardo, agarre del pilón), porque iPhone y Android no calculan `Math.sin` exactamente igual.
 
 ## Próximas fases propuestas
 

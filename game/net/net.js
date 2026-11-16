@@ -9,6 +9,17 @@
  * ambos. Cada uno manda lo que pulsa para 5 pasos después (≈83 ms de retardo) y solo
  * avanza cuando tiene las entradas del otro. La aleatoriedad del combate sale de una
  * semilla común, así que en los dos móviles pasa exactamente lo mismo.
+ *
+ * Diagnóstico (v0.12.2):
+ *   - Huella del código (FINGERPRINT): si los dos móviles no tienen la misma versión del
+ *     juego, no se deja pelear (una versión vieja en caché desincroniza seguro).
+ *   - Cada 30 pasos (medio segundo) se compara una instantánea detallada de la pelea. Si no
+ *     coincide, los dos se mandan su instantánea y el registro apunta qué campos difieren.
+ *   - Registro (TrolinaNetLog): configuración, entradas de los últimos pasos, instantáneas,
+ *     esperas, errores y final. Se guarda en el móvil y se puede copiar o compartir desde
+ *     los resultados o desde la pantalla de Multijugador.
+ *   - Si el rival termina la pelea y aquí no (desincronizado), aquí también se termina con su
+ *     resultado en vez de quedarse «esperando». Sin respuesta durante 20 s, se cancela.
  */
 (function (root) {
   const REAL_RANDOM = Math.random;
@@ -18,6 +29,76 @@
   const TICK = 1000 / 60;
   const DELAY = 5;
   const NEUTRAL = { l: 0, r: 0, u: 0, b: 0, a: [] };
+  const HASH_EVERY = 30;       // pasos entre comprobaciones (0,5 s)
+  const GIVE_UP_MS = 20000;    // sin entradas del rival durante tanto tiempo: se cancela
+
+  /** FNV-1a de 32 bits en hexadecimal. */
+  function fnv(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return ('0000000' + h.toString(16)).slice(-8);
+  }
+
+  /** Huella del código y los datos que deciden la pelea. Se calcula al cargar, antes de que nada los toque. */
+  function computeFingerprint() {
+    try {
+      const R = root.TrolinaRules, parts = [R.GAME_VERSION];
+      for (const k of Object.keys(R).sort()) { const v = R[k]; parts.push(k + '=' + (typeof v === 'function' ? v.toString() : JSON.stringify(v))); }
+      for (const c of [root.Combatant, root.Match, root.BottleSystem, root.BottleAttack, root.Fighter, root.Fountain]) parts.push(c ? c.toString() : '-');
+      const M = root.TrolinaMoves;
+      parts.push(M ? JSON.stringify(M.ANIMS) + M.install.toString() : '-');
+      parts.push(JSON.stringify(root.FIGHTER_DATA || null), JSON.stringify(root.BOTTLE_DATA || null), JSON.stringify(root.TROLINA_CHARACTERS || null));
+      return fnv(parts.join('\n'));
+    } catch (e) { return 'error'; }
+  }
+  const FINGERPRINT = computeFingerprint();
+
+  /* ---------- Registro del multijugador ---------- */
+  const NetLog = {
+    KEY: 'trolina-netlog',
+    cur: null,
+    begin(head) {
+      this.cur = { t0: Date.now(), head, lines: [], inputs: [], snaps: [] };
+      this.add('INICIO', 'partida en red');
+    },
+    stamp() {
+      if (!this.cur) return '';
+      const ms = Date.now() - this.cur.t0;
+      return '[' + String(Math.floor(ms / 60000)).padStart(2, '0') + ':' + String(Math.floor(ms / 1000) % 60).padStart(2, '0') + '.' + String(ms % 1000).padStart(3, '0') + ']';
+    },
+    add(tag, text) {
+      if (!this.cur) return;
+      this.cur.lines.push(this.stamp() + ' ' + tag + ' ' + text);
+      if (this.cur.lines.length > 400) this.cur.lines.splice(1, 1);
+    },
+    input(tick, mine, theirs) {
+      if (!this.cur) return;
+      const enc = (x) => (x.l ? 'L' : '·') + (x.r ? 'R' : '·') + (x.u ? 'U' : '·') + (x.b ? 'B' : '·') + (x.a && x.a.length ? ' ' + x.a.join(',') : '');
+      this.cur.inputs.push(tick + '  yo ' + enc(mine) + '  | rival ' + enc(theirs));
+      if (this.cur.inputs.length > 900) this.cur.inputs.shift();
+    },
+    snap(tick, h, s) {
+      if (!this.cur) return;
+      this.cur.snaps.push(tick + ' #' + h + ' ' + s);
+      if (this.cur.snaps.length > 40) this.cur.snaps.shift();
+    },
+    text() {
+      const c = this.cur;
+      if (!c) return this.last() || '';
+      return ['REGISTRO MULTIJUGADOR · La Trolina Fighters', c.head, '',
+        '== EVENTOS ==', ...c.lines, '',
+        '== ÚLTIMAS INSTANTÁNEAS (cada ' + HASH_EVERY + ' pasos) ==', ...c.snaps, '',
+        '== ÚLTIMAS ENTRADAS (paso · yo · rival) ==', ...c.inputs].join('\n');
+    },
+    save() {
+      if (!this.cur) return;
+      try { localStorage.setItem(this.KEY, this.text().slice(-250000)); } catch (e) { /* sin espacio */ }
+    },
+    last() { try { return localStorage.getItem(this.KEY); } catch (e) { return null; } }
+  };
+  root.addEventListener('error', (e) => {
+    if (NetLog.cur && NetLog.active) { NetLog.add('ERROR', (e.message || e) + (e.filename ? ' @ ' + e.filename.split('/').pop() + ':' + e.lineno : '')); NetLog.save(); }
+  });
 
   function randomCode() {
     let c = '';
@@ -175,10 +256,19 @@
 
   /** Pelea sincronizada por pasos. side 0 = izquierda (anfitrión), 1 = derecha (invitado). */
   class Lockstep {
-    constructor({ link, match, side, seed, input, early }) {
+    constructor({ link, match, side, seed, input, early, head }) {
       Object.assign(this, { link, match, side, input });
       this.gid = seed;
-      this.rng = seeded(seed);
+      // Azar común con contador: si los dos móviles gastan distinto número de tiradas, se ve en el registro.
+      const base = seeded(seed);
+      this.rngCalls = 0;
+      this.rng = () => { this.rngCalls++; return base(); };
+      this.snaps = new Map(); this.firstDesync = -1; this.peerEnd = null; this.stallLogged = false;
+      this.onPeerEnd = null; this.onGiveUp = null;
+      NetLog.begin(head || '');
+      NetLog.active = true;
+      NetLog.add('VERSION', (root.TrolinaRules && root.TrolinaRules.GAME_VERSION) + ' · huella ' + FINGERPRINT + ' · lado ' + (side === 0 ? 'anfitrión (izquierda)' : 'invitado (derecha)') + ' · semilla ' + seed);
+      NetLog.add('MOVIL', (navigator.userAgent || '?').slice(0, 160));
       this.tick = 0; this.acc = 0;
       this.local = new Map(); this.remote = new Map();
       this.carry = [[], []];
@@ -193,6 +283,12 @@
       if (m.g !== this.gid) return;
       if (m.type === 'in') this.remote.set(m.t, m.i);
       else if (m.type === 'hash') { this.theirHash.set(m.t, m.h); this.compare(m.t); }
+      else if (m.type === 'dump') this.theirDump(m);
+      else if (m.type === 'end') {
+        this.peerEnd = { t: m.t, wins: m.wins };
+        NetLog.add('RIVAL', 'ha terminado la pelea en el paso ' + m.t + ' (' + (m.wins || []).join('-') + '); aquí vamos por el ' + this.tick + (this.match.ended ? ' (también terminada)' : ''));
+        NetLog.save();
+      }
     }
 
     sample() {
@@ -220,7 +316,27 @@
         this.local.delete(t); this.remote.delete(t);
         this.tick++; this.acc -= TICK; steps++;
       }
-      if (stalled) { this.stallMs += dt; this.acc = Math.min(this.acc, TICK * 2); } else if (steps) this.stallMs = 0;
+      if (stalled) {
+        this.stallMs += dt; this.acc = Math.min(this.acc, TICK * 2);
+        if (this.stallMs > 400 && !this.stallLogged) { this.stallLogged = true; NetLog.add('ESPERA', 'sin entradas del rival en el paso ' + this.tick + (this.remote.size ? ' (hay ' + this.remote.size + ' pasos suyos más adelante)' : '')); }
+        // El rival ya terminó y no van a llegar más entradas: aquí la pelea va por otro lado.
+        if (this.peerEnd && !m.ended && this.onPeerEnd) {
+          NetLog.add('FIN', 'el rival terminó y aquí no: partida desincronizada, se cierra con su resultado');
+          m.netDesync = true; NetLog.save();
+          const pe = this.peerEnd; this.peerEnd = null;
+          this.onPeerEnd(pe);
+          return;
+        }
+        if (this.stallMs > GIVE_UP_MS && this.onGiveUp) {
+          NetLog.add('FIN', 'el rival no responde desde hace ' + Math.round(this.stallMs / 1000) + ' s (paso ' + this.tick + ')');
+          NetLog.save();
+          const f = this.onGiveUp; this.onGiveUp = null; f();
+          return;
+        }
+      } else if (steps) {
+        if (this.stallLogged) NetLog.add('ESPERA', 'se reanuda tras ' + Math.round(this.stallMs) + ' ms (paso ' + this.tick + ')');
+        this.stallMs = 0; this.stallLogged = false;
+      }
       m.netStall = this.stallMs;
     }
 
@@ -233,17 +349,29 @@
       try { m.update(TICK); } finally { Math.random = REAL_RANDOM; }
       // Lo pulsado durante una pausa del juego (congelado del ultimate, golpe) se guarda para el siguiente paso.
       for (const k of [0, 1]) this.carry[k] = m.netConsumed[k] ? [] : inputs[k].a.slice(-4);
-      if (this.tick % 120 === 0) {
-        const h = this.hash();
+      NetLog.input(this.tick, mine, theirs);
+      if (this.tick % HASH_EVERY === 0) {
+        const s = this.snapshot(), h = fnv(s);
         this.myHash.set(this.tick, h);
+        this.snaps.set(this.tick, s);
+        if (this.snaps.size > 24) this.snaps.delete(this.snaps.keys().next().value);
+        NetLog.snap(this.tick, h, s);
         this.link.send({ type: 'hash', g: this.gid, t: this.tick, h });
         this.compare(this.tick);
       }
     }
 
-    hash() {
-      const m = this.match, r = (v) => Math.round(v * 10);
-      return [m.p1.hp, m.p1.cx, m.p1.y, m.p2.hp, m.p2.cx, m.p2.y, m.timer, m.round].map(r).join(',');
+    /** Estado detallado de la pelea en este paso (lo que se compara entre los dos móviles). */
+    snapshot() {
+      const m = this.match, r = (v, d) => (typeof v === 'number' ? Number(v.toFixed(d === undefined ? 2 : d)) : v);
+      const f = (c) => ['hp=' + r(c.hp), 'x=' + r(c.cx), 'y=' + r(c.y), 'vx=' + r(c.vx), 'vy=' + r(c.vy), 'fu=' + r(c.fuelle),
+        'st=' + c.state, 'an=' + c.f.animation + ':' + c.f.frameIndex, 'hs=' + r(c.hitstun, 0), 'bs=' + r(c.blockstun, 0),
+        'dz=' + r(c.dizzyT, 0), 'dw=' + r(c.downT + c.getupT, 0), 'da=' + r(c.dashT, 0), 'gu=' + (c.guard ? 1 : 0),
+        'am=' + c.ammo, 'me=' + r(c.meter, 1), 'co=' + c.combo, 'fa=' + c.facing].join(' ');
+      const b = (m.bottles.projectiles || []).filter((p) => p.alive).map((p) => r(p.x, 0) + '/' + r(p.y, 0)).join(',');
+      return ['t=' + this.tick, 'rng=' + this.rngCalls, 'fase=' + m.phase, 'reloj=' + r(m.timer), 'asalto=' + m.round, 'gana=' + m.wins.join('-'),
+        'bot=[' + b + ']', 'dardos=' + m.darts.length, 'agarre=' + (m.throwing ? 1 : 0) + (m.grab ? 'p' : ''),
+        '| P1 ' + f(m.p1), '| P2 ' + f(m.p2)].join(' ');
     }
 
     compare(t) {
@@ -251,12 +379,42 @@
       if (this.myHash.get(t) !== this.theirHash.get(t)) {
         this.match.netDesync = true;
         if (root.console) console.warn('[multijugador] desincronizado en el paso', t, this.myHash.get(t), this.theirHash.get(t));
+        if (this.firstDesync < 0) {
+          // Primera vez: se apunta y se manda la instantánea para ver qué difiere.
+          this.firstDesync = t;
+          NetLog.add('DESINCRONIZADO', 'en el paso ' + t + ' (' + this.myHash.get(t) + ' aquí, ' + this.theirHash.get(t) + ' en el rival)');
+          NetLog.add('MIA', this.snaps.get(t) || '?');
+          this.link.send({ type: 'dump', g: this.gid, t, s: this.snaps.get(t) || '' });
+          NetLog.save();
+        }
       }
       this.myHash.delete(t); this.theirHash.delete(t);
     }
 
-    stop() { if (this.off) this.off(); this.off = null; }
+    theirDump(m) {
+      NetLog.add('SUYA', 'paso ' + m.t + ': ' + m.s);
+      const mine = this.snaps.get(m.t);
+      if (mine) {
+        // Campo a campo: lo que no coincide.
+        const parse = (s) => { const out = {}; let who = ''; for (const tok of String(s).split(' ')) { if (tok === 'P1' || tok === 'P2') who = tok + '.'; else if (tok.includes('=')) { const i = tok.indexOf('='); out[who + tok.slice(0, i)] = tok.slice(i + 1); } } return out; };
+        const a = parse(mine), b = parse(m.s), diff = [];
+        for (const k of Object.keys(a)) if (a[k] !== b[k]) diff.push(k + ': aquí ' + a[k] + ' / rival ' + b[k]);
+        NetLog.add('DIFERENCIAS', diff.length ? diff.join(' · ') : 'ninguna en lo apuntado');
+      }
+      // Si el rival detectó la diferencia antes, también mandamos la nuestra.
+      if (this.firstDesync < 0) { this.firstDesync = m.t; this.match.netDesync = true; if (mine) this.link.send({ type: 'dump', g: this.gid, t: m.t, s: mine }); }
+      NetLog.save();
+    }
+
+    stop(reason) {
+      if (this.off) this.off();
+      this.off = null;
+      NetLog.add('FIN', (reason || 'pelea terminada') + ' en el paso ' + this.tick + ' · tiradas de azar ' + this.rngCalls + (this.firstDesync >= 0 ? ' · DESINCRONIZADA desde el paso ' + this.firstDesync : ' · sincronizada'));
+      NetLog.active = false;
+      NetLog.save();
+    }
   }
 
-  root.TrolinaNet = { NetLink, Lockstep, seeded, randomCode, TICK, DELAY, loadPeerJs };
+  root.TrolinaNet = { NetLink, Lockstep, seeded, randomCode, TICK, DELAY, loadPeerJs, FINGERPRINT, fnv, computeFingerprint };
+  root.TrolinaNetLog = NetLog;
 })(window);

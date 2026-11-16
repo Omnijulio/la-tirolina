@@ -492,7 +492,39 @@
     return parts.slice(0, -1).join(', ') + ' y ' + parts[parts.length - 1];
   }
 
+  /* ---------- Matemáticas deterministas para la simulación ----------
+   * Math.sin/cos/atan2/hypot no dan exactamente el mismo resultado en todos los
+   * navegadores (iPhone y Android pueden diferir en el último decimal) y en el
+   * multijugador eso basta para que las dos partidas se separen. Para todo lo que mueve
+   * la pelea se usan estas versiones, hechas solo con + − × ÷ y raíz cuadrada (idénticas
+   * en cualquier navegador). Lo que solo se dibuja puede seguir usando Math.
+   */
+  const TAU = 6.283185307179586, HALF_PI = 1.5707963267948966, PI = 3.141592653589793;
+  function dsin(x) {
+    x = x - TAU * Math.round(x / TAU);                         // a [−π, π]
+    if (x > HALF_PI) x = PI - x; else if (x < -HALF_PI) x = -PI - x;   // a [−π/2, π/2]
+    const x2 = x * x;
+    return x * (1 - x2 / 6 * (1 - x2 / 20 * (1 - x2 / 42 * (1 - x2 / 72 * (1 - x2 / 110)))));
+  }
+  function dcos(x) { return dsin(x + HALF_PI); }
+  function datan(z) {                                          // |z| <= 1
+    const z2 = z * z;
+    return z * (0.9998660 + z2 * (-0.3302995 + z2 * (0.1801410 + z2 * (-0.0851330 + z2 * 0.0208351))));
+  }
+  function datan2(y, x) {
+    if (x === 0 && y === 0) return 0;
+    const ax = Math.abs(x), ay = Math.abs(y);
+    let a = ax >= ay ? datan(ay / ax) : HALF_PI - datan(ax / ay);
+    if (x < 0) a = PI - a;
+    return y < 0 ? -a : a;
+  }
+  function dhypot(x, y) { return Math.sqrt(x * x + y * y); }
+
+  /** Versión del juego: se muestra en el multijugador y se compara con la del rival. */
+  const GAME_VERSION = '0.12.2';
+
   const Rules = {
+    GAME_VERSION, dsin, dcos, datan2, dhypot,
     BOTTLE_PRICE, MAX_BOTTLES, START_COINS, DIFFICULTIES, DIFFICULTY_ORDER, MOVES,
     ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX, NOISE, POLICE, WET, FOUNTAIN,
     FUELLE, GUARD_BREAK, PARRY, COUNTER, KNOCKDOWN, DASH, GRAB, DIVE, GANCHO,

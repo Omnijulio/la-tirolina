@@ -365,16 +365,35 @@
       return net;
     },
 
+    /** ¿El rival tiene el mismo juego? Con versiones distintas la pelea se desincroniza seguro. */
+    netCheckVersion(m) {
+      const N = root.TrolinaNet;
+      if (m.fp === N.FINGERPRINT) return true;
+      const mine = R.GAME_VERSION, theirs = m.v || 'anterior a 0.12.2';
+      if (root.TrolinaNetLog) { root.TrolinaNetLog.begin('Versión distinta'); root.TrolinaNetLog.add('VERSION', 'aquí ' + mine + ' (' + N.FINGERPRINT + '), rival ' + theirs + ' (' + (m.fp || '?') + ')'); root.TrolinaNetLog.save(); }
+      if (this.net) this.net.send({ type: 'bye', reason: 'version', v: mine });
+      this.onNetClosed(mine === theirs
+        ? 'Tu rival tiene el juego a medio actualizar. Recargad la página en los dos móviles y volved a crear la sala.'
+        : 'Tu rival tiene otra versión del juego (' + theirs + '; tú, ' + mine + '). Recargad la página en los dos móviles y volved a crear la sala.');
+      return false;
+    },
+
     onNetMsg(m) {
+      if (m.type === 'hello') { this.netCheckVersion(m); return; }
+      if (m.type === 'end' || m.type === 'dump') {
+        // Lo recibe el propio Lockstep si la pelea está en marcha.
+        if (!this.lockstep) { this.netEarly.push(m); if (this.netEarly.length > 900) this.netEarly.shift(); }
+        return;
+      }
       if (m.type === 'in' || m.type === 'hash') {
         // Inputs que llegan antes de que la pelea arranque en este móvil: se guardan.
         if (!this.lockstep) { this.netEarly.push(m); if (this.netEarly.length > 900) this.netEarly.shift(); }
         return;
       }
-      if (m.type === 'ready') { this.netTheirReady = m; this.netMaybeStart(); UI.netUpdate && UI.netUpdate(); }
+      if (m.type === 'ready') { if (!this.netCheckVersion(m)) return; this.netTheirReady = m; this.netMaybeStart(); UI.netUpdate && UI.netUpdate(); }
       else if (m.type === 'start' && !this.net.isHost) this.startNetMatch(m.cfg);
       else if (m.type === 'again') { this.netTheirAgain = true; this.netMaybeAgain(); UI.netUpdate && UI.netUpdate(); }
-      else if (m.type === 'bye') this.onNetClosed('Tu rival ha salido de la sala');
+      else if (m.type === 'bye') this.onNetClosed(m.reason === 'version' ? 'Tu rival tiene otra versión del juego (' + (m.v || '?') + '; tú, ' + R.GAME_VERSION + '). Recargad la página en los dos móviles y volved a crear la sala.' : 'Tu rival ha salido de la sala');
     },
 
     /** Ya conectados: cada uno elige luchador y pide en la barra (gratis). */
@@ -382,6 +401,7 @@
       const s = this.session;
       if (this.netMyChar) s.p1 = this.netMyChar;
       Object.assign(s, { mode: 'online', wild: false, p2: null });
+      if (this.net) this.net.send({ type: 'hello', v: R.GAME_VERSION, fp: root.TrolinaNet.FINGERPRINT });
       this.netMyReady = null; this.netTheirReady = null; this.netMyAgain = false; this.netTheirAgain = false;
       this.match = null; this.lockstep = null;
       UI.show('select', { step: 'p1' });
@@ -391,7 +411,7 @@
       const s = this.session, d = Save.data, c = this.charById(s.p1);
       const loadout = R.computeLoadout(c, order, d.upgrades, root.TROLINA_BAR_ITEMS, root.TROLINA_UPGRADES, {});
       this.netMyChar = s.p1;
-      this.netMyReady = { type: 'ready', char: s.p1, order: loadout.order, loadout };
+      this.netMyReady = { type: 'ready', char: s.p1, order: loadout.order, loadout, v: R.GAME_VERSION, fp: root.TrolinaNet.FINGERPRINT };
       this.net.send(this.netMyReady);
       UI.show('netwait', {});
       this.netMaybeStart();
@@ -439,8 +459,18 @@
         net: { side },
         onEnd: (r) => this.endNetMatch(r)
       });
-      this.lockstep = new root.TrolinaNet.Lockstep({ link: this.net, match: this.match, side, seed: cfg.seed, input: this.input, early: this.netEarly });
+      const head = 'Ambiente ' + cfg.stage + ' · fuente ' + (cfg.fountain.on ? 'encendida' : 'apagada') + ' · jardinera ' + (cfg.jardinera ? 'sí' : 'no') +
+        ' · P1 ' + cfg.p1.char + ' ' + JSON.stringify(cfg.p1.order) + ' · P2 ' + cfg.p2.char + ' ' + JSON.stringify(cfg.p2.order);
+      this.lockstep = new root.TrolinaNet.Lockstep({ link: this.net, match: this.match, side, seed: cfg.seed, input: this.input, early: this.netEarly, head });
       this.netEarly = [];
+      // El rival terminó y aquí no (desincronizado): se acaba con su resultado para no quedarse esperando.
+      this.lockstep.onPeerEnd = (pe) => {
+        const m = this.match;
+        if (!m || m.ended) return;
+        m.ended = true; m.netDesync = true;
+        this.endNetMatch({ ...m.result(), wins: pe.wins && pe.wins.length === 2 ? pe.wins.slice() : m.wins.slice() }, true);
+      };
+      this.lockstep.onGiveUp = () => this.onNetClosed('Tu rival no responde desde hace 20 s. La partida se ha cancelado.');
       this.paused = false;
       this.input.capture = true; this.input.releaseAll(); this.input.clear();
       document.body.classList.add('fighting', 'online');
@@ -452,9 +482,11 @@
       UI.hide();
     },
 
-    endNetMatch(r) {
+    endNetMatch(r, forced) {
       const side = this.net && this.net.isHost ? 0 : 1;
-      if (this.lockstep) this.lockstep.stop();
+      // Aviso al rival: si su pelea no ha terminado, está desincronizada y terminará con este resultado.
+      if (!forced && this.net && this.lockstep) this.net.send({ type: 'end', g: this.netCfg.seed, t: this.lockstep.tick, wins: r.wins });
+      if (this.lockstep) this.lockstep.stop(forced ? 'cerrada con el resultado del rival' : 'pelea terminada');
       this.lockstep = null;
       document.body.classList.remove('fighting');
       this.input.capture = false;
@@ -467,7 +499,7 @@
       const score = R.finalScore({ raw: r.score, won: mine > theirs, online: true });
       const rival = this.charById(side === 0 ? this.netCfg.p2.char : this.netCfg.p1.char);
       const entry = { char: side === 0 ? this.netCfg.p1.char : this.netCfg.p2.char, mode: 'online', difficulty: 'online', won: mine > theirs, rounds: mine + '-' + theirs, vs: rival ? rival.name : '' };
-      UI.show('netresults', { mine, theirs, desync: this.match && this.match.netDesync, score, entry });
+      UI.show('netresults', { mine, theirs, desync: this.match && this.match.netDesync, forced: !!forced, score, entry });
     },
 
     netAgain() {
@@ -488,7 +520,7 @@
       UI.show('title');
     },
     netCleanup() {
-      if (this.lockstep) this.lockstep.stop();
+      if (this.lockstep) this.lockstep.stop('salida de la sala');
       this.lockstep = null;
       if (this.session.mode === 'online') { this.match = null; this.session.mode = 'quick'; }
       this.netMyChar = null; this.netCfg = null;

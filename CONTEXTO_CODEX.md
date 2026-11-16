@@ -35,6 +35,8 @@ Peticiones incorporadas, en orden:
 
 16. **v0.12 — Combate 2.0**: fuelle, guardia solo con abajo y guardia justa, guardia rota, agarre (botón AGARRE en lugar de GUARDIA), gancho antiaéreo, patada en picado, paso rápido, contra/castigo, retroceso con regla de esquina y derribo. Ver `COMBATE.md` y, para el arte, `ASSETS_COMBATE.md`.
 
+17. **v0.12.2 — Multijugador**: registro de partidas en red (ver/copiar/compartir), instantáneas detalladas cada 0,5 s con diferencias campo a campo, versión y huella obligatorias, fin avisado al rival y trigonometría determinista en la simulación. Ver `MULTIJUGADOR.md`.
+
 El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
 ## Cómo está organizado el juego (v0.2)

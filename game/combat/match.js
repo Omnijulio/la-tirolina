@@ -238,9 +238,11 @@
         c.dripAt = this.t;
         return this.waterOn(c, 'goteo');
       }
-      if (Math.random() > 0.27) return;
+      // Solo decorado: azar real, para no gastar el de la semilla común del multijugador.
+      const rnd = root.__trolinaRealRandom || Math.random;
+      if (rnd() > 0.27) return;
       const hb = c.f.getHurtbox();
-      this.dusts.push({ drop: true, x: hb.x + Math.random() * hb.w, y: hb.y + Math.random() * hb.h * 0.7, vx: 0, vy: 60, r: 2, t: 0, life: 500 });
+      this.dusts.push({ drop: true, x: hb.x + rnd() * hb.w, y: hb.y + rnd() * hb.h * 0.7, vx: 0, vy: 60, r: 2, t: 0, life: 500 });
     }
 
     startFountainThrow(att) {
@@ -291,7 +293,7 @@
       if (g.phase === 'hold') {
         // Lo levanta por encima de la cabeza antes de tirarlo.
         const k = Math.min(1, g.t / 260);
-        def.cx = att.cx + att.facing * (60 - 40 * k); def.y = -60 - 150 * k - Math.sin(g.t / 60) * 3;
+        def.cx = att.cx + att.facing * (60 - 40 * k); def.y = -60 - 150 * k - R.dsin(g.t / 60) * 3;
         def.facing = -att.facing; def.grabRot = k * Math.PI / 2;
         att.poseOverride = { anim: 'throwBottle', frame: k < 1 ? 1 : 2 };
         def.sync();
@@ -332,7 +334,7 @@
         return;
       }
       if (g.phase === 'soak') {
-        def.cx = fo.x; def.y = fo.waterY - C.GROUND + 56 + Math.sin(g.t / 160) * 3; def.sync();
+        def.cx = fo.x; def.y = fo.waterY - C.GROUND + 56 + R.dsin(g.t / 160) * 3; def.sync();
         if (!att.attacking) att.locked = false;
         // Con los chorros encendidos le sigue cayendo agua encima.
         if (fo.on && this.t - (g.sprayAt || -1e9) > 700) { g.sprayAt = this.t; fo.fx.push({ img: this.assets.fountain && this.assets.fountain.wet, def: root.TROLINA_FOUNTAIN_DATA && root.TROLINA_FOUNTAIN_DATA.fx.mojado, x: fo.x + (Math.random() - 0.5) * 50, y: fo.waterY + 30, t: 0, scale: 1.5 }); }
@@ -401,7 +403,7 @@
       const tx = hb.x + hb.w / 2, ty = hb.y + hb.h * 0.35;
       let dx = tx - ev.x, dy = ty - ev.y;
       if (Math.sign(dx) !== owner.facing) { dx = owner.facing; dy = 0; }
-      const len = Math.hypot(dx, dy) || 1;
+      const len = R.dhypot(dx, dy) || 1;
       const speed = 1400;
       this.darts.push({ owner, target, x: ev.x, y: ev.y, vx: dx / len * speed, vy: dy / len * speed, speed, age: 0, trail: [] });
       this.sfx('dart');
@@ -416,11 +418,12 @@
           // Ultrapreciso: corrige la trayectoria hacia el rival mientras vuela.
           if (d.target.state !== 'ko') {
             const hb = d.target.f.getHurtbox();
-            const want = Math.atan2(hb.y + hb.h * 0.35 - d.y, hb.x + hb.w / 2 - d.x);
-            let ang = Math.atan2(d.vy, d.vx);
+            // Trigonometría determinista (R.d*): en el multijugador debe dar lo mismo en los dos móviles.
+            const want = R.datan2(hb.y + hb.h * 0.35 - d.y, hb.x + hb.w / 2 - d.x);
+            let ang = R.datan2(d.vy, d.vx);
             let diff = ((want - ang + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
             ang += Math.max(-4 * s, Math.min(4 * s, diff));
-            d.vx = Math.cos(ang) * d.speed; d.vy = Math.sin(ang) * d.speed;
+            d.vx = R.dcos(ang) * d.speed; d.vy = R.dsin(ang) * d.speed;
           }
           const ax = d.x, ay = d.y;
           d.x += d.vx * s; d.y += d.vy * s; d.age += ms;

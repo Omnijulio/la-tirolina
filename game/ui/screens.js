@@ -150,6 +150,36 @@
       if (!t) { t = el('<div class="toast" role="status"></div>'); node.append(t); }
       t.textContent = msg; t.classList.add('snarky'); t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
     },
+    /** Registro de la última partida en red: ver, copiar o compartir (para encontrar desincronizaciones). */
+    netLogPanel(parent) {
+      const L = root.TrolinaNetLog;
+      const text = (L && (L.cur ? L.text() : L.last())) || 'Todavía no hay ningún registro.';
+      const old = parent.querySelector('.netlog');
+      if (old) { old.remove(); return; }
+      const box = el(`<div class="netlog">
+        <p class="small">Registro del multijugador. Compártelo para encontrar el fallo:</p>
+        <textarea readonly spellcheck="false"></textarea>
+        <nav class="menu row"><button class="primary" data-share>📤 Compartir</button><button data-copy>Copiar</button><button class="ghost" data-close>Cerrar</button></nav>
+      </div>`);
+      const ta = box.querySelector('textarea');
+      ta.value = text;
+      box.querySelector('[data-copy]').addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(text); this.flashError(parent, 'Registro copiado'); }
+        catch (e) { ta.focus(); ta.select(); this.flashError(parent, 'Selecciona el texto y cópialo'); }
+      });
+      box.querySelector('[data-share]').addEventListener('click', async () => {
+        try {
+          const file = typeof File !== 'undefined' ? new File([text], 'registro-trolina-multijugador.txt', { type: 'text/plain' }) : null;
+          if (file && navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ title: 'Registro La Trolina', files: [file] });
+          else if (navigator.share) await navigator.share({ title: 'Registro La Trolina', text });
+          else { await navigator.clipboard.writeText(text); this.flashError(parent, 'Registro copiado'); }
+        } catch (e) { /* cancelado */ }
+      });
+      box.querySelector('[data-close]').addEventListener('click', () => box.remove());
+      (parent.querySelector('.online-box') || parent).append(box);
+      box.scrollIntoView({ block: 'nearest' });
+    },
+
     flashError(node, msg) {
       root.TrolinaSfx.play('error');
       let t = node.querySelector('.toast');
@@ -800,8 +830,12 @@
           </div>
           <div class="online-status" aria-live="polite"></div>
           <p class="muted small">Experimental: si va a tirones o se queda «esperando», volved a crear la sala. Todos los luchadores están disponibles y la barra es libre. Sin policía ni modo salvaje.</p>
+          <p class="muted small">Versión ${esc(root.TrolinaRules.GAME_VERSION)} (huella ${esc(root.TrolinaNet ? root.TrolinaNet.FINGERPRINT : '?')}): tiene que ser la misma en los dos móviles.
+            ${root.TrolinaNetLog && root.TrolinaNetLog.last() ? '<button class="ghost small" data-log>📋 Registro de la última partida</button>' : ''}</p>
         </div>
       </div>`);
+      const logBtn = node.querySelector('[data-log]');
+      if (logBtn) logBtn.addEventListener('click', () => this.netLogPanel(node));
       const status = node.querySelector('.online-status');
       const hostBtn = node.querySelector('[data-host]'), joinBtn = node.querySelector('[data-join]'), input = node.querySelector('[data-code]');
       const busy = (b) => { hostBtn.disabled = b; joinBtn.disabled = b; input.disabled = b; };
@@ -865,10 +899,13 @@
         <h1>${draw ? 'EMPATE' : won ? '¡HAS GANADO!' : 'HAS PERDIDO'}</h1>
         <p class="score">${p.mine} – ${p.theirs} · Multijugador (experimental)</p>
         ${p.score ? this.scoreBlock(p.score) : ''}
-        ${p.desync ? '<p class="muted">Aviso: las dos partidas se desincronizaron durante la pelea. Si lo ves a menudo, dímelo.</p>' : ''}
+        ${p.forced ? '<p class="err">Las dos partidas se separaron y tu rival terminó antes: este es su resultado.</p>' : p.desync ? '<p class="muted">Aviso: las dos partidas se desincronizaron durante la pelea.</p>' : ''}
+        ${p.desync ? '<p class="muted small">Pulsa <b>Registro</b> y compártelo para encontrar el fallo.</p>' : ''}
         <p class="wait muted"></p>
-        <nav class="menu row"><button class="primary" data-again>Revancha</button><button data-leave>Salir</button></nav>
+        <nav class="menu row"><button class="primary" data-again>Revancha</button><button data-leave>Salir</button><button class="ghost" data-log>📋 Registro</button></nav>
+        <p class="muted small">v${esc(root.TrolinaRules.GAME_VERSION)}</p>
       </div>`);
+      node.querySelector('[data-log]').addEventListener('click', () => this.netLogPanel(node));
       const wait = node.querySelector('.wait');
       const paint = () => {
         if (g.netMyAgain && !g.netTheirAgain) wait.textContent = 'Esperando a que tu rival quiera la revancha…';
