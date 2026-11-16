@@ -1,6 +1,6 @@
 # Contexto para continuar en Codex
 
-Estado: **v0.4** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
+Estado: **v0.5** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
 
 ## Objetivo del usuario y decisiones aceptadas
 
@@ -18,6 +18,8 @@ Peticiones incorporadas, en orden:
 7. **v0.3**: mecánica única por personaje empezando por El Barbas: un **ultimate** que se carga encadenando combos y lanza un **dardo ultrapreciso** de mucho daño; **peleas más largas** para poder cargarlo; **joystick** táctil que permite moverse sin levantar el pulgar; **bolsa de azúcar** (60 €: mucha velocidad y sin embriaguez, a los 30 s se pasa y a los 45 s te quedas inconsciente) y **paquete de tabaco** (fumar es una mecánica importante: baja el puntillo).
 
 8. **v0.4 — Policía Local**: aparece según un **nivel de ruido** (sobre todo muchos botellines seguidos), para la pelea, **multa a los dos** y la pelea se reinicia; si pasa **3 veces seguidas**, noche en el **calabozo** (esos personajes no se pueden usar durante 1 minuto). Se puede desactivar. Los sprites del agente y la patrulla y el controlador `src/police.js` vienen del paquete v1.4 del usuario (ver `POLICE.md`).
+
+9. **v0.5 — La fuente**: ultimate de **El Peñista** «Al pilón» (lo tira a una fuente a la izquierda: mucho daño y queda mojado y más lento). La fuente puede estar encendida o apagada y con o sin luz; encendida, su ruido tapa el de los botellines y la policía no viene por ellos. La fuente es provisional (dibujada por código) hasta que lleguen los assets; formato esperado en `FUENTE.md`. Vendrán también fondos nocturnos nuevos.
 
 El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
@@ -69,6 +71,10 @@ Flujo: Título → (Historia | Pelea rápida) → Selección (luchador; en pelea
 - **Bolsa de azúcar** (60 €): 0–30 s de combate sin puntillo, +40 % de velocidad y animaciones un 20 % más rápidas; 30–45 s vuelve el puntillo («¡BAJÓN DE AZÚCAR!»); a los 45 s el personaje se desmaya 6 s, tumbado e indefenso, y recibe un 50 % más de daño. Se puede cambiar a «pierde el asalto» en `faint()` de `combatant.js` si se prefiere más duro.
 - Objetos: café (−20 % puntillo, +4 % velocidad), agua (−10 % puntillo, +5 vida), tortilla (+12 vida, sube 30 % más lento), bocata (+25 vida, −8 % velocidad), orujo (+15 % fuerza, 2,5 de puntillo, sin envase), energética (+12 % velocidad, sube 20 % más rápido), gafas de sol (mitad de niebla visual).
 - La CPU también pide en la barra según dificultad y personalidad; se muestra en la pantalla VS.
+
+### La fuente y «Al pilón» (v0.5)
+
+Ver `FUENTE.md`. `game/combat/fountain.js` dibuja la fuente (capa trasera antes de los luchadores; murete delantero encima de quien cae dentro). `Match.startFountainThrow/updateGrab` controlan carga → agarre → lanzamiento → chapuzón → salida; los luchadores implicados usan los estados `grabbed`/`soaked` y `locked`. `Combatant.wetT` aplica `TrolinaRules.WET`. `Match.addBottleNoise` ignora el ruido de botellines con la fuente encendida. El estado se elige en `main.preFight` con `TrolinaRules.pickFountain` (opciones `settings.fountain` y `settings.fountainLight`) y se conserva al reiniciar por la policía.
 
 ### Policía Local (v0.4)
 
@@ -130,6 +136,11 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 - Utilidades de depuración por URL: `?autoplay=1&fast=3` (CPU contra CPU, acelerado), `?autoplay=story`, `?screen=barra|shop|options|help|vs|cinematic|fight`, parámetros `p1`, `p2`, `diff`, `bottles`.
 - Publicación y opciones para jugar en remoto: `PUBLICAR.md`. Hoja de ruta: `PLAN.md`.
 
+## Validación realizada en v0.5
+
+- `npm test`: 20 pruebas (nueva: fuente, mojado y estados aleatorios).
+- Chrome sin interfaz: los cuatro estados de la fuente; 5 botellines seguidos con la fuente encendida no suben el ruido (con la apagada 4 llaman a la patrulla); «Al pilón» completo (carga, levantar, lanzamiento, chapuzón dentro del pilón, salida mojado y más lento, unos 60 de daño con 6 botellines); la CPU con El Peñista lo usa en combate. Sin errores de consola.
+
 ## Validación realizada en v0.4
 
 - `npm test`: 5 suites (botellín, escenario, policía y Fighter Lab del paquete v1.4, y 15 pruebas de reglas, incluida la de ruido/multa/calabozo).
@@ -150,7 +161,8 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 
 - Las variantes de personaje son recoloreados con la misma cara; no hay arte propio por personaje.
 - No hay animaciones dedicadas de caminar, salto, recibir golpe, caída ni victoria (se simulan con poses existentes).
-- Solo El Barbas tiene ultimate; no hay agacharse, agarres ni especiales con comandos.
+- Solo El Barbas (dardo) y El Peñista (pilón) tienen ultimate; no hay agacharse ni especiales con comandos.
+- La fuente es provisional (dibujada por código) hasta recibir los assets.
 - Cinemáticas: solo texto y retratos provisionales.
 - Sin música; los efectos de sonido son sintéticos.
 - Sin multijugador (ni local ni online).

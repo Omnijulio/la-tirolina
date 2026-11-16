@@ -72,6 +72,7 @@
       this.whiff = false; this.lastHitAction = -1; this.hitConfirm = -1; this.chain = 0;
       this.combo = 0; this.noAmmoCooldown = 0;
       this.smoking = null; this.faintT = 0; this.faintTotal = 0;
+      this.wetT = 0; this.locked = false; this.poseOverride = null; this.grabRot = 0;
       this.f.enabled = true;
       this.f.play('idle', true);
       this.sync();
@@ -109,6 +110,13 @@
       this.hitstun = Math.max(0, this.hitstun - dt);
       this.blockstun = Math.max(0, this.blockstun - dt);
       this.stumble = Math.max(0, this.stumble - dt);
+      this.wetT = Math.max(0, this.wetT - dt);
+      if (this.wetT > 0 && Math.random() < dt / 60 && match.drip) match.drip(this);
+
+      // Agarrado o dentro de la fuente: la posición la controla el combate.
+      if (this.state === 'grabbed' || this.state === 'soaked') { this.sync(); return; }
+      // Ejecutando un ultimate guiado por el combate (carga y lanzamiento a la fuente).
+      if (this.locked) { this.f.update(dt); this.sync(); return; }
 
       if (this.state !== 'fight') {
         this.walking = false; this.guard = false; this.smoking = null;
@@ -129,8 +137,9 @@
       const sugar = rules.sugarPhase(this.loadout, match.matchTime);
       if (sugar === 'fading' && !this.notes.fading) { this.notes.fading = true; match.popup(this, '¡BAJÓN DE AZÚCAR!', '#ffb37a'); match.sfx('faintWarn'); }
       if (sugar === 'crashed' && !this.fainted && !this.air) return this.faint(match);
-      const speed = this.loadout.speed * (sugar === 'boost' ? rules.SUGAR.speedMult : 1);
-      const animMult = sugar === 'boost' ? rules.SUGAR.animMult : 1;
+      const wet = this.wetT > 0;
+      const speed = this.loadout.speed * (sugar === 'boost' ? rules.SUGAR.speedMult : 1) * (wet ? rules.WET.speedMult : 1);
+      const animMult = (sugar === 'boost' ? rules.SUGAR.animMult : 1) * (wet ? rules.WET.animMult : 1);
 
       const intox = match.intoxOf(this);
       const imp = rules.impairment(intox, this.loadout.aim);
@@ -270,11 +279,27 @@
         if (!this.noAmmoCooldown) { match.popup(this, this.char.special.short + ' ' + Math.floor(this.meter) + '%', '#9aa1ab'); this.noAmmoCooldown = 700; }
         return false;
       }
-      if (!this.f.play('throwDart', true)) return false;
+      const id = this.char.special.id;
+      if (id === 'fuente') {
+        if (!match.fountain) return false;
+        this.f.play('idle', true);
+      } else if (!this.f.play('throwDart', true)) return false;
       this.meter = 0; this.chain = 0; this.ultimates++;
       this.pending = [];
       match.superFlash(this);
+      if (id === 'fuente') match.startFountainThrow(this);
       return true;
+    }
+
+    /** Cae a la fuente: mucho daño y queda empapado. Devuelve 'hit' o 'ko'. */
+    splashHit(damage) {
+      this.hp = Math.max(0, this.hp - damage);
+      this.flash = 160; this.flashColor = '#9fe6ff';
+      this.wetT = R().WET.ms;
+      this.state = 'fight';
+      if (this.hp <= 0) return this.knockOut(1);
+      this.state = 'soaked';
+      return 'hit';
     }
 
     trySmoke(match) {
@@ -375,6 +400,14 @@
         // Cae de espaldas girando alrededor de la cadera (coordenadas locales desde el ancla).
         frame = anims.idle.frames[0];
         lying(Math.min(1, this.koT / 520));
+      } else if (this.state === 'grabbed') {
+        frame = anims.idle.frames[0];
+        rot = this.grabRot;
+      } else if (this.state === 'soaked') {
+        frame = anims.idle.frames[0];
+        lying(1); dy = Math.sin(this.t / 180) * 3;
+      } else if (this.poseOverride) {
+        frame = anims[this.poseOverride.anim].frames[this.poseOverride.frame];
       } else if (this.faintT > 0) {
         frame = anims.idle.frames[0];
         const since = this.faintTotal - this.faintT;
@@ -441,6 +474,20 @@
         ctx.translate(-p.pivot.x, -p.pivot.y);
       } else if (p.rot) ctx.rotate(p.rot);
       ctx.drawImage(src, sx, sy, fr.w, fr.h, -a.x, -a.y, fr.w, fr.h);
+      if (this.wetT > 0 && this.flash <= 0 && !o.ghost) {
+        // Mojado: brillo azulado sobre el sprite.
+        tintCtx.clearRect(0, 0, 192, 176);
+        tintCtx.globalCompositeOperation = 'source-over';
+        tintCtx.drawImage(this.image, fr.x, fr.y, fr.w, fr.h, 0, 0, fr.w, fr.h);
+        tintCtx.globalCompositeOperation = 'source-atop';
+        tintCtx.fillStyle = '#4fb4ff';
+        tintCtx.fillRect(0, 0, 192, 176);
+        tintCtx.globalCompositeOperation = 'source-over';
+        const k = Math.min(1, this.wetT / 2000);
+        ctx.globalAlpha = (o.alpha !== undefined ? o.alpha : 1) * (0.28 + 0.08 * Math.sin(this.t / 160)) * k;
+        ctx.drawImage(tintCanvas, 0, 0, fr.w, fr.h, -a.x, -a.y, fr.w, fr.h);
+        ctx.globalAlpha = o.alpha !== undefined ? o.alpha : 1;
+      }
       if (!o.ghost) {
         if (p.cig) {
           // Cigarrillo en la boca (coordenadas locales de la celda).

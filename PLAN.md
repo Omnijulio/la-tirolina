@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.4** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.5** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -29,6 +29,12 @@ Estado: **v0.4** (16/11/2026). Un jugador contra la CPU, en navegador de escrito
 
 - **Policía Local**: barra de ruido (sobre todo muchos botellines seguidos); si se llena llega la patrulla, para la pelea, multa a los dos y la pelea se reinicia. A la tercera seguida, **noche en el calabozo**: esos luchadores no se pueden usar durante 1 minuto. Se puede desactivar en Opciones.
 
+## Hecho en v0.5
+
+- **Ultimate de El Peñista: «Al pilón»**: agarra al rival y lo tira a la fuente; mucho daño y lo deja **mojado** y más lento 12 s.
+- **Fuente** a la izquierda: encendida/apagada y con/sin luz (aleatoria o fija en Opciones). Encendida, **tapa el ruido de los botellines** para la policía.
+- Fuente provisional dibujada por código, lista para cambiar por los assets definitivos (`FUENTE.md`).
+
 ## Próximas fases propuestas
 
 ### Fase 1 — Publicar y probar con amigos
@@ -40,6 +46,10 @@ Estado: **v0.4** (16/11/2026). Un jugador contra la CPU, en navegador de escrito
 - [ ] Animaciones que faltan: caminar, salto, recibir golpe, caída/KO, victoria, beber.
 - [ ] Ultimate propio para el resto de personajes (la estructura `special` ya existe; p. ej. bandeja del Camarero, sprint del Runner).
 - [ ] Pose propia de fumar y de lanzar el dardo.
+
+### Fase 2b — Fuente y fondos nocturnos (assets en camino)
+- [ ] Sustituir la fuente provisional por los assets definitivos (4 estados + murete delantero).
+- [ ] Nuevos fondos/escenarios nocturnos con el formato de tres planos.
 
 ### Fase 3 — Cinemáticas
 - [ ] Ilustraciones o vídeos cortos por combate en `assets/cinematics/` y registrarlos en `game/data/cinematics.js` (ya admite `image` y `video`).

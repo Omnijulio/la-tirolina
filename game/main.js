@@ -125,6 +125,7 @@
     preFight() {
       const s = this.session;
       s.cpuOrder = R.cpuOrder(s.difficulty, this.charById(s.p2));
+      s.fountain = R.pickFountain(Save.data.settings.fountain, Save.data.settings.fountainLight);
       const cine = root.TROLINA_CINEMATICS || {};
       const scenes = (s.mode === 'story' && cine['story-' + s.storyIndex]) || cine['vs-' + s.p2];
       const vs = () => UI.show('vs', { onDone: () => this.startMatch() });
@@ -145,6 +146,7 @@
         autoplay: params.has('autoplay'),
         timeScale: Number(params.get('fast')) || 1,
         police: d.settings.police !== false,
+        fountain: s.fountain || (s.fountain = R.pickFountain(d.settings.fountain, d.settings.fountainLight)),
         onEnd: (r) => this.endMatch(r),
         onPolice: (info) => this.onPolice(info)
       });
@@ -273,7 +275,8 @@
         if (!this.paused) this.match.update(dt);
         this.match.draw(this.ctx);
         this.updateTouchHud();
-      } else if (this.attract) this.drawAttract(dt);
+        Sfx.setWater(!this.paused && !this.match.ended && this.match.fountain && this.match.fountain.on);
+      } else if (this.attract) { Sfx.setWater(false); this.drawAttract(dt); }
       UI.tick(dt);
       requestAnimationFrame((t) => this.loop(t));
     },

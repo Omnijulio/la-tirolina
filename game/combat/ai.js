@@ -62,7 +62,12 @@
         if (dist < 230) this.act(r() < 0.5 ? 'punch' : 'kick'); else this.set('approach', 300);
         return;
       }
-      if (me.meterFull && opp.state === 'fight' && dist < 850 && (opp.hitstun > 0 || r() < 0.45)) { this.act('special'); return; }
+      if (me.meterFull && opp.state === 'fight') {
+        const sp = me.char.special.id;
+        // El dardo vale a cualquier distancia; el pilón necesita estar cerca y con el rival en el suelo.
+        const ok = sp === 'fuente' ? dist < 420 && !opp.air : dist < 850;
+        if (ok && (opp.hitstun > 0 || r() < 0.45)) { this.act('special'); return; }
+      }
       const intox = match.intoxOf(me);
       if (me.cigs > 0 && intox > 0.3 && dist > 400 && !match.incomingBottle(me) && r() < 0.4) { this.act('smoke'); return; }
       const incoming = match.incomingBottle(me);

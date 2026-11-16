@@ -38,6 +38,23 @@
       s.connect(f); f.connect(g); g.connect(this.master);
       s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.02);
     },
+    /** Rumor continuo de la fuente encendida. */
+    setWater(on) {
+      if (!this.ctx || this.ctx.state !== 'running' || !this.enabled) on = false;
+      if (on && !this.water) {
+        try {
+          const c = this.ctx;
+          const s = c.createBufferSource(); s.buffer = this.noise; s.loop = true;
+          const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 900; f.Q.value = 0.6;
+          const g = c.createGain(); g.gain.value = 0.12;
+          s.connect(f); f.connect(g); g.connect(this.master); s.start();
+          this.water = { s, g };
+        } catch (e) { this.water = null; }
+      } else if (!on && this.water) {
+        try { this.water.s.stop(); } catch (e) { /* ya parado */ }
+        this.water = null;
+      }
+    },
     play(name) {
       if (!this.enabled || !this.ctx || this.ctx.state !== 'running') return;
       try {
@@ -77,6 +94,10 @@
           case 'whistle': this.tone('square', 2900, 3000, 0.18, 0.12); this.tone('square', 3000, 2950, 0.5, 0.12, 0.22); break;
           case 'radio': this.hiss(0.25, 0.18, 'bandpass', 1800, 2400); this.tone('square', 1200, 1200, 0.05, 0.08, 0.28); break;
           case 'jail': [330, 247, 196].forEach((f, i) => this.tone('square', f, f * 0.98, 0.3, 0.14, i * 0.28)); this.tone('sine', 80, 60, 0.4, 0.5, 0.9); break;
+          case 'grab': this.tone('sine', 180, 90, 0.15, 0.6); this.hiss(0.1, 0.4, 'lowpass', 900); break;
+          case 'splash':
+            this.hiss(0.9, 0.7, 'lowpass', 3500, 400); this.hiss(0.4, 0.5, 'highpass', 2500);
+            this.tone('sine', 110, 40, 0.5, 0.7); break;
           case 'faint': this.tone('triangle', 500, 80, 1.0, 0.3); this.tone('sine', 120, 40, 0.6, 0.5, 0.3); break;
         }
       } catch (e) { /* audio opcional */ }

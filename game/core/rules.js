@@ -22,8 +22,23 @@
     kick: { damage: 7, hitstun: 470, knockback: 420, blockstun: 230 },
     bottle: { damage: 9, hitstun: 480, knockback: 520, blockstun: 260, chip: 0.25 },
     // Ultimate de El Barbas: no se puede bloquear.
-    dart: { damage: 30, hitstun: 800, knockback: 950, blockstun: 0, unblockable: true }
+    dart: { damage: 30, hitstun: 800, knockback: 950, blockstun: 0, unblockable: true },
+    // Ultimate de El Peñista: agarre y chapuzón en la fuente (no se puede bloquear).
+    fountain: { damage: 38, hitstun: 300, knockback: 0, blockstun: 0, unblockable: true }
   };
+
+  // Mojado tras caer a la fuente: más lento durante un buen rato.
+  const WET = { ms: 12000, speedMult: 0.7, animMult: 0.85 };
+  // Fuente: con los chorros encendidos tapa el ruido de los botellines.
+  const FOUNTAIN = { masksBottleNoise: true, splashNoise: 10 };
+
+  /** Estado de la fuente para un combate: pref 'random' | 'on' | 'off' (luz: 'random' | 'lit' | 'dark'). */
+  function pickFountain(pref, lightPref, rng) {
+    const r = rng || Math.random;
+    const on = pref === 'on' ? true : pref === 'off' ? false : r() < 0.5;
+    const lit = lightPref === 'lit' ? true : lightPref === 'dark' ? false : r() < 0.6;
+    return { on, lit };
+  }
 
   /** Escalado dentro de un combo (n = número de golpe del combo, 1 = primero). */
   function comboScale(n) {
@@ -224,8 +239,8 @@
 
   const Rules = {
     BOTTLE_PRICE, MAX_BOTTLES, START_COINS, DIFFICULTIES, DIFFICULTY_ORDER, MOVES,
-    ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX, NOISE, POLICE,
-    comboScale, meterGain, sugarPhase, bottleNoise, policeOutcome,
+    ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX, NOISE, POLICE, WET, FOUNTAIN,
+    comboScale, meterGain, sugarPhase, bottleNoise, policeOutcome, pickFountain,
     formatMoney, orderCost, sanitizeOrder, computeLoadout, intoxAt, impairment,
     damageFor, matchReward, cpuOrder, describeOrder, clampQty
   };

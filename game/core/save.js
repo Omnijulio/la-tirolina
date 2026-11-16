@@ -12,7 +12,7 @@
       difficulty: 'normal',
       selected: 'barbas',
       lastOrder: { botellin: 3 },
-      settings: { sound: true, volume: 0.7, touch: 'auto', reduceMotion: false, police: true },
+      settings: { sound: true, volume: 0.7, touch: 'auto', reduceMotion: false, police: true, fountain: 'random', fountainLight: 'random' },
       police: { strikes: 0, jail: {} },
       stats: { wins: 0, losses: 0, bottles: 0, earned: 0, fines: 0, nightsInJail: 0 }
     };

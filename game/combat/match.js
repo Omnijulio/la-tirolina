@@ -22,7 +22,7 @@
         }
       }
     }
-    breakBottle(p) { super.breakBottle(p); this.match.sfx('glass'); this.match.addNoise(R.NOISE.bottleBreak); }
+    breakBottle(p) { super.breakBottle(p); this.match.sfx('glass'); this.match.addBottleNoise(R.NOISE.bottleBreak); }
   }
 
   class Match {
@@ -36,6 +36,10 @@
       const dartAnim = JSON.parse(JSON.stringify(data.animations.throwBottle));
       for (const f of dartAnim.frames) for (const e of f.events || []) if (e.type === 'spawn-projectile') e.weapon = 'dart';
       data.animations.throwDart = dartAnim;
+      // Ultimate de El Peñista: el mismo gesto de lanzar, sin botellín en la mano.
+      const grabAnim = JSON.parse(JSON.stringify(data.animations.throwBottle));
+      for (const f of grabAnim.frames) { f.events = []; delete f.itemSocket; }
+      data.animations.throwGrab = grabAnim;
       const mk = (side, sel, isCPU) => new Combatant({
         character: sel.character, image: this.assets.characters[sel.character.id], data,
         loadout: sel.loadout, isCPU, side
@@ -57,6 +61,10 @@
       // Policía Local: aparece si el ruido llega a 100 (ver TrolinaRules.NOISE).
       this.noise = 0; this.bottleStreak = -1; this.lastBottleAt = -1e9; this.noiseWarned = false;
       this.police = null; this.separate = null;
+      // Fuente a la izquierda: encendida/apagada y con/sin luz.
+      const fs = opts.fountain || { on: true, lit: true };
+      this.fountain = root.Fountain ? new root.Fountain({ on: fs.on, lit: fs.lit }) : null;
+      this.grab = null; this.fountainNoted = false;
       if (opts.police && this.assets.police && root.PoliceIntervention && root.POLICE_DATA) {
         this.policeData = JSON.parse(JSON.stringify(root.POLICE_DATA));
         this.police = new PoliceIntervention(this.assets.police, this.policeData, {
@@ -78,6 +86,7 @@
       this.round++;
       this.p1.reset(330, 1);
       this.p2.reset(630, -1);
+      this.cancelGrab();
       this.bottles.reset();
       this.darts = []; this.smokes = []; this.superFreeze = 0;
       this.timer = R.ROUND_SECONDS;
@@ -120,7 +129,128 @@
     onBottleThrown() {
       this.bottleStreak = this.t - this.lastBottleAt < R.NOISE.streakWindowMs ? this.bottleStreak + 1 : 0;
       this.lastBottleAt = this.t;
-      this.addNoise(R.bottleNoise(this.bottleStreak));
+      this.addBottleNoise(R.bottleNoise(this.bottleStreak));
+    }
+
+    /** Con los chorros encendidos la fuente tapa el ruido de los botellines. */
+    addBottleNoise(n) {
+      if (this.fountain && this.fountain.on && R.FOUNTAIN.masksBottleNoise) {
+        if (this.police && !this.fountainNoted && this.phase === 'fight') {
+          this.fountainNoted = true;
+          this.popups.push({ x: 480 + this.camera * 2, y: 250, text: 'LA FUENTE TAPA EL RUIDO DE LOS BOTELLINES', color: '#9ff0ff', t: 0, life: 1600 });
+        }
+        return;
+      }
+      this.addNoise(n);
+    }
+
+    /* ---------- ultimate de la fuente (El Peñista) ---------- */
+
+    drip(c) {
+      const hb = c.f.getHurtbox();
+      this.dusts.push({ drop: true, x: hb.x + Math.random() * hb.w, y: hb.y + Math.random() * hb.h * 0.7, vx: 0, vy: 60, r: 2, t: 0, life: 500 });
+    }
+
+    startFountainThrow(att) {
+      const def = att === this.p1 ? this.p2 : this.p1;
+      att.locked = true;
+      att.poseOverride = { anim: 'punch', frame: 3 };
+      att.facing = Math.sign(def.cx - att.cx) || att.facing;
+      this.grab = { att, def, phase: 'dash', t: 0 };
+    }
+
+    cancelGrab() {
+      const g = this.grab;
+      if (!g) return;
+      g.att.locked = false; g.att.poseOverride = null;
+      if (g.def.state === 'grabbed' || g.def.state === 'soaked') {
+        g.def.state = this.phase === 'fight' ? 'fight' : 'ready';
+        g.def.y = 0; g.def.air = false; g.def.f.enabled = true; g.def.grabRot = 0;
+      }
+      this.grab = null;
+    }
+
+    updateGrab(dt) {
+      const g = this.grab;
+      if (!g) return;
+      const { att, def } = g;
+      const fo = this.fountain;
+      g.t += dt;
+      if (g.phase === 'dash') {
+        att.cx = Math.max(C.MIN_X, Math.min(C.MAX_X, att.cx + att.facing * 950 * dt / 1000));
+        att.sync();
+        if (Math.abs(def.cx - att.cx) <= 130 && def.state === 'fight' && Math.abs(def.y) < 160) {
+          g.phase = 'hold'; g.t = 0;
+          def.state = 'grabbed'; def.f.play('idle', true); def.f.enabled = false;
+          def.smoking = null; def.faintT = 0; def.pending = []; def.hitstun = 0; def.blockstun = 0;
+          att.facing = -1;                              // la fuente está a la izquierda
+          att.poseOverride = { anim: 'throwBottle', frame: 1 };
+          this.popup(att, '¡AL PILÓN!', '#9ff0ff');
+          this.sfx('grab'); this.hitstop = 90; this.shake = 6;
+        } else if (g.t > 520) {
+          att.locked = false; att.poseOverride = null;
+          att.stumble = 450; att.stumbleDir = att.facing;
+          this.popup(att, '¡SE LE ESCAPA!', '#ff8a7a');
+          this.grab = null;
+        }
+        return;
+      }
+      if (g.phase === 'hold') {
+        // Lo levanta por encima de la cabeza antes de tirarlo.
+        const k = Math.min(1, g.t / 260);
+        def.cx = att.cx + att.facing * (60 - 40 * k); def.y = -60 - 150 * k - Math.sin(g.t / 60) * 3;
+        def.facing = -att.facing; def.grabRot = k * Math.PI / 2;
+        att.poseOverride = { anim: 'throwBottle', frame: k < 1 ? 1 : 2 };
+        def.sync();
+        if (g.t > 420) {
+          g.phase = 'throw'; g.t = 0;
+          att.poseOverride = null; att.f.play('throwGrab', true);
+          g.x0 = def.cx; g.y0 = def.y;
+          g.x1 = fo.x; g.y1 = fo.waterY - C.GROUND + 10;
+          g.dur = Math.min(1100, 600 + Math.abs(g.x0 - g.x1) * 0.6);
+          this.sfx('swing');
+        }
+        return;
+      }
+      if (g.phase === 'throw') {
+        const u = Math.min(1, g.t / g.dur);
+        def.cx = g.x0 + (g.x1 - g.x0) * u;
+        def.y = g.y0 + (g.y1 - g.y0) * u - 230 * 4 * u * (1 - u);
+        def.grabRot = Math.PI / 2 - u * Math.PI * 3 * def.facing;
+        def.sync();
+        if (u >= 1) {
+          if (!att.attacking) att.locked = false;
+          fo.splash(def.cx, 1.2);
+          this.sfx('splash'); this.shake = 14; this.hitstop = 160;
+          this.addNoise(R.FOUNTAIN.splashNoise);
+          const dmg = R.damageFor('fountain', att.loadout.power, att === this.p2 ? this.diff.cpuDamage : 1);
+          def.grabRot = 0;
+          const res = def.splashHit(dmg);
+          if (att === this.p1) this.stats.ultimates++;
+          this.popups.push({ x: def.cx, y: fo.waterY - 150, text: '¡CALADO!', color: '#9ff0ff', t: 0, life: 1100 });
+          if (res === 'ko') {
+            att.locked = false; this.grab = null;
+            this.onKO(att, def);
+            return;
+          }
+          g.phase = 'soak'; g.t = 0;
+        }
+        return;
+      }
+      if (g.phase === 'soak') {
+        def.cx = fo.x; def.y = fo.waterY - C.GROUND + 18; def.sync();
+        if (!att.attacking) att.locked = false;
+        if (g.t > 1100) {
+          // Sale de la fuente de un salto, empapado.
+          def.state = 'fight'; def.f.enabled = true;
+          def.cx = Math.min(C.MAX_X, fo.right + 40); def.y = -30; def.air = true; def.vy = -380; def.vx = 160;
+          def.facing = Math.sign(att.cx - def.cx) || 1;
+          def.hitstun = 250;
+          fo.splash(fo.x + 40, 0.5);
+          att.locked = false; att.poseOverride = null;
+          this.grab = null;
+        }
+      }
     }
 
     callPolice() {
@@ -146,6 +276,7 @@
         if (f.state !== 'ko') { f.state = 'ready'; f.f.play('idle', true); }
         f.smoking = null; f.faintT = 0; f.pending = [];
       }
+      this.cancelGrab();
       this.bottles.reset(); this.darts = []; this.superFreeze = 0; this.slowmo = 0;
       const [ax, bx] = this.policeData.settings.officerTargetX;
       const mid = (ax + bx) / 2;
@@ -245,6 +376,7 @@
       if (this.banner) this.banner.t += real;
       const actions = this.o.input ? this.o.input.take() : [];
       if (this.superText) this.superText.t += real;
+      if (this.fountain) this.fountain.update(real);
       if (this.superFreeze > 0) {
         this.superFreeze -= real;
         if (actions.length && this.o.input) this.o.input.queue.unshift(...actions);
@@ -285,6 +417,7 @@
         for (const [f, x] of this.separate) { f.cx += (x - f.cx) * Math.min(1, dt * 0.004); f.sync(); }
       }
 
+      this.updateGrab(dt);
       const c1 = this.controls(this.p1, this.brain1, this.p2, actions, dt);
       const c2 = this.controls(this.p2, this.brain2, this.p1, [], dt);
       this.p1.update(dt, c1, this.p2, this);
@@ -313,7 +446,7 @@
 
     resolvePush() {
       const a = this.p1, b = this.p2;
-      if (a.state === 'ko' || b.state === 'ko') return;
+      if (a.state === 'ko' || b.state === 'ko' || this.grab) return;
       if (Math.abs(a.y - b.y) > 150) return; // uno salta por encima del otro
       let dx = b.cx - a.cx;
       const overlap = C.PUSH - Math.abs(dx);
@@ -335,7 +468,7 @@
       for (const [att, def] of [[this.p1, this.p2], [this.p2, this.p1]]) {
         const anim = att.f.animation;
         if (anim !== 'punch' && anim !== 'kick') continue;
-        if (att.lastHitAction === att.f.actionId || def.state === 'ko' || att.state !== 'fight') continue;
+        if (att.lastHitAction === att.f.actionId || def.state !== 'fight' || att.state !== 'fight' || att.locked) continue;
         const hbs = att.f.getHitboxes();
         if (!hbs.length) continue;
         const hurt = def.f.getHurtbox();
@@ -407,6 +540,7 @@
     }
 
     timeUp() {
+      this.cancelGrab();
       this.phase = 'timeup'; this.phaseT = 0;
       const r1 = this.p1.hp / this.p1.maxHp, r2 = this.p2.hp / this.p2.maxHp;
       for (const f of this.fighters) { f.state = 'ready'; f.f.play('idle', true); }
@@ -467,7 +601,9 @@
         cameraX: this.camera, drawActors: (c) => {
           if (this.superFreeze > 0 && this.superOwner) this.drawSuperBack(c);
           if (this.police) this.police.drawBack(c, { flashes: !reduce });
-          for (const f of this.fighters) f.drawShadow(c);
+          const soaking = this.grab && this.grab.phase === 'soak';
+          if (this.fountain) this.fountain.drawBack(c, !soaking);
+          for (const f of this.fighters) if (f.state !== 'soaked' && f.state !== 'grabbed') f.drawShadow(c);
           if (I > 0.15) {
             const g = { ghost: true, alpha: Math.min(0.4, 0.32 * I), dx: Math.sin(this.t / 420) * 22 * I, dy: Math.cos(this.t / 610) * 6 * I };
             this.p2.draw(c, g); this.p1.draw(c, { ...g, dx: -g.dx });
@@ -482,6 +618,7 @@
           }
           this.bottles.draw(c, [this.p1.f, this.p2.f]);
           this.drawDarts(c);
+          if (this.fountain) { if (soaking) this.fountain.drawFront(c); else this.fountain.drawDrops(c); }
           if (this.police) this.police.drawFront(c);
           this.drawWorldFx(c);
         }
@@ -553,6 +690,11 @@
       }
       for (const d of this.dusts) {
         const k = d.t / d.life;
+        if (d.drop) {
+          c.fillStyle = 'rgba(160,220,255,' + (0.85 * (1 - k)) + ')';
+          c.fillRect(Math.round(d.x), Math.round(d.y + d.vy * d.t / 1000 + 300 * (d.t / 1000) ** 2), 2, 3);
+          continue;
+        }
         c.fillStyle = 'rgba(190,180,170,' + (0.45 * (1 - k)) + ')';
         c.beginPath(); c.arc(d.x + d.vx * d.t / 1000, d.y - 6 - k * 18, d.r * (1 + k), 0, Math.PI * 2); c.fill();
       }
@@ -679,6 +821,7 @@
           sx += side * 20;
           status('×' + c.cigs, c.smoking ? '#ffb347' : '#e8e6df');
         }
+        if (c.wetT > 0) status('MOJADO ' + Math.ceil(c.wetT / 1000) + 's', '#9ff0ff');
         if (c.loadout.sugar) {
           const ph = R.sugarPhase(c.loadout, this.matchTime);
           if (c.faintT > 0) status('FRITO ' + Math.ceil(c.faintT / 1000) + 's', '#ff6a5a');
@@ -717,7 +860,8 @@
         ctx.fillRect(nx, ny, nw * k, 8);
         ctx.font = 'bold 11px ' + FONT; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#05070c';
         ctx.fillStyle = '#dfe7f0';
-        ctx.strokeText('RUIDO', 480, ny + 22); ctx.fillText('RUIDO', 480, ny + 22);
+        const rlabel = this.fountain && this.fountain.on ? 'RUIDO · FUENTE ON' : 'RUIDO';
+        ctx.strokeText(rlabel, 480, ny + 22); ctx.fillText(rlabel, 480, ny + 22);
         if (this.police.active && this.phase !== 'police') {
           const label = this.police.getStatus().label.toUpperCase();
           ctx.font = 'bold 16px ' + FONT;

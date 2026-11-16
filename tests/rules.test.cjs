@@ -154,3 +154,16 @@ test('policía: el ruido de botellines seguidos crece y a la tercera, calabozo',
   assert.ok(b.fine >= a.fine && !b.jail);
   assert.ok(c.jail && c.jailMs === 60000);
 });
+
+test('fuente: el pilón quita mucha vida, deja mojado y más lento; encendida tapa los botellines', () => {
+  const penista = CHARACTERS.find((c) => c.id === 'penista');
+  assert.equal(penista.special.id, 'fuente');
+  assert.ok(R.MOVES.fountain.unblockable && R.MOVES.fountain.damage > R.MOVES.dart.damage);
+  assert.ok(R.WET.ms >= 10000 && R.WET.speedMult < 1 && R.WET.animMult < 1);
+  assert.ok(R.FOUNTAIN.masksBottleNoise);
+  assert.deepEqual(R.pickFountain('on', 'lit'), { on: true, lit: true });
+  assert.deepEqual(R.pickFountain('off', 'dark'), { on: false, lit: false });
+  const seen = new Set();
+  for (let i = 0; i < 200; i++) { const f = R.pickFountain('random', 'random'); seen.add(f.on + '-' + f.lit); }
+  assert.equal(seen.size, 4, 'en aleatorio salen las cuatro combinaciones');
+});

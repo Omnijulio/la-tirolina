@@ -9,8 +9,8 @@
  *   speed      multiplicador de velocidad al andar/saltar
  *   tolerance  aguante al alcohol (0 = normal, positivo reduce el "puntillo")
  *   aim        puntería: reduce fallos e imprecisión del lanzamiento (1 = normal)
- * special: ultimate propio del personaje (se carga encadenando golpes). Por ahora
- *   solo El Barbas tiene uno; el resto lo recibirá más adelante.
+ * special: ultimate propio del personaje (se carga encadenando golpes).
+ *   id 'dardo' (El Barbas) o 'fuente' (El Peñista). El resto lo recibirá más adelante.
  * unlock:
  *   start: true  -> disponible desde el principio
  *   story: n     -> se desbloquea al ganar el combate n del modo historia
@@ -44,6 +44,10 @@
       tagline: 'Lleva desde las fiestas sin dormir. Pega muy fuerte.',
       stats: { hp: 104, power: 1.15, speed: 0.94, tolerance: 0.30, aim: 0.9 },
       unlock: { story: 1, price: 20000 },
+      special: {
+        id: 'fuente', name: 'Al pilón', short: 'PILÓN',
+        desc: 'Se lanza a por el rival, lo agarra y lo tira a la fuente de la izquierda: le quita muchísima vida y lo deja empapado y más lento un buen rato. No se puede bloquear. Se carga encadenando combos.'
+      },
       cpu: { bottles: 2, style: 'brawler' }
     },
     {

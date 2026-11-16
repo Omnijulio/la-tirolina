@@ -387,7 +387,8 @@
       const items = root.TROLINA_BAR_ITEMS;
       const node = el(`<div class="scr vs">
         <div class="side l" style="--c:${c1.color}"><canvas width="192" height="176"></canvas><h3>${esc(c1.name)}</h3><p>Tú · ${esc(R.describeOrder(s.order, items))}</p></div>
-        <div class="vs-mid"><b>VS</b><span>${esc(R.DIFFICULTIES[s.difficulty].name)}${s.mode === 'story' ? ' · Historia ' + (s.storyIndex + 1) + '/' + root.TROLINA_STORY.length : ''}</span></div>
+        <div class="vs-mid"><b>VS</b><span>${esc(R.DIFFICULTIES[s.difficulty].name)}${s.mode === 'story' ? ' · Historia ' + (s.storyIndex + 1) + '/' + root.TROLINA_STORY.length : ''}</span>
+          ${s.fountain ? `<span class="fountain-state">⛲ Fuente ${s.fountain.on ? 'encendida' : 'apagada'} · ${s.fountain.lit ? 'con luz' : 'sin luz'}${s.fountain.on ? ' — tapa el ruido de los botellines' : ''}</span>` : ''}</div>
         <div class="side r" style="--c:${c2.color}"><canvas width="192" height="176"></canvas><h3>${esc(c2.name)}</h3><p>CPU · ${esc(R.describeOrder(s.cpuOrder, items))}</p></div>
         <span class="hint">Toca para empezar</span>
       </div>`);
@@ -529,6 +530,10 @@
             <select data-k="touch"><option value="auto">Automático</option><option value="always">Mostrar siempre</option><option value="never">Ocultar</option></select></label>
           <label class="row">Reducir mareo de pantalla <input type="checkbox" data-k="reduceMotion"></label>
           <label class="row">Policía Local (ruido, multas y calabozo) <input type="checkbox" data-k="police"></label>
+          <label>Fuente de la terraza
+            <select data-k="fountain"><option value="random">Aleatoria en cada pelea</option><option value="on">Siempre encendida</option><option value="off">Siempre apagada</option></select></label>
+          <label>Luz de la fuente
+            <select data-k="fountainLight"><option value="random">Aleatoria</option><option value="lit">Con luz</option><option value="dark">Sin luz</option></select></label>
           <p class="muted">${g.save.persistent ? 'El progreso se guarda en este navegador.' : 'Este navegador no permite guardar: el progreso se perderá al cerrar.'}</p>
           <button class="danger" data-reset>Borrar progreso</button>
         </div>
@@ -615,6 +620,8 @@
           <section><h3>La Barra y el puntillo</h3><p>Antes de cada combate puedes pedir hasta <b>10 botellines a 2,90 €</b>. Cada uno da <b>+7 % de fuerza</b> y un envase para lanzar por asalto, pero sube tu <b>puntillo</b>: niebla que crece con el tiempo, visión doble, pantalla que se balancea, tropiezos, golpes al aire y controles con retraso.</p>
           <p><b>Tabaco</b>: cada cigarrillo que fumas (botón FUMAR) quita un 15 % de puntillo, pero te quedas quieto 1,5 s y, si te pegan, se te cae. A partir del cuarto, tos.</p>
           <p><b>Bolsa de azúcar (60 €)</b>: 30 s a toda velocidad y sin puntillo; luego se pasa y a los 45 s te quedas inconsciente unos segundos.</p></section>
+          <section><h3>La fuente</h3><p>A la izquierda de la terraza hay una fuente, a veces <b>encendida</b> (con chorros) y a veces <b>apagada</b>, con o sin luz. Encendida hace tanto ruido que <b>los botellines no cuentan para la policía</b>.</p>
+          <p><b>El Peñista</b> tiene el ultimate <b>¡Al pilón!</b>: se lanza a por el rival, lo agarra y lo tira a la fuente. Quita muchísima vida, no se puede bloquear y deja al rival <b>mojado</b> y más lento durante 12 s.</p></section>
           <section><h3>Policía Local</h3><p>Cada golpe, botella rota o KO hace <b>ruido</b> (barra bajo el reloj). Lo que más ruido hace es <b>lanzar muchos botellines seguidos</b>; el ruido baja solo si os calmáis, y el puntillo os hace más escandalosos.</p>
           <p>Si llega al máximo, viene la patrulla: para la pelea, <b>multa</b> a los dos y la pelea se reinicia. Si pasa <b>3 veces seguidas</b>, noche en el <b>calabozo</b>: esos luchadores no se pueden usar durante 1 minuto. Se puede desactivar en Opciones.</p></section>
           <section><h3>Teclado</h3><table>
