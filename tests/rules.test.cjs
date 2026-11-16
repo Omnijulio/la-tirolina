@@ -35,14 +35,14 @@ test('el puntillo crece con el tiempo de combate', () => {
   assert.ok(c <= 1);
 });
 
-test('café, agua, tortilla y gafas contrarrestan al botellín', () => {
+test('café, agua, Peterete y gafas contrarrestan al botellín', () => {
   const base = R.computeLoadout(barbas, { botellin: 8 }, {}, BAR_ITEMS, UPGRADES);
   const cafe = R.computeLoadout(barbas, { botellin: 8, cafe: 2 }, {}, BAR_ITEMS, UPGRADES);
-  const tortilla = R.computeLoadout(barbas, { botellin: 8, tortilla: 1 }, {}, BAR_ITEMS, UPGRADES);
+  const agua = R.computeLoadout(barbas, { botellin: 8, agua: 2 }, {}, BAR_ITEMS, UPGRADES);
   const gafas = R.computeLoadout(barbas, { botellin: 8, gafas: 1 }, {}, BAR_ITEMS, UPGRADES);
   assert.ok(cafe.intoxLevel < base.intoxLevel);
-  assert.ok(R.intoxAt(tortilla, 30) < R.intoxAt(base, 30));
-  assert.ok(tortilla.maxHp > base.maxHp);
+  assert.ok(R.intoxAt(agua, 30) < R.intoxAt(base, 30));
+  assert.ok(agua.maxHp > base.maxHp);
   assert.ok(gafas.fogMult < base.fogMult);
 });
 
@@ -183,4 +183,23 @@ test('modo salvaje: normal hasta el segundo 30 y caos después; objetos exagerad
   assert.ok(worst.whiffChance <= 0.6 && worst.inputDelayMs > chaos.inputDelayMs);
   const won = R.matchReward({ won: true, difficulty: 'normal', roundsWon: 2, wild: true });
   assert.ok(won.lines.some((l) => /salvaje/.test(l.label)));
+});
+
+test('La Barra solo sirve bebida: chupitos, Peterete, Red Bull y Marlboro a 6,20 €', () => {
+  const ids = BAR_ITEMS.map((i) => i.id);
+  for (const food of ['tortilla', 'bocata']) assert.ok(!ids.includes(food), food + ' no debería estar');
+  for (const id of ['jager', 'licorcafe', 'tequila', 'peterete', 'energetica', 'tabaco']) assert.ok(ids.includes(id), id);
+  const byId = Object.fromEntries(BAR_ITEMS.map((i) => [i.id, i]));
+  assert.equal(byId.tabaco.price, 620);
+  assert.match(byId.tabaco.name, /Marlboro/);
+  assert.equal(byId.energetica.name, 'Red Bull');
+  const base = R.computeLoadout(barbas, { botellin: 1 }, {}, BAR_ITEMS, UPGRADES);
+  for (const id of ['jager', 'licorcafe', 'tequila']) {
+    const lo = R.computeLoadout(barbas, { [id]: 1 }, {}, BAR_ITEMS, UPGRADES);
+    assert.ok(lo.power > base.power && lo.intoxLevel > base.intoxLevel && lo.ammo === 0, id + ': más fuerza y puntillo que un botellín, sin envase');
+  }
+  const pet = R.computeLoadout(barbas, { peterete: 1 }, {}, BAR_ITEMS, UPGRADES);
+  assert.ok(pet.fogMult < base.fogMult && pet.ammo === 0);
+  // Pedidos viejos con comida se limpian solos.
+  assert.deepEqual(R.sanitizeOrder({ tortilla: 1, bocata: 1, botellin: 2 }, BAR_ITEMS), { botellin: 2 });
 });

@@ -25,12 +25,13 @@
       botellin: ['Otro. Claro que sí.', 'Tú sabrás.', 'Muy buena idea. Seguro.', 'Así, sin pensarlo.'],
       cafe: ['Un café. Qué responsable, de repente.'],
       agua: ['Agua. Valiente.', 'Agua. Qué emoción.'],
-      tortilla: ['Tortilla. Algo sensato, por fin.'],
-      bocata: ['Un bocata antes de pelear. Profesional.'],
-      orujo: ['Orujo. Perfecto, lo que faltaba.', 'Orujo. Ya puestos…'],
-      energetica: ['Bebida energética con todo lo demás. Sin riesgos.'],
+      peterete: ['Un Peterete. Verde, como tus ideas.', 'Con hielo, para pensar con claridad. Ja.'],
+      jager: ['Jäger. Perfecto, lo que faltaba.', 'Jäger antes de pelear. Muy de atleta.'],
+      licorcafe: ['Licor café: para estar despierto mientras te pegan.', 'Ya puestos…'],
+      tequila: ['Tequila. Esto solo puede salir bien.', 'Sal, limón y malas decisiones.'],
+      energetica: ['Red Bull con todo lo demás. Sin riesgos.'],
       gafas: ['Gafas de sol de noche. Con estilo.'],
-      tabaco: ['Fumar arregla todo, ¿no?'],
+      tabaco: ['Marlboro. Fumar arregla todo, ¿no?', '6,20 € en salud. Bien invertidos.'],
       azucar: ['60 € en azúcar. Normal.', 'Azúcar. Muy de deportista.']
     }
   };

@@ -177,6 +177,7 @@ header.bar h2 { flex: 1; font-size: clamp(18px, 3.4vw, 28px); }
 .item.main { border-color: #f8ce73; background: linear-gradient(90deg, #2a1c08ee, #0d1522e6); }
 .item .ico { font-size: 26px; text-align: center; }
 .item .ico img { width: 24px; height: 32px; image-rendering: pixelated; transform: scale(1.2); }
+.item .ico img.drink { transform: scale(1.4); }
 .item .txt b { font-size: 14px; }
 .item .price { color: var(--yellow); font-weight: 800; font-size: 13px; margin-left: 4px; }
 .item p { margin: 1px 0 0; font-size: 12px; }

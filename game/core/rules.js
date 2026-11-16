@@ -260,8 +260,9 @@
     const order = { botellin: bottles };
     if (bottles >= 5 && r() < 0.5) order.cafe = 1;
     if (bottles >= 3 && r() < 0.5) order.tabaco = 1;
-    if (r() < 0.3) order.tortilla = 1;
-    if (difficulty === 'pesadilla' && r() < 0.5) order.orujo = 1;
+    if (r() < 0.3) order.peterete = 1;
+    if (difficulty === 'dificil' && r() < 0.3) order.licorcafe = 1;
+    if (difficulty === 'pesadilla' && r() < 0.5) order[r() < 0.5 ? 'jager' : 'tequila'] = 1;
     return order;
   }
 

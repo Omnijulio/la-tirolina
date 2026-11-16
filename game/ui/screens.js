@@ -262,7 +262,7 @@
       for (const it of items) {
         const isBottle = it.id === 'botellin';
         const row = el(`<div class="item${isBottle ? ' main' : ''}" data-id="${it.id}">
-          <div class="ico">${it.icon === 'bottle' ? '<img src="assets/bottle.png" alt="">' : it.icon}</div>
+          <div class="ico">${it.icon === 'bottle' ? '<img src="assets/bottle.png" alt="">' : it.icon.startsWith('img:') ? `<img class="drink" src="${it.icon.slice(4)}" alt="">` : it.icon}</div>
           <div class="txt"><b>${esc(it.name)}</b> <span class="price">${money(it.price)}</span>
             <p class="good">▲ ${esc(it.good)}</p><p class="bad">▼ ${esc(it.bad)}</p>
           </div>
@@ -282,7 +282,7 @@
         if (!qty) delete next[it.id];
         if (R.orderCost(next, items) > d.coins) { this.flashError(node, 'No te llega el dinero'); return; }
         if (qty > (order[it.id] || 0)) {
-          root.TrolinaSfx.play(it.id === 'botellin' || it.id === 'orujo' ? 'gulp' : 'buy');
+          root.TrolinaSfx.play(['botellin', 'peterete', 'jager', 'licorcafe', 'tequila'].includes(it.id) ? 'gulp' : 'buy');
           if (s.wild && root.trolinaBarSnark) this.snarkToast(node, root.trolinaBarSnark(it.id));
         } else root.TrolinaSfx.play('back');
         order = next; render();
@@ -480,7 +480,7 @@
         ${this.header('Tienda', 'title')}
         <div class="tabs"><button data-tab="chars">Personajes</button><button data-tab="ups">Mejoras permanentes</button></div>
         <div class="shop-list"></div>
-        <p class="muted center">Los objetos de la barra (botellines, café, tortilla…) se piden antes de cada combate.</p>
+        <p class="muted center">Los objetos de la barra (botellines, chupitos, Peterete, café…) se piden antes de cada combate.</p>
       </div>`);
       const list = node.querySelector('.shop-list');
       const render = () => {

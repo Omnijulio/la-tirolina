@@ -1,6 +1,7 @@
 /* Objetos del juego. Precios en céntimos de euro.
  *
- * BAR_ITEMS: consumibles que se piden en "La Barra" antes de cada combate.
+ * BAR_ITEMS: lo que se pide en "La Barra" antes de cada combate. Solo bebida (más el
+ *   tabaco, la bolsa de azúcar y las gafas). `icon`: emoji, 'bottle' o 'img:<ruta png>'.
  *   Cada unidad aplica `effect` sobre el objeto de modificadores `m`:
  *     m.hp           vida extra
  *     m.powerPct     % de fuerza extra
@@ -25,6 +26,41 @@
       effect: (m) => { m.powerPct += 7; m.intox += 1; m.ammo += 1; }
     },
     {
+      id: 'peterete', name: 'Peterete', short: 'Peterete', icon: 'img:assets/icons/drinks/peterete.png',
+      price: 450, max: 2,
+      good: '+9 % de fuerza y el hielo refresca: −15 % de niebla',
+      bad: 'Equivale a 1,5 botellines de puntillo y no da envase',
+      effect: (m) => { m.powerPct += 9; m.intox += 1.5; m.fogMult *= 0.85; }
+    },
+    {
+      id: 'jager', name: 'Chupito de Jägermeister', short: 'Jäger', icon: 'img:assets/icons/drinks/jager.png',
+      price: 350, max: 3,
+      good: '+14 % de fuerza y +4 % de velocidad',
+      bad: 'Equivale a 2,5 botellines de puntillo, sube un 10 % más rápido y no da envase',
+      effect: (m) => { m.powerPct += 14; m.speedPct += 4; m.intox += 2.5; m.riseMult *= 1.1; }
+    },
+    {
+      id: 'licorcafe', name: 'Chupito de licor café', short: 'Licor café', icon: 'img:assets/icons/drinks/licor-cafe.png',
+      price: 300, max: 3,
+      good: '+10 % de fuerza y +6 % de velocidad: el café despierta',
+      bad: 'Equivale a 2 botellines de puntillo y no da envase',
+      effect: (m) => { m.powerPct += 10; m.speedPct += 6; m.intox += 2; }
+    },
+    {
+      id: 'tequila', name: 'Chupito de tequila', short: 'Tequila', icon: 'img:assets/icons/drinks/tequila.png',
+      price: 400, max: 3,
+      good: '+20 % de fuerza',
+      bad: 'Equivale a 3 botellines de puntillo, +25 % de niebla y no da envase',
+      effect: (m) => { m.powerPct += 20; m.intox += 3; m.fogMult *= 1.25; }
+    },
+    {
+      id: 'energetica', name: 'Red Bull', short: 'Red Bull', icon: '⚡',
+      price: 250, max: 2,
+      good: '+12 % de velocidad',
+      bad: 'El puntillo sube un 20 % más rápido',
+      effect: (m) => { m.speedPct += 12; m.riseMult *= 1.2; }
+    },
+    {
       id: 'cafe', name: 'Café solo', short: 'Café', icon: '☕',
       price: 130, max: 2,
       good: '−20 % de puntillo y +4 % de velocidad',
@@ -39,36 +75,8 @@
       effect: (m) => { m.intoxMult *= 0.9; m.hp += 5; }
     },
     {
-      id: 'tortilla', name: 'Pincho de tortilla', short: 'Tortilla', icon: '🥚',
-      price: 350, max: 2,
-      good: '+12 de vida y el puntillo sube un 30 % más despacio',
-      bad: '—',
-      effect: (m) => { m.hp += 12; m.riseMult *= 0.7; }
-    },
-    {
-      id: 'bocata', name: 'Bocata de calamares', short: 'Bocata', icon: '🥖',
-      price: 550, max: 1,
-      good: '+25 de vida',
-      bad: '−8 % de velocidad: pesa en el estómago',
-      effect: (m) => { m.hp += 25; m.speedPct -= 8; }
-    },
-    {
-      id: 'orujo', name: 'Chupito de orujo', short: 'Orujo', icon: '🥃',
-      price: 300, max: 3,
-      good: '+15 % de fuerza',
-      bad: 'Equivale a 2,5 botellines de puntillo y no da envase',
-      effect: (m) => { m.powerPct += 15; m.intox += 2.5; }
-    },
-    {
-      id: 'energetica', name: 'Bebida energética', short: 'Energética', icon: '⚡',
-      price: 250, max: 2,
-      good: '+12 % de velocidad',
-      bad: 'El puntillo sube un 20 % más rápido',
-      effect: (m) => { m.speedPct += 12; m.riseMult *= 1.2; }
-    },
-    {
-      id: 'tabaco', name: 'Paquete de tabaco', short: 'Tabaco', icon: '🚬',
-      price: 550, max: 1,
+      id: 'tabaco', name: 'Paquete de Marlboro', short: 'Marlboro', icon: '🚬',
+      price: 620, max: 1,
       good: '10 cigarrillos para el combate: cada uno que fumas (F) quita un 15 % de puntillo',
       bad: 'Fumar te deja quieto 1,5 s y, a partir del 4.º, entra la tos',
       effect: (m) => { m.cigs += 10; }
