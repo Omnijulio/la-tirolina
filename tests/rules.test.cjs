@@ -167,3 +167,20 @@ test('fuente: el pilón quita mucha vida, deja mojado y más lento; encendida ta
   for (let i = 0; i < 200; i++) { const f = R.pickFountain('random', 'random'); seen.add(f.on + '-' + f.lit); }
   assert.equal(seen.size, 4, 'en aleatorio salen las cuatro combinaciones');
 });
+
+test('modo salvaje: normal hasta el segundo 30 y caos después; objetos exagerados', () => {
+  assert.equal(R.chaosAt(0), 0);
+  assert.equal(R.chaosAt(29.9), 0);
+  assert.ok(R.chaosAt(37.5) > 0.4 && R.chaosAt(37.5) < 0.6);
+  assert.equal(R.chaosAt(45), 1);
+  assert.ok(R.chaosAt(500) <= 1 + R.WILD.chaosExtra + 1e-9);
+  const normal = R.computeLoadout(barbas, { botellin: 5 }, {}, BAR_ITEMS, UPGRADES);
+  const wild = R.computeLoadout(barbas, { botellin: 5 }, {}, BAR_ITEMS, UPGRADES, { wild: true });
+  assert.ok(wild.intoxLevel > normal.intoxLevel && wild.power > normal.power);
+  const sober = R.impairment(R.wildLevel(0, 0), 1), chaos = R.impairment(R.wildLevel(0, 1), 1), worst = R.impairment(R.wildLevel(1, 1.25), 1);
+  assert.equal(sober.whiffChance, 0);
+  assert.ok(chaos.whiffChance > 0.2 && chaos.inputDelayMs > 100, 'solo con el caos ya es horrible');
+  assert.ok(worst.whiffChance <= 0.6 && worst.inputDelayMs > chaos.inputDelayMs);
+  const won = R.matchReward({ won: true, difficulty: 'normal', roundsWon: 2, wild: true });
+  assert.ok(won.lines.some((l) => /salvaje/.test(l.label)));
+});

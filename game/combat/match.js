@@ -3,6 +3,11 @@
   const C = root.TrolinaCombat;
   const R = root.TrolinaRules;
   const FONT = '"Arial Black", "Arial Bold", Impact, system-ui, sans-serif';
+  // Versión corta de cada fallo del modo salvaje, cuando ya hay un mensaje grande en pantalla.
+  const SNARK_SHORT = {
+    whiff: '¡CASI!', stumble: '¡HIC!', fall: '¡PUMBA!', invert: '¡AL REVÉS!', swap: '¿ESO?',
+    phantom: '¿A DÓNDE VAS?', delay: 'YA LLEGARÁS…', bottleBack: '¡HACIA ATRÁS!', bottleMiss: '¡A LA MESA!'
+  };
 
   /** BottleSystem compartido + imprecisión por puntillo y sonido de cristal. */
   class MatchBottles extends BottleSystem {
@@ -15,14 +20,27 @@
         p.tweaked = true;
         const c = p.owner && p.owner.combatant;
         if (!c) continue;
-        const spread = R.impairment(this.match.intoxOf(c), c.loadout.aim).throwSpread;
+        const spread = R.impairment(this.match.levelOf(c), c.loadout.aim).throwSpread;
         if (spread > 0) {
           p.vx *= 1 + (Math.random() * 2 - 1) * 0.35 * spread;
           p.vy += (Math.random() * 2 - 1) * 260 * spread;
         }
+        // Modo salvaje: a veces sale hacia atrás.
+        const chaos = this.match.chaos();
+        if (chaos > 0 && Math.random() < R.WILD.reverseThrow * chaos) {
+          p.vx = -p.vx; p.facing = -p.facing;
+          this.match.say(c, 'bottleBack');
+        }
       }
     }
-    breakBottle(p) { super.breakBottle(p); this.match.sfx('glass'); this.match.addBottleNoise(R.NOISE.bottleBreak); }
+    breakBottle(p) {
+      super.breakBottle(p); this.match.sfx('glass'); this.match.addBottleNoise(R.NOISE.bottleBreak);
+      const c = p.owner && p.owner.combatant, m = this.match;
+      if (c && m.wild) {
+        const opp = c === m.p1 ? m.p2 : m.p1;
+        if (Math.abs(p.x - opp.cx) > 140) m.say(c, 'bottleMiss');
+      }
+    }
   }
 
   class Match {
@@ -65,6 +83,9 @@
       const fs = opts.fountain || { on: true, lit: true };
       this.fountain = root.Fountain ? new root.Fountain({ on: fs.on, lit: fs.lit }) : null;
       this.grab = null; this.fountainNoted = false;
+      // Modo salvaje (experimental): caos desde el segundo 30 y mensajes pasivo-agresivos.
+      this.wild = !!opts.wild;
+      this.snark = null; this.snarkCd = {}; this.onsetSaid = false; this.blackout = 0; this.visionAt = 0;
       if (opts.police && this.assets.police && root.PoliceIntervention && root.POLICE_DATA) {
         this.policeData = JSON.parse(JSON.stringify(root.POLICE_DATA));
         this.police = new PoliceIntervention(this.assets.police, this.policeData, {
@@ -81,6 +102,28 @@
 
     sfx(name) { if (this.o.sfx) this.o.sfx.play(name); }
     intoxOf(c) { return R.intoxAt(c.loadout, this.matchTime, c.relief); }
+    chaos() { return this.wild ? R.chaosAt(this.matchTime) : 0; }
+    /** Torpeza efectiva: el puntillo, más el caos en el modo salvaje. */
+    levelOf(c) { const i = this.intoxOf(c); return this.wild ? R.wildLevel(i, this.chaos()) : i; }
+
+    /**
+     * Mensaje pasivo-agresivo grande en pantalla (solo modo salvaje). Para la CPU
+     * solo de vez en cuando. Devuelve true si se ha mostrado.
+     */
+    say(c, type, force) {
+      if (!this.wild || !root.trolinaSnark) return false;
+      if (c && c !== this.p1) { if (Math.random() > 0.15) return false; type = 'cpu'; }
+      const now = this.t;
+      if (!force && ((now - (this.snarkCd[type] || -1e9) < 2600) || (this.snark && now - this.snark.t0 < 1000))) {
+        // No pisamos el mensaje grande, pero el fallo se ve igual encima del luchador.
+        const short = SNARK_SHORT[type];
+        if (c === this.p1 && short) { this.popup(c, short, '#ffd27a'); return true; }
+        return false;
+      }
+      this.snarkCd[type] = now;
+      this.snark = { text: root.trolinaSnark(type), t0: now };
+      return true;
+    }
 
     startRound() {
       this.round++;
@@ -394,6 +437,15 @@
         this.timer = Math.max(0, this.timer - dt / 1000);
         this.matchTime += dt / 1000;
         if (this.timer <= 0) this.timeUp();
+        if (this.wild) {
+          const ch = this.chaos();
+          if (ch > 0 && !this.onsetSaid) { this.onsetSaid = true; this.say(null, 'onset', true); this.sfx('bell'); this.shake = 10; }
+          if (ch > 0 && this.blackout <= 0 && Math.random() < R.WILD.blackoutPerSec * ch * dt / 1000) {
+            this.blackout = 280 + Math.random() * 380;
+            if (Math.random() < 0.5) this.say(null, 'blackout');
+          }
+          if (this.levelOf(this.p1) > 0.8 && this.t - this.visionAt > 9000) { this.visionAt = this.t; this.say(this.p1, 'vision'); }
+        }
       } else if (this.phase === 'ko' || this.phase === 'timeup') {
         if (this.phaseT > 1500 && this.roundWinner && this.roundWinner.state !== 'win') {
           this.roundWinner.setWin();
@@ -434,6 +486,7 @@
       const target = Math.max(-24, Math.min(24, (mid - 480) / 2));
       this.camera += (target - this.camera) * Math.min(1, dt * 0.006);
       this.shake = Math.max(0, this.shake - real * 0.03);
+      this.blackout = Math.max(0, this.blackout - real);
     }
 
     updateEffects(dt) {
@@ -476,7 +529,7 @@
         if (!hit) continue;
         att.lastHitAction = att.f.actionId;
         if (att.whiff) {
-          this.popup(att, '¡AL AIRE!', '#f8ce73');
+          if (!this.say(att, 'whiff')) this.popup(att, '¡AL AIRE!', '#f8ce73');
           this.sfx('whiff');
           att.stumble = Math.max(att.stumble, 260); att.stumbleDir = att.facing;
           continue;
@@ -497,7 +550,9 @@
       const n = kind === 'dart' ? (stunned ? att.combo + 1 : 1) : stunned ? att.combo + 1 : 1;
       const sc = kind === 'dart' ? { damage: 1, knockback: 1, hitstun: 1 } : R.comboScale(n);
       const mv = R.MOVES[kind];
-      const dmg = R.damageFor(kind, att.loadout.power, att === this.p2 ? this.diff.cpuDamage : 1) * sc.damage;
+      const wildBonus = this.wild ? 1 + R.WILD.damageBonus * Math.min(1, this.chaos()) : 1;
+      const dmg = R.damageFor(kind, att.loadout.power, att === this.p2 ? this.diff.cpuDamage : 1) * sc.damage * wildBonus;
+      if (this.wild && def === this.p1 && this.levelOf(def) > 0.6 && Math.random() < 0.25) this.say(def, 'gotHit');
       const res = def.takeHit(kind, dmg, att.cx, { hitstun: mv.hitstun * sc.hitstun, knockback: mv.knockback * sc.knockback });
       this.addNoise(res === 'block' ? R.NOISE.block : res === 'ko' ? R.NOISE.ko : kind === 'dart' ? R.NOISE.dart : R.NOISE.hit);
       if (res === 'block') {
@@ -577,6 +632,7 @@
         ultimates: this.stats.ultimates,
         bottles: this.p1.loadout.bottles,
         difficulty: this.o.difficulty,
+        wild: this.wild,
         matchSeconds: Math.round(this.matchTime)
       };
     }
@@ -584,7 +640,8 @@
     /* ---------- dibujo ---------- */
 
     draw(ctx) {
-      const I = this.intoxOf(this.p1);
+      const I = this.levelOf(this.p1);
+      const W = this.wild ? 1.8 : 1;   // en el modo salvaje todo se mueve el doble
       const reduce = this.o.settings && this.o.settings.reduceMotion;
       ctx.save();
       ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, 960, 540);
@@ -592,10 +649,10 @@
       if (I > 0.04) {
         const sway = reduce ? 0.3 : 1;
         ctx.translate(480, 300);
-        ctx.rotate(Math.sin(this.t / 1300) * 0.028 * I * sway);
-        const z = 1 + 0.07 * I * sway;
+        ctx.rotate(Math.sin(this.t / 1300) * 0.028 * I * sway * W);
+        const z = 1 + 0.07 * I * sway * W + (this.wild ? Math.max(0, Math.sin(this.t / 600)) * 0.04 * this.chaos() : 0);
         ctx.scale(z, z);
-        ctx.translate(-480 + Math.sin(this.t / 900) * 10 * I * sway, -300);
+        ctx.translate(-480 + Math.sin(this.t / 900) * 10 * I * sway * W, -300);
       }
       this.terrace.draw(ctx, {
         cameraX: this.camera, drawActors: (c) => {
@@ -605,7 +662,7 @@
           if (this.fountain) this.fountain.drawBack(c, !soaking);
           for (const f of this.fighters) if (f.state !== 'soaked' && f.state !== 'grabbed') f.drawShadow(c);
           if (I > 0.15) {
-            const g = { ghost: true, alpha: Math.min(0.4, 0.32 * I), dx: Math.sin(this.t / 420) * 22 * I, dy: Math.cos(this.t / 610) * 6 * I };
+            const g = { ghost: true, alpha: Math.min(0.45, 0.32 * I), dx: Math.sin(this.t / 420) * 22 * I * W, dy: Math.cos(this.t / 610) * 6 * I * W };
             this.p2.draw(c, g); this.p1.draw(c, { ...g, dx: -g.dx });
           }
           const order = this.p1.attacking ? [this.p2, this.p1] : [this.p1, this.p2];
@@ -624,10 +681,64 @@
         }
       });
       ctx.restore();
-      this.drawFog(ctx, I * this.p1.loadout.fogMult);
+      this.drawFog(ctx, Math.min(1.4, I * this.p1.loadout.fogMult));
       this.drawPoliceLights(ctx, reduce);
+      if (this.wild) this.drawChaos(ctx, reduce);
+      ctx.save();
+      if (this.wild && this.chaos() > 0 && !reduce) {
+        // Hasta el marcador se mueve.
+        const ch = this.chaos();
+        ctx.translate(Math.sin(this.t / 700) * 7 * ch, Math.cos(this.t / 950) * 4 * ch);
+      }
       this.drawHud(ctx, I);
+      ctx.restore();
       this.drawBanner(ctx);
+      this.drawSnark(ctx);
+    }
+
+    /** Modo salvaje: tintes que cambian, apagones y viñeta de mareo. */
+    drawChaos(ctx, reduce) {
+      const ch = this.chaos();
+      if (ch > 0 && !reduce) {
+        ctx.save();
+        const hue = Math.floor(this.t / 1600) % 3;
+        ctx.globalAlpha = (0.06 + 0.06 * Math.sin(this.t / 400)) * ch;
+        ctx.fillStyle = ['#7a2cff', '#2cff8a', '#ff2c6a'][hue];
+        ctx.fillRect(0, 0, 960, 540);
+        ctx.restore();
+      }
+      if (this.blackout > 0) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,' + Math.min(0.9, this.blackout / 300) + ')';
+        ctx.fillRect(0, 0, 960, 540);
+        ctx.restore();
+      }
+    }
+
+    /** Mensaje pasivo-agresivo actual, grande y claro. */
+    drawSnark(ctx) {
+      const sn = this.snark;
+      if (!sn) return;
+      const age = this.t - sn.t0, life = 1900;
+      if (age > life) { this.snark = null; return; }
+      const k = Math.min(1, age / 140), out = age > life - 350 ? (life - age) / 350 : 1;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, out);
+      ctx.translate(480, 262);
+      ctx.rotate(Math.sin(sn.t0) * 0.04);
+      const s = 0.85 + 0.15 * k;
+      ctx.scale(s, s);
+      ctx.font = 'italic bold 38px ' + FONT;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      let w = ctx.measureText(sn.text).width;
+      if (w > 860) { ctx.font = 'italic bold ' + Math.floor(38 * 860 / w) + 'px ' + FONT; w = ctx.measureText(sn.text).width; }
+      ctx.fillStyle = 'rgba(10,6,16,0.72)';
+      ctx.fillRect(-w / 2 - 22, -32, w + 44, 64);
+      ctx.fillStyle = '#f8ce73'; ctx.fillRect(-w / 2 - 22, -32, 6, 64);
+      ctx.lineWidth = 6; ctx.strokeStyle = '#0a0610';
+      ctx.strokeText(sn.text, 0, 2);
+      ctx.fillStyle = '#ffffff'; ctx.fillText(sn.text, 0, 2);
+      ctx.restore();
     }
 
     /** Destellos azules/rojos de la patrulla sobre la escena (se desactivan con «Reducir mareo»). */
@@ -776,14 +887,14 @@
           ctx.fillStyle = i < this.wins[wi] ? '#f8ce73' : 'rgba(255,255,255,0.15)'; ctx.fill();
           ctx.strokeStyle = '#05070c'; ctx.lineWidth = 2; ctx.stroke();
         }
-        // puntillo y munición
-        const intox = this.intoxOf(c);
+        // puntillo y munición (en el modo salvaje incluye el caos y puede pasar del 100 %)
+        const intox = this.wild ? this.levelOf(c) : this.intoxOf(c);
         const my = y + h + 36, mw = 150;
         const mx = side === 1 ? x : x + w - mw;
         ctx.fillStyle = 'rgba(5,7,12,0.75)'; ctx.fillRect(mx - 2, my - 2, mw + 4, 14);
         const ig = ctx.createLinearGradient(mx, 0, mx + mw, 0);
         ig.addColorStop(0, '#f8ce73'); ig.addColorStop(1, '#c2402e');
-        ctx.fillStyle = ig; ctx.fillRect(mx, my, mw * intox, 10);
+        ctx.fillStyle = ig; ctx.fillRect(mx, my, mw * Math.min(1, intox), 10);
         ctx.font = 'bold 12px ' + FONT; ctx.fillStyle = intox > 0.5 ? '#ffb37a' : '#f3e6c4'; ctx.textAlign = side === 1 ? 'left' : 'right';
         ctx.lineWidth = 3; ctx.strokeStyle = '#05070c';
         const ptxt = 'PUNTILLO ' + Math.round(intox * 100) + '%';
@@ -822,6 +933,7 @@
           status('×' + c.cigs, c.smoking ? '#ffb347' : '#e8e6df');
         }
         if (c.wetT > 0) status('MOJADO ' + Math.ceil(c.wetT / 1000) + 's', '#9ff0ff');
+        if (c.invertT > 0) status('⇄ AL REVÉS', (this.t % 400) < 200 ? '#ff4d5e' : '#ffb3a8');
         if (c.loadout.sugar) {
           const ph = R.sugarPhase(c.loadout, this.matchTime);
           if (c.faintT > 0) status('FRITO ' + Math.ceil(c.faintT / 1000) + 's', '#ff6a5a');
@@ -871,7 +983,14 @@
           ctx.fillStyle = '#cfe8ff'; ctx.fillText('🚨 ' + label, 480, 171);
         }
       }
-      if (playerIntox > 0.55 && !(this.police && this.police.active)) {
+      if (this.wild) {
+        const ch = this.chaos();
+        ctx.font = 'bold 13px ' + FONT; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#05070c';
+        const wl = ch > 0 ? 'MODO SALVAJE · CAOS ' + Math.round(ch * 100) + '%' : 'MODO SALVAJE · CAOS EN ' + Math.ceil(R.WILD.chaosStart - this.matchTime) + 's';
+        ctx.fillStyle = ch > 0 ? ((this.t % 500) < 250 ? '#ff4d5e' : '#ffb3a8') : '#f8ce73';
+        ctx.strokeText(wl, 480, 144); ctx.fillText(wl, 480, 144);
+      }
+      if (playerIntox > 0.55 && !(this.police && this.police.active) && !this.wild) {
         ctx.font = 'bold 13px ' + FONT; ctx.fillStyle = '#f8ce73'; ctx.textAlign = 'center';
         ctx.globalAlpha = 0.6 + 0.4 * Math.sin(this.t / 200);
         ctx.fillText('VAS FINO…', 480, 152);

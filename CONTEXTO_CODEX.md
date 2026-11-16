@@ -1,6 +1,6 @@
 # Contexto para continuar en Codex
 
-Estado: **v0.5** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
+Estado: **v0.6** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
 
 ## Objetivo del usuario y decisiones aceptadas
 
@@ -20,6 +20,8 @@ Peticiones incorporadas, en orden:
 8. **v0.4 — Policía Local**: aparece según un **nivel de ruido** (sobre todo muchos botellines seguidos), para la pelea, **multa a los dos** y la pelea se reinicia; si pasa **3 veces seguidas**, noche en el **calabozo** (esos personajes no se pueden usar durante 1 minuto). Se puede desactivar. Los sprites del agente y la patrulla y el controlador `src/police.js` vienen del paquete v1.4 del usuario (ver `POLICE.md`).
 
 9. **v0.5 — La fuente**: ultimate de **El Peñista** «Al pilón» (lo tira a una fuente a la izquierda: mucho daño y queda mojado y más lento). La fuente puede estar encendida o apagada y con o sin luz; encendida, su ruido tapa el de los botellines y la policía no viene por ellos. La fuente es provisional (dibujada por código) hasta que lleguen los assets; formato esperado en `FUENTE.md`. Vendrán también fondos nocturnos nuevos.
+
+10. **v0.6 — Modo salvaje (experimental)**: pelea rápida aparte en la que los objetos pegan más y, desde el segundo 30 de partida, el juego se vuelve casi injugable para los dos; cada fallo sale en pantalla con un mensaje pasivo-agresivo.
 
 El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
@@ -71,6 +73,13 @@ Flujo: Título → (Historia | Pelea rápida) → Selección (luchador; en pelea
 - **Bolsa de azúcar** (60 €): 0–30 s de combate sin puntillo, +40 % de velocidad y animaciones un 20 % más rápidas; 30–45 s vuelve el puntillo («¡BAJÓN DE AZÚCAR!»); a los 45 s el personaje se desmaya 6 s, tumbado e indefenso, y recibe un 50 % más de daño. Se puede cambiar a «pierde el asalto» en `faint()` de `combatant.js` si se prefiere más duro.
 - Objetos: café (−20 % puntillo, +4 % velocidad), agua (−10 % puntillo, +5 vida), tortilla (+12 vida, sube 30 % más lento), bocata (+25 vida, −8 % velocidad), orujo (+15 % fuerza, 2,5 de puntillo, sin envase), energética (+12 % velocidad, sube 20 % más rápido), gafas de sol (mitad de niebla visual).
 - La CPU también pide en la barra según dificultad y personalidad; se muestra en la pantalla VS.
+
+### Modo salvaje (v0.6, experimental)
+
+- Entrada propia en el título (`beginWild`, `session.wild`); `?wild=1` en las URL de prueba. Revancha conserva el modo; Pelea rápida e Historia lo desactivan.
+- Reglas en `TrolinaRules.WILD`, `chaosAt(s)` (0 hasta 30 s, 1 a los 45 s, hasta 1,25 si se alarga) y `wildLevel(intox, caos)` (máx. 1,5). `computeLoadout(..., {wild:true})`: puntillo ×1,6 y fuerza de los objetos ×1,4. `Match.levelOf(c)` sustituye a `intoxOf` para la torpeza y la percepción.
+- Efectos con caos (para los dos luchadores, en `Combatant.update`): controles invertidos 1,5–3 s, puñetazo/patada cambiados, pasos solos, caídas solo (1,1 s en el suelo, cuentan como desmayo), botellas hacia atrás, micro-siestas (pantalla en negro), tintes que cambian, mareo ×1,8 y marcador que se mueve. Equilibrio: +30 % de daño con el caos a tope y prima del 50 % al ganar.
+- Mensajes en `game/data/snark.js` (editables): `Match.say(c, tipo)` muestra uno grande en el centro; si ya hay otro, una versión corta encima del luchador. De la CPU solo comenta alguno. En La Barra, cada pedido tiene su comentario.
 
 ### La fuente y «Al pilón» (v0.5)
 
@@ -135,6 +144,11 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 - Pruebas: `npm test` (botellín, escenario y reglas del juego).
 - Utilidades de depuración por URL: `?autoplay=1&fast=3` (CPU contra CPU, acelerado), `?autoplay=story`, `?screen=barra|shop|options|help|vs|cinematic|fight`, parámetros `p1`, `p2`, `diff`, `bottles`.
 - Publicación y opciones para jugar en remoto: `PUBLICAR.md`. Hoja de ruta: `PLAN.md`.
+
+## Validación realizada en v0.6
+
+- `npm test`: 21 pruebas (nueva: caos del modo salvaje, objetos exagerados, prima).
+- Chrome sin interfaz, CPU contra CPU en modo salvaje (3 combates): normal hasta el segundo 30, luego mensajes cada 1–2 s; los combates terminan (≈2–3 min de partida). Menú, Barra (comentarios al pedir) y resultados en móvil horizontal. Sin errores de consola.
 
 ## Validación realizada en v0.5
 

@@ -109,12 +109,18 @@
     beginStory(skipSelect) {
       const d = Save.data;
       if (d.story.stage >= root.TROLINA_STORY.length) d.story.stage = 0;
-      Object.assign(this.session, { mode: 'story', storyIndex: d.story.stage, p2: root.TROLINA_STORY[d.story.stage], difficulty: d.difficulty });
+      Object.assign(this.session, { mode: 'story', wild: false, storyIndex: d.story.stage, p2: root.TROLINA_STORY[d.story.stage], difficulty: d.difficulty });
       if (skipSelect) UI.show('barra'); else UI.show('select', { step: 'p1' });
     },
 
     beginQuick() {
-      Object.assign(this.session, { mode: 'quick', difficulty: Save.data.difficulty });
+      Object.assign(this.session, { mode: 'quick', wild: false, difficulty: Save.data.difficulty });
+      UI.show('select', { step: 'p1' });
+    },
+
+    /** Modo salvaje (experimental): pelea rápida con caos desde el segundo 30. */
+    beginWild() {
+      Object.assign(this.session, { mode: 'quick', wild: true, difficulty: Save.data.difficulty });
       UI.show('select', { step: 'p1' });
     },
 
@@ -139,8 +145,9 @@
       const items = root.TROLINA_BAR_ITEMS, ups = root.TROLINA_UPGRADES;
       this.match = new root.Match({
         assets: this.assets,
-        p1: { character: c1, loadout: R.computeLoadout(c1, s.order, d.upgrades, items, ups) },
-        p2: { character: c2, loadout: R.computeLoadout(c2, s.cpuOrder, {}, items, ups) },
+        p1: { character: c1, loadout: R.computeLoadout(c1, s.order, d.upgrades, items, ups, { wild: s.wild }) },
+        p2: { character: c2, loadout: R.computeLoadout(c2, s.cpuOrder, {}, items, ups, { wild: s.wild }) },
+        wild: !!s.wild,
         difficulty: s.difficulty,
         input: this.input, sfx: Sfx, settings: d.settings,
         autoplay: params.has('autoplay'),
@@ -290,7 +297,8 @@
         mode: story ? 'story' : 'quick', storyIndex: stage, p1: params.get('p1') || 'barbas',
         p2: story ? root.TROLINA_STORY[stage] : params.get('p2') || 'runner',
         difficulty: params.get('diff') || 'normal',
-        order: { botellin: Number(params.get('bottles') || 4) }
+        order: { botellin: Number(params.get('bottles') || 4) },
+        wild: params.has('wild')
       });
       this.session.cpuOrder = R.cpuOrder(this.session.difficulty, this.charById(this.session.p2));
       this.startMatch();
@@ -306,7 +314,7 @@
     },
 
     debugQuickManual() {
-      Object.assign(this.session, { mode: 'quick', p1: params.get('p1') || 'barbas', p2: params.get('p2') || 'runner', order: { botellin: Number(params.get('bottles') || 3) } });
+      Object.assign(this.session, { mode: 'quick', wild: params.has('wild'), p1: params.get('p1') || 'barbas', p2: params.get('p2') || 'runner', order: { botellin: Number(params.get('bottles') || 3) } });
       this.session.cpuOrder = R.cpuOrder(this.session.difficulty, this.charById(this.session.p2));
       this.startMatch();
     }

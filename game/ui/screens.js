@@ -78,11 +78,16 @@
       node.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => (fn ? fn() : this.show(b.dataset.back))));
       this.keyHandler = (e) => { if (e.key === 'Escape') { const b = node.querySelector('[data-back]'); if (b) b.click(); } };
     },
+    snarkToast(node, msg) {
+      let t = node.querySelector('.toast');
+      if (!t) { t = el('<div class="toast" role="status"></div>'); node.append(t); }
+      t.textContent = msg; t.classList.add('snarky'); t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+    },
     flashError(node, msg) {
       root.TrolinaSfx.play('error');
       let t = node.querySelector('.toast');
       if (!t) { t = el('<div class="toast" role="status"></div>'); node.append(t); }
-      t.textContent = msg; t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+      t.textContent = msg; t.classList.remove('snarky'); t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
     }
   };
 
@@ -100,6 +105,7 @@
         <nav class="menu">
           <button data-go="story">Modo historia <small>${d.story.completed ? 'Completado · rejugar' : 'Combate ' + stage + ' / ' + root.TROLINA_STORY.length}</small></button>
           <button data-go="quick">Pelea rápida <small>Elige rival y dificultad</small></button>
+          <button data-go="wild" class="wild">Modo salvaje <small>Experimental · desde el segundo 30, tú verás</small></button>
           <button data-go="shop">Tienda <small>Personajes y mejoras</small></button>
           <button data-go="help">Cómo se juega</button>
           <button data-go="options">Opciones</button>
@@ -111,6 +117,7 @@
         const go = b.dataset.go;
         if (go === 'story') g.beginStory();
         else if (go === 'quick') g.beginQuick();
+        else if (go === 'wild') g.beginWild();
         else this.show(go);
       }));
       const fs = node.querySelector('[data-fs]');
@@ -124,7 +131,7 @@
       const step = p.step || 'p1';
       const story = s.mode === 'story';
       const chars = root.TROLINA_CHARACTERS;
-      const title = step === 'p1' ? 'Elige tu luchador' : 'Elige rival';
+      const title = (step === 'p1' ? 'Elige tu luchador' : 'Elige rival') + (s.wild ? ' <span class="wild-badge">MODO SALVAJE</span>' : '');
       const node = el(`<div class="scr select">
         ${this.header(title, step === 'p2' ? 'p1' : 'title')}
         <div class="select-body">
@@ -238,6 +245,7 @@
       }
       const node = el(`<div class="scr barra">
         ${this.header('La Barra', 'back')}
+        ${s.wild ? '<p class="intro wild-intro"><b>MODO SALVAJE.</b> Aquí todo pega más: lo bueno y lo malo. Los primeros 30 segundos son normales. Después, buena suerte. O no.</p>' : ''}
         <p class="intro">Antes de pelear contra <b style="color:${rival.color}">${esc(rival.name)}</b>, pide algo. Cada <b>botellín (2,90 €)</b> te da fuerza y un envase para lanzar, pero sube el <b>puntillo</b>: niebla, mareo, golpes al aire y controles lentos. Cuanto más dure la pelea, peor. <b>Fumar</b> lo baja; la <b>bolsa de azúcar</b> lo borra… un rato.</p>
         <div class="barra-body">
           <div class="items"></div>
@@ -273,8 +281,10 @@
         const next = { ...order, [it.id]: qty };
         if (!qty) delete next[it.id];
         if (R.orderCost(next, items) > d.coins) { this.flashError(node, 'No te llega el dinero'); return; }
-        if (qty > (order[it.id] || 0)) root.TrolinaSfx.play(it.id === 'botellin' || it.id === 'orujo' ? 'gulp' : 'buy');
-        else root.TrolinaSfx.play('back');
+        if (qty > (order[it.id] || 0)) {
+          root.TrolinaSfx.play(it.id === 'botellin' || it.id === 'orujo' ? 'gulp' : 'buy');
+          if (s.wild && root.trolinaBarSnark) this.snarkToast(node, root.trolinaBarSnark(it.id));
+        } else root.TrolinaSfx.play('back');
         order = next; render();
       };
       const render = () => {
@@ -288,8 +298,8 @@
           row.querySelector('[data-d="1"]').disabled = q >= it.max || cost + it.price > d.coins;
           row.querySelectorAll('[data-n]').forEach((b) => b.classList.toggle('on', Number(b.dataset.n) <= q));
         }
-        const lo = R.computeLoadout(char, order, d.upgrades, items, root.TROLINA_UPGRADES);
-        const base = R.computeLoadout(char, {}, d.upgrades, items, root.TROLINA_UPGRADES);
+        const lo = R.computeLoadout(char, order, d.upgrades, items, root.TROLINA_UPGRADES, { wild: s.wild });
+        const base = R.computeLoadout(char, {}, d.upgrades, items, root.TROLINA_UPGRADES, { wild: s.wild });
         const pct = (v) => (v >= 0 ? '+' : '') + Math.round(v * 100) + ' %';
         const i0 = R.intoxAt(lo, 0), i1 = R.intoxAt(lo, 60), i2 = R.intoxAt(lo, 120);
         node.querySelector('.sum-lines').innerHTML = `
@@ -387,7 +397,7 @@
       const items = root.TROLINA_BAR_ITEMS;
       const node = el(`<div class="scr vs">
         <div class="side l" style="--c:${c1.color}"><canvas width="192" height="176"></canvas><h3>${esc(c1.name)}</h3><p>Tú · ${esc(R.describeOrder(s.order, items))}</p></div>
-        <div class="vs-mid"><b>VS</b><span>${esc(R.DIFFICULTIES[s.difficulty].name)}${s.mode === 'story' ? ' · Historia ' + (s.storyIndex + 1) + '/' + root.TROLINA_STORY.length : ''}</span>
+        <div class="vs-mid"><b>VS</b>${s.wild ? '<span class="wild-badge">MODO SALVAJE</span>' : ''}<span>${esc(R.DIFFICULTIES[s.difficulty].name)}${s.mode === 'story' ? ' · Historia ' + (s.storyIndex + 1) + '/' + root.TROLINA_STORY.length : ''}</span>
           ${s.fountain ? `<span class="fountain-state">⛲ Fuente ${s.fountain.on ? 'encendida' : 'apagada'} · ${s.fountain.lit ? 'con luz' : 'sin luz'}${s.fountain.on ? ' — tapa el ruido de los botellines' : ''}</span>` : ''}</div>
         <div class="side r" style="--c:${c2.color}"><canvas width="192" height="176"></canvas><h3>${esc(c2.name)}</h3><p>CPU · ${esc(R.describeOrder(s.cpuOrder, items))}</p></div>
         <span class="hint">Toca para empezar</span>
@@ -410,6 +420,7 @@
       const unlockedChar = unlocked ? g.charById(unlocked) : null;
       const node = el(`<div class="scr results ${result.won ? 'win' : 'lose'}">
         <h1>${result.won ? '¡VICTORIA!' : 'DERROTA'}</h1>
+        ${result.wild && root.trolinaSnark ? `<p class="snark">«${esc(root.trolinaSnark(result.won ? 'win' : 'lose'))}»</p>` : ''}
         <p class="score">${result.roundsWon} – ${result.roundsLost} · ${esc(R.DIFFICULTIES[result.difficulty].name)}</p>
         <ul class="reward">${reward.lines.map((l, i) => `<li style="animation-delay:${i * 0.18}s"><span>${esc(l.label)}</span><b>+${money(l.cents)}</b></li>`).join('')}</ul>
         <p class="sum">Ganado: <b>${money(reward.total)}</b> · Cartera: <b>${money(d.coins)}</b></p>
@@ -620,6 +631,8 @@
           <section><h3>La Barra y el puntillo</h3><p>Antes de cada combate puedes pedir hasta <b>10 botellines a 2,90 €</b>. Cada uno da <b>+7 % de fuerza</b> y un envase para lanzar por asalto, pero sube tu <b>puntillo</b>: niebla que crece con el tiempo, visión doble, pantalla que se balancea, tropiezos, golpes al aire y controles con retraso.</p>
           <p><b>Tabaco</b>: cada cigarrillo que fumas (botón FUMAR) quita un 15 % de puntillo, pero te quedas quieto 1,5 s y, si te pegan, se te cae. A partir del cuarto, tos.</p>
           <p><b>Bolsa de azúcar (60 €)</b>: 30 s a toda velocidad y sin puntillo; luego se pasa y a los 45 s te quedas inconsciente unos segundos.</p></section>
+          <section><h3>Modo salvaje (experimental)</h3><p>Una pelea rápida donde los objetos pegan más (para bien y para mal) y, <b>a partir del segundo 30</b>, todo se desmorona para los dos: controles que se invierten, golpes que cambian solos, pasos sin querer, caídas sin que nadie te toque, botellas hacia atrás, micro-siestas y una pantalla que no se está quieta.</p>
+          <p>Cada fallo te lo recuerdan en grande, con todo el cariño. A cambio, cuando un golpe entra, pega más fuerte, y si ganas te llevas una prima.</p></section>
           <section><h3>La fuente</h3><p>A la izquierda de la terraza hay una fuente, a veces <b>encendida</b> (con chorros) y a veces <b>apagada</b>, con o sin luz. Encendida hace tanto ruido que <b>los botellines no cuentan para la policía</b>.</p>
           <p><b>El Peñista</b> tiene el ultimate <b>¡Al pilón!</b>: se lanza a por el rival, lo agarra y lo tira a la fuente. Quita muchísima vida, no se puede bloquear y deja al rival <b>mojado</b> y más lento durante 12 s.</p></section>
           <section><h3>Policía Local</h3><p>Cada golpe, botella rota o KO hace <b>ruido</b> (barra bajo el reloj). Lo que más ruido hace es <b>lanzar muchos botellines seguidos</b>; el ruido baja solo si os calmáis, y el puntillo os hace más escandalosos.</p>

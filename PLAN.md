@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.5** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.6** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -34,6 +34,13 @@ Estado: **v0.5** (16/11/2026). Un jugador contra la CPU, en navegador de escrito
 - **Ultimate de El Peñista: «Al pilón»**: agarra al rival y lo tira a la fuente; mucho daño y lo deja **mojado** y más lento 12 s.
 - **Fuente** a la izquierda: encendida/apagada y con/sin luz (aleatoria o fija en Opciones). Encendida, **tapa el ruido de los botellines** para la policía.
 - Fuente provisional dibujada por código, lista para cambiar por los assets definitivos (`FUENTE.md`).
+
+## Hecho en v0.6
+
+- **Modo salvaje (experimental)**: los objetos pegan más (para bien y para mal) y, a partir del segundo 30, el caos convierte la pelea en una experiencia horrible para los dos: controles invertidos, golpes cambiados, pasos solos, caídas solo, botellas hacia atrás, micro-siestas y pantalla que no para.
+- Cada fallo se anuncia en grande con mensajes pasivo-agresivos («Casi.», «Ya ni ves.», «Le has dado a una mesa.», «Casi te caes solo.»…), también al pedir en La Barra y en los resultados.
+- Equilibrio: cuando un golpe entra pega más; los combates acaban. Prima del 50 % por ganar.
+- Pendiente de ajustar tras probarlo jugando: frecuencia de cada efecto y de los mensajes.
 
 ## Próximas fases propuestas
 

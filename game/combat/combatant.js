@@ -129,7 +129,7 @@
         this.faintT = Math.max(0, this.faintT - dt);
         this.guard = false; this.walking = false; this.pending = [];
         this.physics(s, false); this.sync();
-        if (this.faintT === 0) { match.popup(this, '¡SE DESPIERTA!', '#8bf2ce'); this.f.play('idle', true); }
+        if (this.faintT === 0) { if (this.faintReason !== 'fall') match.popup(this, '¡SE DESPIERTA!', '#8bf2ce'); this.f.play('idle', true); }
         return;
       }
 
@@ -141,8 +141,11 @@
       const speed = this.loadout.speed * (sugar === 'boost' ? rules.SUGAR.speedMult : 1) * (wet ? rules.WET.speedMult : 1);
       const animMult = (sugar === 'boost' ? rules.SUGAR.animMult : 1) * (wet ? rules.WET.animMult : 1);
 
-      const intox = match.intoxOf(this);
+      const intox = match.levelOf ? match.levelOf(this) : match.intoxOf(this);
       const imp = rules.impairment(intox, this.loadout.aim);
+      const chaos = match.wild ? match.chaos() : 0;
+      this.invertT = Math.max(0, (this.invertT || 0) - dt);
+      this.phantomT = Math.max(0, (this.phantomT || 0) - dt);
 
       // Pequeño búfer: una acción pulsada durante otro movimiento se ejecuta al acabar (≤260 ms).
       // El puntillo retrasa las acciones.
@@ -166,19 +169,42 @@
         return;
       }
 
+      // Modo salvaje: controles invertidos, pasos solos y caídas sin que nadie te toque.
+      if (chaos > 0) {
+        const W = rules.WILD;
+        if (!this.invertT && Math.random() < W.invertPerSec * chaos * s) {
+          this.invertT = 1500 + Math.random() * 1500;
+          match.say(this, 'invert');
+        }
+        if (!this.air && !this.busy && !this.attacking && !this.phantomT && Math.random() < W.phantomPerSec * chaos * s) {
+          this.phantomT = 450; this.phantomDir = Math.random() < 0.5 ? -1 : 1;
+          match.say(this, 'phantom');
+        }
+        if (!this.air && !this.busy && !this.attacking && Math.random() < W.fallPerSec * chaos * s) {
+          this.faintTotal = 1100; this.faintT = 1100; this.faintReason = 'fall';
+          this.f.play('idle', true); this.pending = [];
+          if (!match.say(this, 'fall')) match.popup(this, '¡PUMBA!', '#ffb37a');
+          match.sfx('land'); match.dust(this.cx, C.GROUND, 1);
+          this.sync();
+          return;
+        }
+      }
+
       // Tropiezos (puntillo) y tos (tabaco).
       if (!this.air && !this.busy && !this.attacking) {
         if (intox > 0.05 && Math.random() < imp.stumblePerSec * s) {
           this.stumble = 420 + Math.random() * 250;
           this.stumbleDir = Math.random() < 0.5 ? -1 : 1;
-          match.popup(this, '¡HIC!', '#f8ce73');
+          if (!match.say(this, 'stumble')) match.popup(this, '¡HIC!', '#f8ce73');
         } else if (this.smoked > rules.SMOKE.coughFrom && Math.random() < rules.SMOKE.coughPerSec * (this.smoked - rules.SMOKE.coughFrom) * s) {
           this.stumble = 320; this.stumbleDir = -this.facing;
           match.popup(this, '¡COF, COF!', '#c9d3df'); match.sfx('cough');
         }
       }
 
-      const dir = (ctl.right ? 1 : 0) - (ctl.left ? 1 : 0);
+      let dir = (ctl.right ? 1 : 0) - (ctl.left ? 1 : 0);
+      if (this.invertT) dir = -dir;                 // izquierda era la otra
+      if (this.phantomT) dir = this.phantomDir;     // te vas tú solo
       if (!this.air && !this.attacking && !this.busy) {
         const want = Math.sign(opp.cx - this.cx);
         if (want && Math.abs(opp.cx - this.cx) > 6) this.facing = want;
@@ -198,8 +224,12 @@
             this.walking = true;
           } else this.vx = 0;
           let acted = false;
-          for (const a of ready) {
+          for (let a of ready) {
             consume(a); acted = true;
+            if (chaos > 0 && (a === 'punch' || a === 'kick') && Math.random() < rules.WILD.swapChance * chaos) {
+              a = a === 'punch' ? 'kick' : 'punch';
+              match.say(this, 'swap');
+            } else if (imp.inputDelayMs > 150 && Math.random() < 0.2) match.say(this, 'delay');
             if (a === 'jump') { this.jump(dir, speed); break; }
             if (a === 'punch' || a === 'kick') { this.chain = 0; this.startAttack(a, imp, match, false); break; }
             if (a === 'bottle') { this.tryThrow(match); break; }
@@ -310,13 +340,14 @@
       }
       this.cigs--; this.smoked++;
       this.smoking = { t: 0 };
+      match.say(this, 'smoke');
       this.vx = 0;
       match.sfx('lighter');
       return true;
     }
 
     faint(match) {
-      this.fainted = true;
+      this.fainted = true; this.faintReason = 'sugar';
       this.faintTotal = R().SUGAR.faintMs; this.faintT = this.faintTotal;
       this.smoking = null; this.pending = [];
       this.f.play('idle', true);

@@ -32,6 +32,34 @@
   // Fuente: con los chorros encendidos tapa el ruido de los botellines.
   const FOUNTAIN = { masksBottleNoise: true, splashNoise: 10 };
 
+  /* ---------- Modo salvaje (experimental) ----------
+   * Los primeros 30 s se juegan normal. Desde el segundo 30 sube el «caos» para los
+   * dos luchadores (a tope a los 45 s y un poco más si se alarga): controles que se
+   * invierten, golpes que cambian, pasos solos, caídas solo, botellas hacia atrás,
+   * micro-siestas… Equilibrio: cuando un golpe entra, pega más fuerte, para que la
+   * pelea termine aunque sea un desastre. Los objetos pegan más, para bien y para mal.
+   */
+  const WILD = {
+    chaosStart: 30, chaosFull: 45, chaosExtra: 0.25, chaosExtraSec: 120,
+    intoxMult: 1.6, powerMult: 1.4, maxLevel: 1.5, chaosToLevel: 0.9,
+    damageBonus: 0.3,                       // +30 % de daño con el caos a tope
+    invertPerSec: 0.14, swapChance: 0.3, phantomPerSec: 0.16, fallPerSec: 0.06,
+    blackoutPerSec: 0.1, reverseThrow: 0.2, reward: 0.5
+  };
+
+  /** Caos del modo salvaje (0 hasta el segundo 30, 1 a los 45, hasta 1,25 si se alarga). */
+  function chaosAt(seconds) {
+    if (seconds < WILD.chaosStart) return 0;
+    const k = Math.min(1, (seconds - WILD.chaosStart) / (WILD.chaosFull - WILD.chaosStart));
+    const extra = WILD.chaosExtra * Math.min(1, Math.max(0, seconds - WILD.chaosFull) / WILD.chaosExtraSec);
+    return k + extra;
+  }
+
+  /** Nivel de torpeza efectivo: puntillo + caos (máx. 1,5). */
+  function wildLevel(intox, chaos) {
+    return Math.min(WILD.maxLevel, intox + chaos * WILD.chaosToLevel);
+  }
+
   /** Estado de la fuente para un combate: pref 'random' | 'on' | 'off' (luz: 'random' | 'lit' | 'dark'). */
   function pickFountain(pref, lightPref, rng) {
     const r = rng || Math.random;
@@ -118,7 +146,7 @@
   }
 
   /** Combina personaje + mejoras permanentes + pedido de la barra en las cifras de combate. */
-  function computeLoadout(character, order, upgradesLevels, items, upgrades) {
+  function computeLoadout(character, order, upgradesLevels, items, upgrades, opts) {
     const base = { ...character.stats };
     for (const up of upgrades || []) {
       const lvl = (upgradesLevels || {})[up.id] || 0;
@@ -130,6 +158,7 @@
     for (const [id, qty] of Object.entries(clean)) {
       for (let i = 0; i < qty; i++) map[id].effect(m);
     }
+    if (opts && opts.wild) { m.intox *= WILD.intoxMult; m.powerPct *= WILD.powerMult; }
     const tolerance = Math.max(-0.3, Math.min(0.8, base.tolerance));
     // 10 botellines equivalen a puntillo 1,0 (máximo) para alguien sin aguante extra.
     const intoxLevel = Math.max(0, Math.min(1, m.intox * 0.1 * m.intoxMult * (1 - tolerance)));
@@ -175,6 +204,7 @@
 
   /** Efectos negativos derivados del puntillo y la puntería. */
   function impairment(intox, aim) {
+    intox = Math.max(0, Math.min(WILD.maxLevel, intox));
     const a = Math.max(0.5, 2 - (aim || 1));
     return {
       whiffChance: Math.min(0.6, 0.32 * intox * a),
@@ -203,6 +233,10 @@
       if (r.bottles > 0) lines.push({ label: 'Valor etílico (' + r.bottles + ' botellines)', cents: 250 * r.bottles });
       if (r.boss) lines.push({ label: 'Jefe derrotado', cents: 10000 });
       if (r.firstClear) lines.push({ label: 'Primera vez', cents: 5000 });
+      if (r.wild) {
+        const sub = lines.reduce((s, l) => s + l.cents, 0);
+        lines.push({ label: 'Prima por sobrevivir al modo salvaje', cents: Math.round(sub * WILD.reward) });
+      }
     } else {
       lines.push({ label: 'Por participar', cents: 1200 });
       if (r.roundsWon) lines.push({ label: 'Asaltos ganados ×' + r.roundsWon, cents: 600 * r.roundsWon });
@@ -240,6 +274,7 @@
   const Rules = {
     BOTTLE_PRICE, MAX_BOTTLES, START_COINS, DIFFICULTIES, DIFFICULTY_ORDER, MOVES,
     ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX, NOISE, POLICE, WET, FOUNTAIN,
+    WILD, chaosAt, wildLevel,
     comboScale, meterGain, sugarPhase, bottleNoise, policeOutcome, pickFountain,
     formatMoney, orderCost, sanitizeOrder, computeLoadout, intoxAt, impairment,
     damageFor, matchReward, cpuOrder, describeOrder, clampQty
