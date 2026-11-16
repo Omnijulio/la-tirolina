@@ -561,7 +561,7 @@
         <nav class="menu">
           <button data-a="resume" autofocus>Continuar</button>
           <button data-a="restart">Reiniciar combate</button>
-          <button data-a="help">Controles</button>
+          <button data-a="help">Cómo se pelea</button>
           ${canFs ? '<button data-a="fs">⛶ Pantalla completa</button>' : ''}
           <button data-a="quit" class="danger">Abandonar</button>
         </nav>
@@ -889,7 +889,20 @@
         <div class="help-grid">
           <section><h3>Objetivo</h3><p>Combates al mejor de 3 asaltos de 99 s contra la máquina. Gana quien deje al rival sin vida o tenga más al acabar el tiempo.</p>
           <p>En el <b>modo historia</b> cada victoria desbloquea al rival como luchador. En <b>pelea rápida</b> eliges rival y dificultad.</p></section>
-          <section><h3>Combos y ultimate</h3><p>Si un puñetazo o una patada <b>conecta</b>, puedes encadenar otro golpe enseguida: pulsa rápido puño, puño, patada…</p>
+          <section class="wide"><h3>Cómo se pelea</h3>
+          <p>Todo tiene respuesta: <b>golpe gana a agarre</b>, <b>agarre gana a guardia</b> y <b>guardia gana a golpe</b>. Saltar esquiva el agarre, y el puño contra alguien que salta cerca sale como <b>gancho</b> y lo tira.</p>
+          <table>
+            <tr><td><b>Puño</b></td><td>Rápido y seguro si te lo bloquean. Empieza los combos. Contra alguien que salta cerca sale como <b>gancho antiaéreo</b>.</td></tr>
+            <tr><td><b>Patada</b></td><td>Llega más lejos y pega casi el doble, pero tarda. Si te la bloquean de cerca o la fallas, te comes un puñetazo seguro (<b>¡CASTIGO!</b>). Echa al rival hacia atrás.</td></tr>
+            <tr><td><b>Agarre</b></td><td>Pegado al rival: no se puede bloquear y lo tira al suelo. Pierde contra cualquier golpe o salto, y si fallas te quedas vendido. Si te agarran, pulsa <b>AGARRE</b> enseguida para zafarte.</td></tr>
+            <tr><td><b>En el aire</b></td><td>PUÑO: puño corto hacia abajo. PATADA: <b>patada en picado</b>, caes en diagonal muy rápido. Si la bloquean o falla, aterrizas vendido.</td></tr>
+            <tr><td><b>Guardia</b></td><td>Joystick <b>abajo</b> (andar hacia atrás ya no cubre). Cada golpe bloqueado gasta fuelle y quita un pelín de vida. Si el fuelle llega a 0 cubriéndote: <b>¡GUARDIA ROTA!</b>, te quedas mareado.</td></tr>
+            <tr><td><b>Guardia justa</b></td><td>Baja el joystick <b>justo antes</b> del golpe (habiendo estado un momento sin cubrirte): no gasta nada, recuperas fuelle y el rival se queda vendido. Machacar el joystick no sirve.</td></tr>
+            <tr><td><b>Paso rápido</b></td><td>Doble toque del joystick hacia delante o hacia atrás.</td></tr>
+          </table>
+          <p><b>Fuelle</b> (barra bajo la vida): pegar lo gasta, unos 10 golpes. Se recupera entero en unos 3 s cuando dejas de pegar, pero <b>no mientras te cubres</b>. Si lo vacías pegando, no puedes atacar hasta que pase de la marca. Pega y descansa.</p>
+          <p><b>¡CONTRA!</b>: pillar al rival mientras arranca un golpe pega más. <b>¡CASTIGO!</b>: pillarlo recuperándose de uno fallado o bloqueado. Los golpes echan hacia atrás; si el rival está contra el borde, el que sale rebotado eres tú.</p></section>
+          <section><h3>Combos y ultimate</h3><p>Si un <b>puñetazo conecta</b>, puedes encadenar otro puño o una patada enseguida: puño, puño, patada… La patada cierra el combo, salvo para rematar con el ultimate.</p>
           <p><b>El Barbas</b> carga su ultimate, el <b>Dardo certero</b>, encadenando combos (cuanto más largo el combo, más carga). Con la barra llena, pulsa <b>DARDO</b>: un dardo ultrapreciso que busca al rival, no se puede bloquear y quita muchísima vida. También puedes lanzarlo al final de un combo.</p></section>
           <section><h3>La Barra y el puntillo</h3><p>Antes de cada combate puedes pedir hasta <b>10 botellines a 2,90 €</b>. Cada uno da <b>+7 % de fuerza</b> y un envase para lanzar por asalto, pero sube tu <b>puntillo</b>: niebla que crece con el tiempo, visión doble, pantalla que se balancea, tropiezos, golpes al aire y controles con retraso.</p>
           <p><b>Tabaco</b>: cada cigarrillo que fumas (botón FUMAR) quita un 15 % de puntillo, pero te quedas quieto 1,5 s y, si te pegan, se te cae. A partir del cuarto, tos.</p>
@@ -907,17 +920,18 @@
           <section><h3>Policía Local</h3><p>Cada golpe, botella rota o KO hace <b>ruido</b> (barra bajo el reloj). Lo que más ruido hace es <b>lanzar muchos botellines seguidos</b>; el ruido baja solo si os calmáis, y el puntillo os hace más escandalosos.</p>
           <p>Si llega al máximo, viene la patrulla: para la pelea, <b>multa</b> a los dos y la pelea se reinicia. Si pasa <b>3 veces seguidas</b>, noche en el <b>calabozo</b>: esos luchadores no se pueden usar durante 1 minuto. Se puede desactivar en Opciones.</p></section>
           <section><h3>Teclado</h3><table>
-            <tr><td>← → / A D</td><td>Andar (atrás = cubrirse)</td></tr>
+            <tr><td>← → / A D</td><td>Andar (doble toque = paso rápido)</td></tr>
             <tr><td>↑ / W</td><td>Saltar (mantener = seguir saltando)</td></tr>
-            <tr><td>↓ / S / G</td><td>Guardia</td></tr>
+            <tr><td>↓ / S / G</td><td>Guardia (justo antes del golpe = guardia justa)</td></tr>
             <tr><td>J / Z</td><td>Puñetazo</td></tr>
-            <tr><td>K / X</td><td>Patada</td></tr>
+            <tr><td>K / X</td><td>Patada (en el aire: en picado)</td></tr>
+            <tr><td>H / N</td><td>Agarre</td></tr>
             <tr><td>L / C</td><td>Lanzar botellín</td></tr>
             <tr><td>U / V</td><td>Ultimate (Dardo)</td></tr>
             <tr><td>F / B</td><td>Fumar</td></tr>
             <tr><td>Esc / P</td><td>Pausa</td></tr></table></section>
-          <section><h3>Móvil</h3><p><b>Joystick</b> a la izquierda: apoya el pulgar en cualquier punto y arrastra sin levantarlo. Lados = andar, arriba = saltar (en diagonal, hacia ese lado), abajo = guardia.</p>
-          <p>A la derecha: <b>Puño</b>, <b>Patada</b>, <b>Botellín</b>, <b>Guardia</b> (mantener), <b>Fumar</b> y <b>Dardo</b> (el aro se llena con los combos). Mejor en horizontal y a pantalla completa.</p>
+          <section><h3>Móvil</h3><p><b>Joystick</b> a la izquierda: apoya el pulgar en cualquier punto y arrastra sin levantarlo. Lados = andar (doble toque = paso rápido), arriba = saltar (en diagonal, hacia ese lado), abajo = guardia.</p>
+          <p>A la derecha: <b>Puño</b>, <b>Patada</b>, <b>Agarre</b>, <b>Botellín</b>, <b>Fumar</b> y <b>Dardo</b> (el aro se llena con los combos). Mejor en horizontal y a pantalla completa.</p>
           <p>Ganar da mucho dinero: úsalo en la tienda para desbloquear luchadores y mejoras.</p></section>
         </div>
       </div>`);

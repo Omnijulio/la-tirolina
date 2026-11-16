@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.11** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.12** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -66,7 +66,39 @@ Estado: **v0.11** (16/11/2026). Un jugador contra la CPU, en navegador de escrit
 - **Ranking** (top 20 en este dispositivo) con firma opcional: se recuerda el nombre, te dice qué puesto conseguirías y la casa invita a una ronda (+10 €) por firmar. Pantalla Ranking en el menú con filtros por modo.
 - **Ranking compartido** («🌍 La Trolina») con Supabase (v0.11), conectado al proyecto `la-tirolina` (ver `SUPABASE.md`).
 
+## Hecho en v0.12 — Combate 2.0
+
+Rediseño de la pelea (detalle y números en `COMBATE.md`):
+
+- **Piedra, papel o tijera.** El golpe gana al agarre, el agarre a la guardia y la guardia al golpe. El salto esquiva el agarre y el gancho tumba al que salta. Referencias: Street Fighter II/III/6, Garou, Smash Bros., Footsies, Divekick y Shadow Fight 2.
+- **Fuelle.** Una barra bajo la vida para pegar y para cubrirse:
+  - Se vacía con unos 10 golpes mezclados y se llena en ~3 s, empezando 1,2 s después del último ataque.
+  - Cubriéndote no se recupera.
+  - A 0 pegando: «¡SIN FUELLE!», no puedes atacar hasta el 30 %.
+  - A 0 cubriéndote: «¡GUARDIA ROTA!», mareado 1,1 s.
+- **Guardia solo con el joystick abajo** (andar hacia atrás ya no cubre); bloquear desgasta un poco de vida.
+- **Guardia justa (parry)**: bajar el joystick ≤140 ms antes del golpe. Para que no se abuse de ella:
+  - Solo cuenta si llevabas ≥300 ms sin cubrirte.
+  - No cuenta en mitad de un bloqueo.
+  - Ponerse en guardia cuesta fuelle.
+- **Puño**: rápido y seguro; abre los combos. Contra alguien que salta cerca sale como **gancho antiaéreo**, que lo tira.
+- **Patada**: larga y fuerte, pero bloqueada de cerca o fallada se castiga.
+- **Agarre**: botón **AGARRE** en lugar de GUARDIA. Es imbloqueable, tira al suelo y se escapa de él pulsando AGARRE a tiempo.
+- **Patada en picado** en el aire.
+- **Paso rápido** con doble toque.
+- **¡CONTRA!** y **¡CASTIGO!**: más daño al pillar al rival arrancando un golpe o recuperándose de uno.
+- **Retroceso** en golpes y bloqueos. **Regla de esquina**: si el rival está contra el borde, retrocede el que pega.
+- **Derribo** con levantarse invulnerable.
+- **CPU por dificultad**: agarra al que se cubre, castiga, hace guardia justa, se zafa, usa el picado y respeta su fuelle.
+- **«Cómo se pelea»** en el menú y en Pausa, y avisos grandes en pelea.
+- **Pruebas del diseño** en `tests/combat.test.cjs`.
+- **Arte provisional** para los golpes nuevos (poses giradas). El encargo del arte definitivo está en `ASSETS_COMBATE.md`.
+
 ## Próximas fases propuestas
+
+### Fase 1b — Ajustar el combate jugando
+- [ ] Jugar v0.12 en móviles reales y ajustar números en `rules.js` (`MOVES`, `FUELLE`, `PARRY`…): duración de los asaltos, cuánto se usa el agarre, si la guardia justa es demasiado fácil o difícil.
+- [ ] Integrar el arte de `ASSETS_COMBATE.md` cuando llegue (filas nuevas del atlas + `build_characters.py`).
 
 ### Fase 1 — Publicar y probar con amigos
 - [ ] Publicar en GitHub Pages (ver `PUBLICAR.md`) y probar en móviles reales.
@@ -74,7 +106,7 @@ Estado: **v0.11** (16/11/2026). Un jugador contra la CPU, en navegador de escrit
 
 ### Fase 2 — Identidad de personajes
 - [ ] Arte propio para cada luchador (fotos de cada amigo → sprites como El Barbas).
-- [ ] Animaciones que faltan: caminar, salto, recibir golpe, caída/KO, victoria, beber.
+- [ ] Animaciones que faltan: caminar, salto, recibir golpe, caída/KO, victoria, beber (las del combate, encargadas en `ASSETS_COMBATE.md`).
 - [ ] Ultimate propio para el resto de personajes (la estructura `special` ya existe; p. ej. bandeja del Camarero, sprint del Runner).
 - [ ] Pose propia de fumar y de lanzar el dardo.
 

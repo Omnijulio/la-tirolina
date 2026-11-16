@@ -8,24 +8,106 @@
   const START_COINS = 3000;
 
   const DIFFICULTIES = {
-    facil:     { id: 'facil', name: 'Fácil', reactionMs: 650, aggression: 0.30, block: 0.10, antiAir: 0.05, combo: 0.10, cpuDamage: 0.75, cpuBottles: [0, 2], reward: 1.0, mistakes: 0.35 },
-    normal:    { id: 'normal', name: 'Normal', reactionMs: 420, aggression: 0.50, block: 0.30, antiAir: 0.20, combo: 0.35, cpuDamage: 1.0, cpuBottles: [1, 4], reward: 1.5, mistakes: 0.18 },
-    dificil:   { id: 'dificil', name: 'Difícil', reactionMs: 250, aggression: 0.66, block: 0.50, antiAir: 0.40, combo: 0.60, cpuDamage: 1.15, cpuBottles: [2, 6], reward: 2.2, mistakes: 0.08 },
-    pesadilla: { id: 'pesadilla', name: 'Pesadilla', reactionMs: 150, aggression: 0.80, block: 0.70, antiAir: 0.60, combo: 0.85, cpuDamage: 1.3, cpuBottles: [3, 8], reward: 3.2, mistakes: 0.03 }
+    // grab: agarra al que se cubre · punish: castiga golpes fallados o bloqueados ·
+    // parry: guardia justa · tech: se zafa de agarres · dive: patada en picado · rest: respeta su fuelle
+    facil:     { id: 'facil', name: 'Fácil', reactionMs: 650, aggression: 0.30, block: 0.10, antiAir: 0.05, combo: 0.10, cpuDamage: 0.75, cpuBottles: [0, 2], reward: 1.0, mistakes: 0.35, grab: 0.08, punish: 0.10, parry: 0, tech: 0.05, dive: 0.10, rest: 0.2 },
+    normal:    { id: 'normal', name: 'Normal', reactionMs: 420, aggression: 0.50, block: 0.30, antiAir: 0.20, combo: 0.35, cpuDamage: 1.0, cpuBottles: [1, 4], reward: 1.5, mistakes: 0.18, grab: 0.25, punish: 0.35, parry: 0.04, tech: 0.2, dive: 0.25, rest: 0.5 },
+    dificil:   { id: 'dificil', name: 'Difícil', reactionMs: 250, aggression: 0.66, block: 0.50, antiAir: 0.40, combo: 0.60, cpuDamage: 1.15, cpuBottles: [2, 6], reward: 2.2, mistakes: 0.08, grab: 0.45, punish: 0.6, parry: 0.12, tech: 0.45, dive: 0.35, rest: 0.75 },
+    pesadilla: { id: 'pesadilla', name: 'Pesadilla', reactionMs: 150, aggression: 0.80, block: 0.70, antiAir: 0.60, combo: 0.85, cpuDamage: 1.3, cpuBottles: [3, 8], reward: 3.2, mistakes: 0.03, grab: 0.65, punish: 0.85, parry: 0.25, tech: 0.7, dive: 0.4, rest: 0.9 }
   };
   const DIFFICULTY_ORDER = ['facil', 'normal', 'dificil', 'pesadilla'];
 
+  /* Golpes (v0.12, «Combate 2.0»). Los tiempos de cada animación están en
+   * game/data/moves.js; aquí lo que pasa al conectar.
+   *   fuelle: lo que cuesta hacerlo · guard: lo que gasta al que lo bloquea (algo más que
+   *   pegar: quien solo se cubre pierde la guerra del fuelle)
+   *   chip: parte del daño que quita aunque lo bloqueen (desgaste)
+   * Piedra-papel-tijera: golpe > agarre > guardia > golpe; salto > agarre y guardia;
+   * gancho (puño contra alguien en el aire) > salto.
+   */
   const MOVES = {
-    // Golpes encadenables: el aturdimiento dura más que lo que tarda el siguiente
-    // puñetazo en llegar si se cancela al conectar (ver Combatant.update).
-    punch: { damage: 5, hitstun: 420, knockback: 260, blockstun: 180 },
-    kick: { damage: 7, hitstun: 470, knockback: 420, blockstun: 230 },
-    bottle: { damage: 9, hitstun: 480, knockback: 520, blockstun: 260, chip: 0.25 },
+    // Puño: rápido y seguro al bloquearlo; empieza los combos.
+    punch: { damage: 4.5, hitstun: 400, knockback: 220, blockstun: 260, fuelle: 8, guard: 10, chip: 0.12, push: 28, blockPush: 22 },
+    // Patada: más alcance y casi el doble de daño, pero bloqueada o fallada te deja vendido.
+    kick: { damage: 9, hitstun: 520, knockback: 420, blockstun: 260, fuelle: 14, guard: 18, chip: 0.12, push: 120, blockPush: 50 },
+    // Gancho: el puño contra un rival que salta cerca. Gana a los ataques en el aire y lo tira.
+    gancho: { damage: 9, hitstun: 600, knockback: 300, blockstun: 260, fuelle: 8, guard: 12, chip: 0.12, push: 40, blockPush: 30, knockdown: true, launch: -560 },
+    // En el aire: puño corto y patada en picado (cae en diagonal muy rápido).
+    airPunch: { damage: 5, hitstun: 450, knockback: 200, blockstun: 240, fuelle: 8, guard: 14, chip: 0.12, push: 30, blockPush: 25 },
+    dive: { damage: 8, hitstun: 520, knockback: 260, blockstun: 280, fuelle: 14, guard: 24, chip: 0.12, push: 45, blockPush: 15 },
+    // Agarre: no se puede bloquear y tira al suelo; pierde contra cualquier golpe o salto.
+    grab: { damage: 11, hitstun: 0, knockback: 380, blockstun: 0, fuelle: 10, guard: 0, unblockable: true, knockdown: true },
+    bottle: { damage: 9, hitstun: 480, knockback: 520, blockstun: 260, chip: 0.25, fuelle: 5, guard: 15, push: 60, blockPush: 35 },
     // Ultimate de El Barbas: no se puede bloquear.
-    dart: { damage: 30, hitstun: 800, knockback: 950, blockstun: 0, unblockable: true },
+    dart: { damage: 30, hitstun: 800, knockback: 950, blockstun: 0, unblockable: true, knockdown: true, launch: -420 },
     // Ultimate de El Peñista: agarre y chapuzón en la fuente (no se puede bloquear).
     fountain: { damage: 38, hitstun: 300, knockback: 0, blockstun: 0, unblockable: true }
   };
+
+  /* Fuelle: una sola barra para pegar y para cubrirse.
+   * Pegar gasta (unos 10 golpes mezclados); se recupera entero en ~3 s empezando
+   * 1,2 s después del último ataque. Cubriéndote no se recupera; al soltar la guardia
+   * empieza enseguida (salvo que acabes de pegar). A 0 por pegar: «¡SIN FUELLE!» y no
+   * puedes atacar hasta el 30 %. A 0 mientras te cubres: «¡GUARDIA ROTA!».
+   */
+  const FUELLE = { max: 100, regenDelayMs: 1200, regenFullMs: 3000, guardEnter: 4, exhaustedUntil: 30, dash: 5 };
+  // Guardia rota: mareado sin poder hacer nada; al despertar recupera algo de fuelle.
+  const GUARD_BREAK = { dizzyMs: 1100, refill: 35 };
+  /* Guardia justa (parry): bajar el joystick como mucho `windowMs` antes del golpe,
+   * habiendo estado al menos `lockoutMs` sin cubrirse y sin estar ya bloqueando una serie.
+   * No gasta fuelle ni vida, devuelve `refund` y deja al atacante vendido. */
+  const PARRY = { windowMs: 140, lockoutMs: 300, refund: 10, defenderStunMs: 70, attackerStunMs: 300 };
+  // Contra (le pillas arrancando o con el golpe fuera) y castigo (recuperándose de un golpe fallado o bloqueado).
+  const COUNTER = { counterDamage: 1.25, counterHitstun: 1.3, punishDamage: 1.2, punishHitstun: 1.25 };
+  // Derribo (agarre y gancho): tumbado y luego levantándose, sin que le puedan pegar.
+  const KNOCKDOWN = { downMs: 650, getupMs: 320 };
+  // Paso rápido: doble toque del joystick hacia delante o hacia atrás.
+  const DASH = { fwdMs: 180, fwdV: 640, backMs: 200, backV: 560, recoverMs: 90, doubleTapMs: 260 };
+  // Agarre: muy de cerca y con el rival en el suelo, libre y sin estar bloqueando o aturdido.
+  const GRAB = { range: 135, holdMs: 320, techMs: 260, throwVx: 380, throwVy: -520, techPush: 360, techStunMs: 260 };
+  // Patada en picado: desde un poco de altura; bloqueada o fallada aterrizas vendido.
+  const DIVE = { minHeight: 50, startupMs: 60, vx: 760, vy: 980, landBlockMs: 420, landWhiffMs: 300, bounceVx: 200, bounceVy: -440 };
+  // El puño sale como gancho si el rival está en el aire a esta distancia (y altura mínima).
+  const GANCHO = { range: 300, minHeight: 30 };
+
+  /** Fuelle que se recupera en `dtMs` (sin contar la espera). */
+  function fuelleRegen(dtMs) { return FUELLE.max * dtMs / FUELLE.regenFullMs; }
+  /** ¿Cuenta como guardia justa? heldMs: tiempo desde que bajó el joystick; idleBeforeMs: lo que llevaba sin cubrirse antes. */
+  function isParry({ heldMs, idleBeforeMs, blockstun }) {
+    return heldMs >= 0 && heldMs <= PARRY.windowMs && idleBeforeMs >= PARRY.lockoutMs && !(blockstun > 0);
+  }
+  /** Tipo de golpe según en qué estaba el que lo recibe: 'counter', 'punish' o null. */
+  function hitType(phase) {
+    if (phase === 'startup' || phase === 'active') return 'counter';
+    if (phase === 'recovery' || phase === 'landing') return 'punish';
+    return null;
+  }
+  /** Multiplicadores de daño y aturdimiento por contra/castigo. */
+  function hitTypeMult(type) {
+    if (type === 'counter') return { damage: COUNTER.counterDamage, hitstun: COUNTER.counterHitstun };
+    if (type === 'punish') return { damage: COUNTER.punishDamage, hitstun: COUNTER.punishHitstun };
+    return { damage: 1, hitstun: 1 };
+  }
+  /** Arranque, golpe activo y recuperación (ms) de una animación con cajas de golpe. */
+  function frameData(frames, activeRange) {
+    let first = -1, last = -1;
+    frames.forEach((f, i) => { if ((f.hitboxes || []).length) { if (first < 0) first = i; last = i; } });
+    if (activeRange) [first, last] = activeRange;
+    const sum = (a, b) => frames.slice(a, b).reduce((n, f) => n + f.duration, 0);
+    return { startup: sum(0, first), active: sum(first, last + 1), recovery: sum(last + 1, frames.length), total: sum(0, frames.length) };
+  }
+  /** Ventaja al ser bloqueado (ms): positivo = el atacante se recupera antes. Peor caso: bloqueado al empezar el golpe. */
+  function blockAdvantage(kind, fd) { return MOVES[kind].blockstun - (fd.active + fd.recovery); }
+
+  /* Retroceso: `push`/`blockPush` son los píxeles que se desliza por el suelo el que
+   * recibe (al recibir / al bloquear). En el aire se usa `knockback` (velocidad).
+   * Regla de esquina: si el que recibe está contra el borde y no le cabe el retroceso,
+   * el que pega sale rebotado lo que falta, para que nadie quede encerrado. */
+  const PUSH = { friction: 2200, cornerShare: 1 };
+  /** Velocidad inicial para deslizarse `px` píxeles frenando con `friction`. */
+  function pushSpeed(px, friction) { return Math.sqrt(2 * (friction || PUSH.friction) * Math.max(0, px)); }
+  /** Reparte un retroceso: lo que no cabe hasta el borde (room) lo recibe el atacante. */
+  function splitPush(px, room) { const def = Math.max(0, Math.min(px, room)); return { def, att: (px - def) * PUSH.cornerShare }; }
 
   // Mojado tras caer a la fuente: más lento durante un buen rato.
   const WET = { ms: 12000, speedMult: 0.7, animMult: 0.85 };
@@ -74,10 +156,11 @@
    * la victoria. Al final se multiplica por la dificultad y por el modo salvaje.
    */
   const SCORE = {
-    hit: { punch: 100, kick: 150, bottle: 200, dart: 1500, fountain: 2000 },
+    hit: { punch: 100, kick: 150, gancho: 250, airPunch: 120, dive: 200, grab: 250, bottle: 200, dart: 1500, fountain: 2000 },
     comboStep: 0.5,       // cada golpe más del combo vale un 50 % más
     styleMax: 1,          // hasta +100 % con el puntillo al máximo
     block: 20,
+    parry: 300, guardBreak: 400, tech: 150, counterBonus: 0.5,   // contra/castigo: +50 %
     roundWin: 2000, perfect: 5000, timePerSec: 50,
     matchWin: 5000,
     diffMult: { facil: 0.5, normal: 1, dificil: 1.5, pesadilla: 2 },
@@ -408,6 +491,8 @@
   const Rules = {
     BOTTLE_PRICE, MAX_BOTTLES, START_COINS, DIFFICULTIES, DIFFICULTY_ORDER, MOVES,
     ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX, NOISE, POLICE, WET, FOUNTAIN,
+    FUELLE, GUARD_BREAK, PARRY, COUNTER, KNOCKDOWN, DASH, GRAB, DIVE, GANCHO,
+    fuelleRegen, isParry, hitType, hitTypeMult, frameData, blockAdvantage, PUSH, pushSpeed, splitPush,
     WILD, chaosAt, wildLevel,
     comboScale, meterGain, sugarPhase, bottleNoise, policeOutcome, pickFountain, pickStage,
     SLOTS, JARDINERA_AMMO, slotsFor, orderUsage, cpuSlots,

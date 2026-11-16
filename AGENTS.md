@@ -7,6 +7,7 @@ Lee `CONTEXTO_CODEX.md`, `PLAN.md`, `README.md` y `STAGE.md` antes de modificar 
 ## Fuentes y construcción
 
 - El juego está en `index.html` + `game/` (scripts clásicos sin empaquetador, cargados en orden). Reglas puras en `game/core/rules.js`; datos editables en `game/data/`.
+- Combate (v0.12): diseño y números en `COMBATE.md`; tiempos, cajas y poses de los golpes en `game/data/moves.js` (no toques `assets/fighter.json` para retocar tiempos del juego); `tests/combat.test.cjs` comprueba que los números cumplen el diseño. Arte pendiente: `ASSETS_COMBATE.md`.
 - Edita el motor base en `src/`, datos canónicos en los JSON y el Fighter Lab en `templates/index.template.html`.
 - Ejecuta `python3 tools/build_demo.py` después de modificar JSON, `src/` o la plantilla. Regenera los espejos `*-data.js` y `fighter-preview.html`. **No genera `index.html`**, que es el juego.
 - `python3 tools/build_characters.py` regenera los atlas de `assets/characters/` a partir de `assets/fighter.png`.

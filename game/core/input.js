@@ -1,5 +1,7 @@
 /* Entrada unificada: teclado + joystick y botones táctiles multitáctiles.
- * held: direcciones mantenidas. queue: acciones puntuales (punch, kick, bottle, special, smoke, jump).
+ * held: direcciones mantenidas (block = joystick abajo / ↓ S G).
+ * queue: acciones puntuales (punch, kick, grab, bottle, special, smoke, jump).
+ * El paso rápido (doble toque) lo detecta el luchador a partir de `held`.
  */
 (function (root) {
   const MOVE_KEYS = {
@@ -9,8 +11,8 @@
     ArrowDown: 'block', KeyS: 'block', KeyG: 'block'
   };
   const ACTION_KEYS = {
-    KeyJ: 'punch', KeyK: 'kick', KeyL: 'bottle', KeyU: 'special', KeyF: 'smoke',
-    KeyZ: 'punch', KeyX: 'kick', KeyC: 'bottle', KeyV: 'special', KeyB: 'smoke'
+    KeyJ: 'punch', KeyK: 'kick', KeyL: 'bottle', KeyU: 'special', KeyF: 'smoke', KeyH: 'grab',
+    KeyZ: 'punch', KeyX: 'kick', KeyC: 'bottle', KeyV: 'special', KeyB: 'smoke', KeyN: 'grab'
   };
 
   class Input {
@@ -59,9 +61,9 @@
 
     /**
      * Joystick flotante: al tocar la zona izquierda aparece bajo el pulgar y se
-     * maneja arrastrando, sin levantar el dedo. Izquierda/derecha andan (atrás =
-     * cubrirse), arriba salta (mantener = seguir saltando, en diagonal salta hacia
-     * ese lado) y abajo pone la guardia.
+     * maneja arrastrando, sin levantar el dedo. Izquierda/derecha andan (doble toque =
+     * paso rápido), arriba salta (mantener = seguir saltando, en diagonal salta hacia
+     * ese lado) y abajo pone la guardia (bajarlo justo antes del golpe = guardia justa).
      */
     bindTouch(container) {
       const zone = container.querySelector('.stick-zone');

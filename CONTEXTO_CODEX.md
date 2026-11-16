@@ -1,6 +1,6 @@
 # Contexto para continuar en Codex
 
-Estado: **v0.11** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
+Estado: **v0.12** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
 
 ## Objetivo del usuario y decisiones aceptadas
 
@@ -33,6 +33,8 @@ Peticiones incorporadas, en orden:
 
 15. **v0.11 — Ranking compartido**: con Supabase (tabla y reglas en `supabase/ranking.sql`, conectado en `game/data/online-config.js`); sin configuración o sin conexión, sigue el ranking de cada móvil. Ver `SUPABASE.md`.
 
+16. **v0.12 — Combate 2.0**: fuelle, guardia solo con abajo y guardia justa, guardia rota, agarre (botón AGARRE en lugar de GUARDIA), gancho antiaéreo, patada en picado, paso rápido, contra/castigo, retroceso con regla de esquina y derribo. Ver `COMBATE.md` y, para el arte, `ASSETS_COMBATE.md`.
+
 El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
 ## Cómo está organizado el juego (v0.2)
@@ -62,6 +64,8 @@ Sin frameworks ni dependencias de ejecución: scripts clásicos que se cargan en
 Flujo: Título → (Historia | Pelea rápida) → Selección (luchador; en pelea rápida también rival) + dificultad → **La Barra** (pago) → cinemática si existe → VS → combate → resultados (recompensa, desbloqueos) → siguiente combate / revancha / menú.
 
 ### Combate
+
+> **Desde v0.12 (Combate 2.0) manda `COMBATE.md`.** Lo de abajo describe la base de v0.2–v0.3; donde no coincida (guardia con atrás, combos de patada, tiempos de puño y patada), vale `COMBATE.md`. Tiempos y cajas de los golpes en `game/data/moves.js` (se instalan sobre el atlas en `Match`); daños, fuelle y reglas en `MOVES`, `FUELLE`, `PARRY`… de `game/core/rules.js`; agarre normal en `Match.checkGrab/updateThrow/techThrow`; contra, castigo, guardia justa, guardia rota y regla de esquina en `Match.applyHit`; estados nuevos (`fuelle`, `dizzyT`, `downT`/`getupT`, `dashT`, `diving`, `landRecT`) en `Combatant`.
 
 - Canvas lógico 960×540, escala de sprite 2, apoyo y=486, cámara −24…24 nativos (sin cambios respecto al kit).
 - `Combatant` guarda la posición como **centro del cuerpo** (`cx`), a 40 px del ancla del pie en la dirección en que mira; así el giro al cruzarse no desplaza el sprite. `Fighter.x/y/facing` se sincronizan desde `Combatant`.

@@ -99,6 +99,12 @@
             this.hiss(0.9, 0.7, 'lowpass', 3500, 400); this.hiss(0.4, 0.5, 'highpass', 2500);
             this.tone('sine', 110, 40, 0.5, 0.7); break;
           case 'faint': this.tone('triangle', 500, 80, 1.0, 0.3); this.tone('sine', 120, 40, 0.6, 0.5, 0.3); break;
+          // Combate 2.0
+          case 'parry': this.tone('triangle', 1760, 2640, 0.12, 0.25); this.tone('sine', 2640, 2600, 0.3, 0.15, 0.06); this.hiss(0.06, 0.3, 'highpass', 6000); break;
+          case 'guardBreak': this.hiss(0.35, 0.6, 'highpass', 3500, 1200); this.tone('square', 700, 120, 0.35, 0.22); this.tone('triangle', 2800, 2000, 0.2, 0.18, 0.05); break;
+          case 'counter': this.tone('square', 1200, 600, 0.1, 0.12); break;
+          case 'dash': this.hiss(0.12, 0.25, 'bandpass', 900, 2200); break;
+          case 'tired': this.hiss(0.25, 0.25, 'bandpass', 600, 380); this.hiss(0.3, 0.2, 'bandpass', 560, 360, 0.35); break;
         }
       } catch (e) { /* audio opcional */ }
     }

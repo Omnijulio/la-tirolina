@@ -77,6 +77,7 @@ body.touch.fighting.portrait #touch::before {
 .tbtn img { width: 14px; height: 18px; image-rendering: pixelated; }
 .tbtn.punch { border-color: #ffcf6e; } .tbtn.kick { border-color: #ff7b6e; }
 .tbtn.bottle { border-color: #8bf2ce; } .tbtn.block { border-color: #8fd6ff; } .tbtn.smoke { border-color: #c9d3df; }
+.tbtn.grab { border-color: #c79bff; }
 .tbtn .count { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; border-radius: 10px; background: #f2efe6; color: #111; font-size: 11px; line-height: 20px; }
 .tbtn.special { border: 0; background: conic-gradient(#f8ce73 calc(var(--charge, 0) * 1%), #ffffff22 0); padding: 3px; }
 .tbtn.special span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; background: #0b1020e0; }
@@ -231,6 +232,8 @@ header.bar h2 { flex: 1; font-size: clamp(18px, 3.4vw, 28px); }
 .form select { background: #0a0f19; border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
 .help-grid { width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
 .help-grid section { background: #0d1522e6; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.help-grid section.wide { grid-column: 1 / -1; border-color: #f8ce7366; }
+.help-grid section.wide td { vertical-align: top; color: #d6dde6; }
 .help-grid h3 { font-size: 16px; color: var(--yellow); margin-bottom: 6px; }
 .help-grid p { margin: 6px 0; font-size: 14px; color: #d6dde6; }
 .help-grid table { width: 100%; font-size: 14px; border-collapse: collapse; }

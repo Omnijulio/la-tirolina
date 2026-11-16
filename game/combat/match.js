@@ -58,6 +58,8 @@
       const grabAnim = JSON.parse(JSON.stringify(data.animations.throwBottle));
       for (const f of grabAnim.frames) { f.events = []; delete f.itemSocket; }
       data.animations.throwGrab = grabAnim;
+      // Combate 2.0: tiempos de puño y patada, gancho, puño aéreo, picado y agarre (game/data/moves.js).
+      root.TrolinaMoves.install(data);
       const mk = (side, sel, isCPU) => new Combatant({
         character: sel.character, image: this.assets.characters[sel.character.id], data,
         loadout: sel.loadout, isCPU, side
@@ -98,6 +100,7 @@
       const fs = opts.fountain || { on: true, lit: true };
       this.fountain = root.Fountain ? new root.Fountain({ on: fs.on, lit: fs.lit, night: this.stageInfo.night !== false, art: this.assets.fountain }) : null;
       this.grab = null; this.fountainNoted = false;
+      this.throwing = null;   // agarre normal en curso (botón AGARRE)
       // Modo salvaje (experimental): caos desde el segundo 30 y mensajes pasivo-agresivos.
       this.wild = !!opts.wild;
       this.snark = null; this.snarkCd = {}; this.onsetSaid = false; this.blackout = 0; this.visionAt = 0;
@@ -181,7 +184,7 @@
       for (let i = 0; i < 6; i++) this.dusts.push({ x: x + (Math.random() - 0.5) * 60, y, vx: (Math.random() - 0.5) * 120, r: 6 + Math.random() * 8 * (size || 1), t: 0, life: 420 });
     }
     spark(x, y, kind) {
-      this.sparks.push({ x, y, kind, t: 0, life: kind === 'block' ? 180 : kind === 'dart' ? 420 : 240, rot: Math.random() * Math.PI });
+      this.sparks.push({ x, y, kind, t: 0, life: kind === 'block' ? 180 : kind === 'dart' ? 420 : kind === 'parry' || kind === 'break' ? 380 : 240, rot: Math.random() * Math.PI });
     }
     smokePuff(c) {
       const p = c.cigTip();
@@ -249,6 +252,7 @@
     }
 
     cancelGrab() {
+      this.cancelThrow();
       const g = this.grab;
       if (!g) return;
       g.att.locked = false; g.att.poseOverride = null;
@@ -268,7 +272,7 @@
       if (g.phase === 'dash') {
         att.cx = Math.max(C.MIN_X, Math.min(C.MAX_X, att.cx + att.facing * 950 * dt / 1000));
         att.sync();
-        if (Math.abs(def.cx - att.cx) <= 130 && def.state === 'fight' && Math.abs(def.y) < 160) {
+        if (Math.abs(def.cx - att.cx) <= 130 && def.state === 'fight' && Math.abs(def.y) < 160 && !def.downed) {
           g.phase = 'hold'; g.t = 0;
           def.state = 'grabbed'; def.f.play('idle', true); def.f.enabled = false;
           def.smoking = null; def.faintT = 0; def.pending = []; def.hitstun = 0; def.blockstun = 0;
@@ -530,6 +534,7 @@
       this.updateGrab(dt);
       const c1 = this.controls(this.p1, this.brain1, this.p2, actions, dt);
       const c2 = this.controls(this.p2, this.brain2, this.p1, [], dt);
+      this.updateThrow(dt, c1, c2);
       this.p1.update(dt, c1, this.p2, this);
       this.p2.update(dt, c2, this.p1, this);
       this.resolvePush();
@@ -557,7 +562,7 @@
 
     resolvePush() {
       const a = this.p1, b = this.p2;
-      if (a.state === 'ko' || b.state === 'ko' || this.grab) return;
+      if (a.state === 'ko' || b.state === 'ko' || this.grab || this.throwing) return;
       if (Math.abs(a.y - b.y) > 150) return; // uno salta por encima del otro
       let dx = b.cx - a.cx;
       const overlap = C.PUSH - Math.abs(dx);
@@ -576,10 +581,15 @@
     }
 
     checkMelee() {
+      const STRIKE = { punch: 1, kick: 1, gancho: 1, airPunch: 1, dive: 1 };
+      const hits = [];
       for (const [att, def] of [[this.p1, this.p2], [this.p2, this.p1]]) {
         const anim = att.f.animation;
-        if (anim !== 'punch' && anim !== 'kick') continue;
-        if (att.lastHitAction === att.f.actionId || def.state !== 'fight' || att.state !== 'fight' || att.locked) continue;
+        if (anim === 'grab') { this.checkGrab(att, def); continue; }
+        if (!STRIKE[anim]) continue;
+        if (att.lastHitAction === att.f.actionId || def.state !== 'fight' || att.state !== 'fight' || att.locked || def.downed) continue;
+        // El gancho gana a lo que venga por el aire mientras arranca o tiene el golpe fuera.
+        if ((anim === 'airPunch' || anim === 'dive') && def.f.animation === 'gancho' && def.attackPhase() !== 'recovery') continue;
         const hbs = att.f.getHitboxes();
         if (!hbs.length) continue;
         const hurt = def.f.getHurtbox();
@@ -593,7 +603,94 @@
           continue;
         }
         const px = att.facing === 1 ? Math.max(hit.x, hurt.x) : Math.min(hit.x + hit.w, hurt.x + hurt.w);
-        this.applyHit(att, def, anim, px, hit.y + hit.h / 2);
+        hits.push([att, def, anim, px, hit.y + hit.h / 2]);
+      }
+      // Se aplican después de mirar los dos: si se pegan a la vez, entran los dos (intercambio).
+      for (const h of hits) if (h[1].state === 'fight') this.applyHit(...h);
+    }
+
+    /* ---------- agarre (botón AGARRE) ---------- */
+
+    checkGrab(att, def) {
+      if (this.throwing || this.grab || att.state !== 'fight' || att.attackPhase() !== 'active' || att.grabTried === att.f.actionId) return;
+      const G = R.GRAB;
+      if (Math.abs(def.cx - att.cx) > G.range || Math.sign(def.cx - att.cx) !== att.facing) return;
+      if (def.state !== 'fight' || def.air || def.downed) return;
+      att.grabTried = att.f.actionId;
+      // Agarre contra agarre: se zafan los dos.
+      if (def.f.animation === 'grab' && def.attackPhase() !== 'recovery') { this.techThrow(att, def); return; }
+      // No se puede agarrar a quien está recibiendo o bloqueando un golpe: hay que esperar a que se suelte.
+      if (def.hitstun > 0 || def.blockstun > 0) return;
+      this.throwing = { att, def, t: 0 };
+      att.locked = true; att.poseOverride = { state: 'grabHold' };
+      def.state = 'grabbed'; def.f.play('idle', true); def.f.enabled = false;
+      def.smoking = null; def.pending = []; def.guard = false; def.hitstun = 0; def.blockstun = 0;
+      def.dashT = 0; def.diving = false; def.dizzyT = 0; def.faintT = 0; def.grabRot = 0;
+      this.popup(att, '¡AGARRE!', '#ffd27a');
+      this.sfx('grab'); this.hitstop = 70; this.shake = 4;
+    }
+
+    updateThrow(dt, c1, c2) {
+      const g = this.throwing;
+      if (!g) return;
+      const { att, def } = g;
+      const G = R.GRAB;
+      g.t += dt;
+      // Lo sujeta delante, un poco levantado.
+      def.facing = -att.facing;
+      def.cx = Math.max(C.MIN_X, Math.min(C.MAX_X, att.cx + att.facing * 70));
+      def.y = -24 - Math.min(1, g.t / 200) * 16; def.grabRot = -0.12; def.sync();
+      // Zafarse: pulsar AGARRE a tiempo.
+      const dctl = def === this.p1 ? c1 : c2;
+      if (g.t <= G.techMs && dctl && (dctl.actions || []).includes('grab')) {
+        dctl.actions = dctl.actions.filter((a) => a !== 'grab');   // la pulsación se gasta en zafarse
+        this.techThrow(att, def); return;
+      }
+      if (g.t < G.holdMs) return;
+      // ¡Lo tira al suelo!
+      this.throwing = null;
+      att.locked = false; att.poseOverride = null; att.f.play('throwGrab', true);
+      def.state = 'fight'; def.f.enabled = true; def.grabRot = 0;
+      def.air = true; def.vy = G.throwVy; def.vx = att.facing * G.throwVx; def.downPending = true; def.hitstun = 1500;
+      const wildBonus = this.wild ? 1 + R.WILD.damageBonus * Math.min(1, this.chaos()) : 1;
+      const dmg = R.damageFor('grab', att.powerNow, att === this.p2 ? this.diff.cpuDamage : 1) * wildBonus;
+      def.hp = Math.max(0, def.hp - dmg); def.flash = 140; def.flashColor = '#ffffff';
+      this.addNoise(R.NOISE.hit * 2);
+      this.sfx('kick'); this.shake = 10; this.hitstop = 90;
+      this.spark(def.cx, C.GROUND + def.y - 180, 'hit');
+      this.addScore(att, R.hitPoints('grab', 1, this.intoxOf(att)), def.cx, C.GROUND - 300);
+      if (att.hasSpecial && !att.meterFull) {
+        att.meter = Math.min(R.METER_MAX, att.meter + R.meterGain(2));
+        if (att.meterFull) { this.popup(att, '¡' + att.char.special.short + ' LISTO!', '#f8ce73'); this.sfx('ready'); }
+      }
+      if (def.hp <= 0) { def.knockOut(att.facing); this.onKO(att, def); }
+    }
+
+    /** Los dos se sueltan y se separan. */
+    techThrow(att, def) {
+      this.throwing = null;
+      const G = R.GRAB;
+      for (const [c, dir] of [[att, -att.facing], [def, att.facing]]) {
+        c.locked = false; c.poseOverride = null;
+        if (c.state === 'grabbed') { c.state = 'fight'; c.f.enabled = true; c.y = 0; c.air = false; c.grabRot = 0; }
+        c.f.play('idle', true); c.hitstun = 0; c.blockstun = G.techStunMs; c.pending = [];
+        c.vx = dir * G.techPush;
+        c.sync();
+      }
+      this.popup(def, '¡SE ZAFA!', '#8fd6ff');
+      this.spark((att.cx + def.cx) / 2, C.GROUND - 200, 'block');
+      this.sfx('block'); this.hitstop = 60;
+      this.addScore(def, R.SCORE.tech);
+    }
+
+    cancelThrow() {
+      const g = this.throwing;
+      if (!g) return;
+      this.throwing = null;
+      g.att.locked = false; g.att.poseOverride = null;
+      if (g.def.state === 'grabbed') {
+        g.def.state = this.phase === 'fight' ? 'fight' : 'ready';
+        g.def.y = 0; g.def.air = false; g.def.f.enabled = true; g.def.grabRot = 0;
       }
     }
 
@@ -605,26 +702,73 @@
 
     applyHit(att, def, kind, x, y) {
       const stunned = def.hitstun > 0;
-      const n = kind === 'dart' ? (stunned ? att.combo + 1 : 1) : stunned ? att.combo + 1 : 1;
+      const n = stunned ? att.combo + 1 : 1;
       const sc = kind === 'dart' ? { damage: 1, knockback: 1, hitstun: 1 } : R.comboScale(n);
       const mv = R.MOVES[kind];
+      const melee = kind !== 'bottle' && kind !== 'dart';
+      // ¿Le pillas arrancando un golpe («contra») o recuperándose de uno («castigo»)?
+      const type = !stunned && !mv.unblockable && def.state === 'fight' ? R.hitType(def.attackPhase()) : null;
+      const tm = R.hitTypeMult(type);
       const wildBonus = this.wild ? 1 + R.WILD.damageBonus * Math.min(1, this.chaos()) : 1;
-      const dmg = R.damageFor(kind, att.powerNow, att === this.p2 ? this.diff.cpuDamage : 1) * sc.damage * wildBonus;
+      const dmg = R.damageFor(kind, att.powerNow, att === this.p2 ? this.diff.cpuDamage : 1) * sc.damage * wildBonus * tm.damage;
       if (this.wild && def === this.p1 && this.levelOf(def) > 0.6 && Math.random() < 0.25) this.say(def, 'gotHit');
-      const res = def.takeHit(kind, dmg, att.cx, { hitstun: mv.hitstun * sc.hitstun, knockback: mv.knockback * sc.knockback });
-      this.addNoise(res === 'block' ? R.NOISE.block : res === 'ko' ? R.NOISE.ko : kind === 'dart' ? R.NOISE.dart : R.NOISE.hit);
+      const res = def.takeHit(kind, dmg, att.cx, { hitstun: mv.hitstun * sc.hitstun * tm.hitstun, knockback: mv.knockback * sc.knockback, pushMult: sc.knockback });
+      if (res === 'miss') return;
+      this.addNoise(res === 'block' || res === 'parry' ? R.NOISE.block : res === 'ko' ? R.NOISE.ko : kind === 'dart' ? R.NOISE.dart : R.NOISE.hit);
+      // La patada en picado rebota en el rival (al dar, al bloquearla o al rechazarla).
+      const bounce = (k) => {
+        if (kind !== 'dive' || !att.air) return;
+        att.diving = false; att.f.play('idle', true);
+        att.vx = -att.facing * R.DIVE.bounceVx * k; att.vy = R.DIVE.bounceVy * k;
+      };
+      // Regla de esquina: el retroceso que no cabe hasta el borde lo recibe el que pega.
+      if (melee && (res === 'hit' || res === 'block' || res === 'break') && !def.air && !att.air && !att.locked) {
+        const px = (res === 'hit' ? mv.push : res === 'break' ? 40 : mv.blockPush) * (res === 'hit' ? sc.knockback : 1);
+        const away = Math.sign(def.cx - att.cx) || att.facing;
+        const room = away > 0 ? C.MAX_X - def.cx : def.cx - C.MIN_X;
+        const sp = R.splitPush(px || 0, Math.max(0, room - 2));
+        if (sp.att > 4) att.vx = -away * R.pushSpeed(sp.att);
+      }
+      if (res === 'parry') {
+        this.spark(x, y, 'parry'); this.sfx('parry'); this.hitstop = 120;
+        if (melee) {
+          att.hitstun = Math.max(att.hitstun, R.PARRY.attackerStunMs);
+          att.f.play('idle', true); att.pending = []; att.dashT = 0;
+          bounce(0.4);
+        }
+        att.combo = 0;
+        this.popup(def, '¡JUSTA!', '#e8fbff');
+        this.addScore(def, R.SCORE.parry, x, y - 40);
+        if (def.hasSpecial && !def.meterFull) def.meter = Math.min(R.METER_MAX, def.meter + 8);
+        return;
+      }
       if (res === 'block') {
         this.spark(x, y, 'block'); this.sfx('block'); this.hitstop = 45;
         this.addScore(def, R.SCORE.block);
         att.combo = 0;
+        if (kind === 'dive' && att.air) {
+          // Bloqueada: deja de picar y cae casi encima, para aterrizar vendido a tiro.
+          att.diving = false; att.f.play('idle', true);
+          att.vx = att.facing * 120; att.vy = 220; att.landRecNext = R.DIVE.landBlockMs;
+        }
         if (def.hp <= 0) this.onKO(att, def);
+        return;
+      }
+      if (res === 'break') {
+        this.spark(x, y, 'break'); this.sfx('guardBreak'); this.hitstop = 150; this.shake = 12;
+        this.popup(def, '¡GUARDIA ROTA!', '#ff8a7a');
+        this.addScore(att, R.SCORE.guardBreak, x, y - 40);
+        att.combo = 0;
+        bounce(1);
         return;
       }
       if (kind === 'punch' || kind === 'kick') att.hitConfirm = att.f.actionId;
       this.spark(x, y, kind === 'bottle' ? 'bottle' : kind === 'dart' ? 'dart' : 'hit');
-      this.sfx(kind === 'kick' ? 'kick' : kind === 'dart' ? 'dartHit' : 'punch');
+      this.sfx(kind === 'kick' || kind === 'dive' || kind === 'gancho' ? 'kick' : kind === 'dart' ? 'dartHit' : 'punch');
+      if (type) { this.popup(def, type === 'counter' ? '¡CONTRA!' : '¡CASTIGO!', type === 'counter' ? '#ffb347' : '#ff6a5a'); this.sfx('counter'); }
+      bounce(1);
       att.combo = n;
-      this.addScore(att, R.hitPoints(kind, n, this.intoxOf(att)), x, y - 40);
+      this.addScore(att, Math.round(R.hitPoints(kind, n, this.intoxOf(att)) * (type ? 1 + R.SCORE.counterBonus : 1) / 10) * 10, x, y - 40);
       if (n >= 2) this.popup(att, n + ' GOLPES', '#8bf2ce');
       if (att === this.p1) this.stats.maxCombo = Math.max(this.stats.maxCombo, n);
       // El ultimate se carga encadenando golpes.
@@ -633,8 +777,8 @@
         if (att.meterFull) { this.popup(att, '¡' + att.char.special.short + ' LISTO!', '#f8ce73'); this.sfx('ready'); }
       }
       if (kind === 'dart' && att === this.p1) this.stats.ultimates++;
-      this.hitstop = res === 'ko' ? 170 : kind === 'dart' ? 220 : kind === 'kick' ? 85 : 65;
-      this.shake = res === 'ko' || kind === 'dart' ? 14 : kind === 'punch' ? 5 : 8;
+      this.hitstop = res === 'ko' ? 170 : kind === 'dart' ? 220 : kind === 'gancho' ? 120 : kind === 'kick' || type ? 95 : kind === 'dive' ? 80 : 65;
+      this.shake = res === 'ko' || kind === 'dart' ? 14 : kind === 'punch' || kind === 'airPunch' ? 5 : 8;
       if (res === 'ko') this.onKO(att, def);
     }
 
@@ -905,7 +1049,17 @@
       }
       for (const s of this.sparks) {
         const k = s.t / s.life;
-        const col = s.kind === 'block' ? '#8fd6ff' : s.kind === 'bottle' ? '#ffd27a' : s.kind === 'dart' ? '#ffe08a' : '#fff6c2';
+        const col = s.kind === 'block' ? '#8fd6ff' : s.kind === 'bottle' ? '#ffd27a' : s.kind === 'dart' ? '#ffe08a' : s.kind === 'parry' ? '#e8fbff' : s.kind === 'break' ? '#ff8a7a' : '#fff6c2';
+        if (s.kind === 'parry' || s.kind === 'break') {
+          // Guardia justa: aro blanco que se abre. Guardia rota: aro rojo que estalla en trozos.
+          c.save(); c.globalAlpha = 1 - k; c.strokeStyle = col; c.lineWidth = 6 * (1 - k) + 2;
+          c.beginPath(); c.arc(s.x, s.y, 20 + 70 * k, 0, Math.PI * 2); c.stroke();
+          if (s.kind === 'break') {
+            c.fillStyle = '#8fd6ff';
+            for (let i = 0; i < 9; i++) { const a = s.rot + i * 0.7; const r = 30 + 110 * k; c.fillRect(s.x + Math.cos(a) * r - 4, s.y + Math.sin(a) * r + 60 * k * k - 4, 8, 8); }
+          }
+          c.restore();
+        }
         if (s.kind === 'dart') { c.save(); c.translate(s.x, s.y); c.scale(1.8, 1.8); c.translate(-s.x, -s.y); }
         c.save(); c.translate(s.x, s.y); c.rotate(s.rot);
         c.globalAlpha = 1 - k; c.strokeStyle = col; c.lineWidth = 5 - 3 * k;
@@ -967,30 +1121,51 @@
         ctx.fillStyle = grd;
         if (side === 1) ctx.fillRect(x, y, w * rh, h); else ctx.fillRect(x + w * (1 - rh), y, w * rh, h);
         ctx.strokeStyle = '#f2f4ea'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
+        // fuelle (pegar y cubrirse lo gastan): bajo la vida
+        {
+          const F = R.FUELLE, fw = 260, fh = 9, fy = y + h + 5;
+          const fx = side === 1 ? x : x + w - fw;
+          const k = Math.max(0, Math.min(1, c.fuelle / F.max));
+          ctx.fillStyle = 'rgba(5,7,12,0.85)'; ctx.fillRect(fx - 2, fy - 2, fw + 4, fh + 4);
+          const blink = (this.t % 360) < 180;
+          ctx.fillStyle = c.dizzyT > 0 ? (blink ? '#ff4d5e' : '#7a1d28') : c.exhausted ? (blink ? '#ff8a5a' : '#ffd0a8') : c.guard ? '#5fb8ff' : k < 0.3 ? '#f8ce73' : '#8bf2ce';
+          if (side === 1) ctx.fillRect(fx, fy, fw * k, fh); else ctx.fillRect(fx + fw * (1 - k), fy, fw * k, fh);
+          // marca del 30 %: por debajo, si te quedas sin fuelle no puedes pegar hasta pasarla
+          ctx.fillStyle = '#05070c';
+          const mk = side === 1 ? fx + fw * F.exhaustedUntil / F.max : fx + fw * (1 - F.exhaustedUntil / F.max);
+          ctx.fillRect(mk - 1, fy, 2, fh);
+          ctx.font = 'bold 11px ' + FONT; ctx.lineWidth = 3; ctx.strokeStyle = '#05070c';
+          ctx.textAlign = side === 1 ? 'left' : 'right';
+          const fl = c.dizzyT > 0 ? 'GUARDIA ROTA' : c.exhausted ? 'SIN FUELLE' : 'FUELLE';
+          ctx.fillStyle = c.dizzyT > 0 || c.exhausted ? '#ffd0c8' : '#dff7ef';
+          const lx = side === 1 ? fx + fw + 8 : fx - 8;
+          ctx.strokeText(fl, lx, fy + 9); ctx.fillText(fl, lx, fy + 9);
+        }
+        const yo = 14;   // lo de debajo baja para dejar sitio al fuelle
         // nombre
         ctx.font = 'bold 20px ' + FONT; ctx.textAlign = side === 1 ? 'left' : 'right';
         ctx.lineWidth = 4; ctx.strokeStyle = '#05070c'; ctx.fillStyle = '#fff';
         const nx = side === 1 ? x : x + w;
         const label = c.char.name.toUpperCase() + (this.net ? (c === this.viewer ? '  · TÚ' : '  · RIVAL') : c === this.p2 ? '  · CPU' : '');
-        ctx.strokeText(label, nx, y + h + 24); ctx.fillText(label, nx, y + h + 24);
+        ctx.strokeText(label, nx, y + h + 24 + yo); ctx.fillText(label, nx, y + h + 24 + yo);
         // marcador de puntos (solo de quien juega)
         if (this.isHuman(c)) {
           ctx.font = 'bold 17px ' + FONT; ctx.textAlign = side === 1 ? 'right' : 'left';
           ctx.lineWidth = 4; ctx.strokeStyle = '#05070c'; ctx.fillStyle = '#ffe08a';
           const sx2 = side === 1 ? x + w - 66 : x + 66, txt = R.formatPoints(c.score) + ' PTS';
-          ctx.strokeText(txt, sx2, y + h + 23); ctx.fillText(txt, sx2, y + h + 23);
+          ctx.strokeText(txt, sx2, y + h + 23 + yo); ctx.fillText(txt, sx2, y + h + 23 + yo);
         }
         // asaltos ganados
         const wi = c === this.p1 ? 0 : 1;
         for (let i = 0; i < R.ROUNDS_TO_WIN; i++) {
           const cx = side === 1 ? x + w - 12 - i * 22 : x + 12 + i * 22;
-          ctx.beginPath(); ctx.arc(cx, y + h + 17, 7, 0, Math.PI * 2);
+          ctx.beginPath(); ctx.arc(cx, y + h + 17 + yo, 7, 0, Math.PI * 2);
           ctx.fillStyle = i < this.wins[wi] ? '#f8ce73' : 'rgba(255,255,255,0.15)'; ctx.fill();
           ctx.strokeStyle = '#05070c'; ctx.lineWidth = 2; ctx.stroke();
         }
         // puntillo y munición (en el modo salvaje incluye el caos y puede pasar del 100 %)
         const intox = this.wild ? this.levelOf(c) : this.intoxOf(c);
-        const my = y + h + 36, mw = 150;
+        const my = y + h + 36 + yo, mw = 150;
         const mx = side === 1 ? x : x + w - mw;
         ctx.fillStyle = 'rgba(5,7,12,0.75)'; ctx.fillRect(mx - 2, my - 2, mw + 4, 14);
         const ig = ctx.createLinearGradient(mx, 0, mx + mw, 0);
