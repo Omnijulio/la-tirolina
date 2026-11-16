@@ -61,8 +61,12 @@
   const COUNTER = { counterDamage: 1.25, counterHitstun: 1.3, punishDamage: 1.2, punishHitstun: 1.25 };
   // Derribo (agarre y gancho): tumbado y luego levantándose, sin que le puedan pegar.
   const KNOCKDOWN = { downMs: 650, getupMs: 320 };
-  // Paso rápido: doble toque del joystick hacia delante o hacia atrás.
-  const DASH = { fwdMs: 180, fwdV: 640, backMs: 200, backV: 560, recoverMs: 90, doubleTapMs: 260 };
+  /* Paso rápido. En el móvil: un toque rápido en la zona del joystick y, enseguida, volver a
+   * apoyar el pulgar y deslizarlo hacia un lado (touchTapMs: lo que puede durar el toque;
+   * touchGapMs: tiempo para volver a apoyar; touchSwipeMs: tiempo para deslizar). En teclado:
+   * doble pulsación de ← o → (doubleTapMs). La CPU lo pide directamente (dashF/dashB). */
+  const DASH = { fwdMs: 180, fwdV: 640, backMs: 200, backV: 560, recoverMs: 90, doubleTapMs: 260,
+    touchTapMs: 220, touchGapMs: 350, touchSwipeMs: 450 };
   // Agarre: muy de cerca y con el rival en el suelo, libre y sin estar bloqueando o aturdido.
   const GRAB = { range: 135, holdMs: 320, techMs: 260, throwVx: 380, throwVy: -520, techPush: 360, techStunMs: 260 };
   // Patada en picado: desde un poco de altura; bloqueada o fallada aterrizas vendido.

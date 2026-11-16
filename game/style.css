@@ -66,6 +66,7 @@ body.touch.fighting.portrait #touch::before {
   box-shadow: 0 4px 12px #0008;
 }
 .stick-base.active .stick-knob { transition: none; }
+.stick-base.armed { box-shadow: 0 0 0 3px var(--mint), 0 0 18px #8bf2ce88; }   /* toque hecho: ahora desliza para el paso rápido */
 .stick-base:not(.active) .stick-knob { transition: transform .12s; }
 .abtns { display: grid; grid-template-columns: repeat(3, auto); gap: clamp(6px, 2vmin, 12px); touch-action: none; align-self: flex-end; }
 .tbtn {

@@ -83,7 +83,7 @@
       this.fuelle = R().FUELLE.max; this.regenAt = 0; this.exhausted = false; this.guardWas = false;
       this.blockInput = false; this.blockPressT = -1e9; this.blockReleaseT = -1e9; this.parryIdle = 1e9; this.parryUsed = false;
       this.dizzyT = 0; this.downT = 0; this.getupT = 0; this.downPending = false;
-      this.dashT = 0; this.dashDir = 0; this.dashRec = 0; this.prevDir = 0; this.tapDir = 0; this.tapT = -1e9;
+      this.dashT = 0; this.dashDir = 0; this.dashRec = 0;
       this.landRecT = 0; this.landRecNext = 0; this.diving = false; this.diveT = 0; this.airAttacked = false;
       this.sweatAt = 0;
       this.f.enabled = true;
@@ -308,13 +308,6 @@
         const want = Math.sign(opp.cx - this.cx);
         if (want && Math.abs(opp.cx - this.cx) > 6) this.facing = want;
       }
-      // Paso rápido: doble toque del joystick (o de la flecha) hacia el mismo lado.
-      let wantDash = 0;
-      if (dir !== 0 && this.prevDir === 0) {
-        if (dir === this.tapDir && this.t - this.tapT <= rules.DASH.doubleTapMs) { wantDash = dir; this.tapDir = 0; }
-        else { this.tapDir = dir; this.tapT = this.t; }
-      }
-      this.prevDir = dir;
       // Solo cubre el joystick abajo (o ↓/S): andar hacia atrás ya no cubre.
       this.guard = !this.air && (this.blockstun > 0 || (!this.attacking && this.hitstun <= 0 && this.stumble <= 0 &&
         this.dashT <= 0 && this.landRecT <= 0 && !!ctl.block));
@@ -329,8 +322,7 @@
         } else if (this.dashT > 0) {
           // Deslizándose: la velocidad la puso startDash.
         } else if (!this.busy && !this.attacking) {
-          if (wantDash && !ctl.block) this.startDash(wantDash, speed, match);
-          else if (ctl.block) this.vx = 0;
+          if (ctl.block) this.vx = 0;
           else if (dir) {
             this.vx = dir * (dir === this.facing ? C.WALK_F : C.WALK_B) * speed;
             if (intox > 0.1) this.vx += Math.sin(this.t / 170 + this.seed) * 80 * intox;
@@ -347,7 +339,9 @@
             if (a === 'punch') { this.chain = 0; this.startPunch(opp, imp, match); break; }
             if (a === 'kick') { this.chain = 0; this.startAttack('kick', imp, match, false); break; }
             if (a === 'grab') { this.chain = 0; this.startAttack('grab', imp, match, false); break; }
+            // Paso rápido: la CPU lo pide hacia delante/atrás; el jugador, hacia un lado de la pantalla.
             if (a === 'dashF' || a === 'dashB') { this.startDash(a === 'dashF' ? this.facing : -this.facing, speed, match); break; }
+            if (a === 'dashLeft' || a === 'dashRight') { const d = (a === 'dashLeft' ? -1 : 1) * (this.invertT ? -1 : 1); this.startDash(d, speed, match); break; }
             if (a === 'bottle') { this.tryThrow(match); break; }
             if (a === 'special') { this.trySpecial(match); break; }
             if (a === 'smoke') { this.trySmoke(match); break; }

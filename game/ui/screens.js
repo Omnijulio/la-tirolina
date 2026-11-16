@@ -898,7 +898,7 @@
             <tr><td><b>En el aire</b></td><td>PUÑO: puño corto hacia abajo. PATADA: <b>patada en picado</b>, caes en diagonal muy rápido. Si la bloquean o falla, aterrizas vendido.</td></tr>
             <tr><td><b>Guardia</b></td><td>Joystick <b>abajo</b> (andar hacia atrás ya no cubre). Cada golpe bloqueado gasta fuelle y quita un pelín de vida. Si el fuelle llega a 0 cubriéndote: <b>¡GUARDIA ROTA!</b>, te quedas mareado.</td></tr>
             <tr><td><b>Guardia justa</b></td><td>Baja el joystick <b>justo antes</b> del golpe (habiendo estado un momento sin cubrirte): no gasta nada, recuperas fuelle y el rival se queda vendido. Machacar el joystick no sirve.</td></tr>
-            <tr><td><b>Paso rápido</b></td><td>Doble toque del joystick hacia delante o hacia atrás.</td></tr>
+            <tr><td><b>Paso rápido</b></td><td>Móvil: un <b>toque rápido</b> en el joystick (apoyar y soltar) y, enseguida, vuelve a apoyar el pulgar y <b>desliza hacia un lado</b>. Teclado: doble pulsación de ← o →.</td></tr>
           </table>
           <p><b>Fuelle</b> (barra bajo la vida): pegar lo gasta, unos 10 golpes. Se recupera entero en unos 3 s cuando dejas de pegar, pero <b>no mientras te cubres</b>. Si lo vacías pegando, no puedes atacar hasta que pase de la marca. Pega y descansa.</p>
           <p><b>¡CONTRA!</b>: pillar al rival mientras arranca un golpe pega más. <b>¡CASTIGO!</b>: pillarlo recuperándose de uno fallado o bloqueado. Los golpes echan hacia atrás; si el rival está contra el borde, el que sale rebotado eres tú.</p></section>
@@ -930,7 +930,7 @@
             <tr><td>U / V</td><td>Ultimate (Dardo)</td></tr>
             <tr><td>F / B</td><td>Fumar</td></tr>
             <tr><td>Esc / P</td><td>Pausa</td></tr></table></section>
-          <section><h3>Móvil</h3><p><b>Joystick</b> a la izquierda: apoya el pulgar en cualquier punto y arrastra sin levantarlo. Lados = andar (doble toque = paso rápido), arriba = saltar (en diagonal, hacia ese lado), abajo = guardia.</p>
+          <section><h3>Móvil</h3><p><b>Joystick</b> a la izquierda: apoya el pulgar en cualquier punto y arrastra sin levantarlo. Lados = andar (toque rápido y luego deslizar = paso rápido), arriba = saltar (en diagonal, hacia ese lado), abajo = guardia.</p>
           <p>A la derecha: <b>Puño</b>, <b>Patada</b>, <b>Agarre</b>, <b>Botellín</b>, <b>Fumar</b> y <b>Dardo</b> (el aro se llena con los combos). Mejor en horizontal y a pantalla completa.</p>
           <p>Ganar da mucho dinero: úsalo en la tienda para desbloquear luchadores y mejoras.</p></section>
         </div>

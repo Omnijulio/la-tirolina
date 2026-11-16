@@ -20,9 +20,10 @@ Se ha tomado como referencia de los clásicos que funcionan con pocos botones: *
 
 ## Controles
 
-- **Joystick**: lados = andar; **doble toque** = paso rápido (adelante o atrás); arriba = saltar; **abajo = guardia**. Andar hacia atrás **ya no cubre**.
+- **Joystick**: lados = andar; arriba = saltar; **abajo = guardia**. Andar hacia atrás **ya no cubre**.
+- **Paso rápido en el móvil**: un **toque rápido** en la zona del joystick (apoyar y soltar sin mover, ≤220 ms) y, en menos de 350 ms, volver a apoyar el pulgar y **deslizarlo hacia un lado** (antes de 450 ms). Tras el toque, la base del joystick se ilumina mientras se puede hacer. Hacia el rival es paso adelante; hacia el otro lado, paso atrás. Tiempos en `DASH` (`touchTapMs`, `touchGapMs`, `touchSwipeMs`).
 - **Botones**: PUÑO, PATADA, **AGARRE** (sustituye a GUARDIA), BOTELLÍN, ULTIMATE y FUMAR.
-- **Teclado**: J/Z puño, K/X patada, **H/N agarre**, ↓/S/G guardia, L/C botellín, U/V ultimate, F/B fumar. Doble toque de ←/→ = paso rápido.
+- **Teclado**: J/Z puño, K/X patada, **H/N agarre**, ↓/S/G guardia, L/C botellín, U/V ultimate, F/B fumar. Doble pulsación de ← o → = paso rápido.
 
 ## Golpes
 

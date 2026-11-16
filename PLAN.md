@@ -85,7 +85,7 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - **Patada**: larga y fuerte, pero bloqueada de cerca o fallada se castiga.
 - **Agarre**: botón **AGARRE** en lugar de GUARDIA. Es imbloqueable, tira al suelo y se escapa de él pulsando AGARRE a tiempo.
 - **Patada en picado** en el aire.
-- **Paso rápido** con doble toque.
+- **Paso rápido**: en el móvil, toque rápido en el joystick y enseguida deslizar hacia un lado; en teclado, doble pulsación de ← o →.
 - **¡CONTRA!** y **¡CASTIGO!**: más daño al pillar al rival arrancando un golpe o recuperándose de uno.
 - **Retroceso** en golpes y bloqueos. **Regla de esquina**: si el rival está contra el borde, retrocede el que pega.
 - **Derribo** con levantarse invulnerable.
