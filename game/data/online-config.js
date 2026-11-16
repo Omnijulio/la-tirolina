@@ -6,6 +6,6 @@
  * Vacío = solo ranking de cada móvil.
  */
 window.TROLINA_ONLINE = {
-  supabaseUrl: '',
-  supabaseKey: ''
+  supabaseUrl: 'https://qicbjpdkdxjaxiithztc.supabase.co',
+  supabaseKey: 'sb_publishable_n3Z5hZB775c7tb7zl6jdSw_el4gsyzh'
 };

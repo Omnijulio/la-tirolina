@@ -64,7 +64,7 @@ Estado: **v0.11** (16/11/2026). Un jugador contra la CPU, en navegador de escrit
 
 - **Puntuación** en cada combate: golpes (más con combos y con puntillo: «estilo»), ultimates, bloqueos, asaltos (perfecto y tiempo), victoria; ×dificultad y ×modo salvaje. Marcador en pantalla y desglose al final.
 - **Ranking** (top 20 en este dispositivo) con firma opcional: se recuerda el nombre, te dice qué puesto conseguirías y la casa invita a una ronda (+10 €) por firmar. Pantalla Ranking en el menú con filtros por modo.
-- **Ranking compartido** («🌍 La Trolina») preparado con Supabase (v0.11): falta crear el proyecto y poner la URL y la clave publicable en `game/data/online-config.js` (ver `SUPABASE.md`).
+- **Ranking compartido** («🌍 La Trolina») con Supabase (v0.11), conectado al proyecto `la-tirolina` (ver `SUPABASE.md`).
 
 ## Próximas fases propuestas
 

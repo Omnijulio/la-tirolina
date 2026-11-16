@@ -31,7 +31,7 @@ Peticiones incorporadas, en orden:
 
 14. **v0.10 — Puntuación y ranking**: puntos en cada combate y ranking (en el dispositivo) con firma opcional premiada.
 
-15. **v0.11 — Ranking compartido**: preparado para Supabase (tabla y reglas en `supabase/ranking.sql`, configuración en `game/data/online-config.js`); sin configurar, solo hay ranking por móvil. Ver `SUPABASE.md`.
+15. **v0.11 — Ranking compartido**: con Supabase (tabla y reglas en `supabase/ranking.sql`, conectado en `game/data/online-config.js`); sin configuración o sin conexión, sigue el ranking de cada móvil. Ver `SUPABASE.md`.
 
 El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 

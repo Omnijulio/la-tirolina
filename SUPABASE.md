@@ -1,5 +1,7 @@
 # Ranking compartido (Supabase)
 
+**Estado:** conectado al proyecto `la-tirolina` (`https://qicbjpdkdxjaxiithztc.supabase.co`, clave publicable en `game/data/online-config.js`).
+
 Sin configurar, cada móvil tiene su propio ranking. Con Supabase (gratis) todos los que juegan comparten el «Ranking de La Trolina».
 
 ## Puesta en marcha (una vez)
