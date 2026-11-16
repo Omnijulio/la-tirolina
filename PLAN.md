@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.2 jugable** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil.
+Estado: **v0.3** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -16,6 +16,15 @@ Estado: **v0.2 jugable** (16/11/2026). Un jugador contra la CPU, en navegador de
 - **Guardado** automático en el navegador.
 - **6 luchadores** (El Barbas + 5 variantes de color provisionales con estadísticas propias).
 
+## Hecho en v0.3
+
+- **Ultimate de El Barbas: Dardo certero**. Se carga encadenando combos; dardo ultrapreciso que busca al rival, no se puede bloquear y hace muchísimo daño. Congelado de pantalla al activarlo.
+- **Combos**: los golpes que conectan se pueden encadenar (puño, puño, patada… y rematar con el dardo).
+- **Peleas más largas**: el doble de vida y asaltos de 99 s.
+- **Joystick táctil** flotante: moverse, saltar (también en diagonal) y cubrirse sin levantar el pulgar.
+- **Bolsa de azúcar** (60 €): 30 s de velocidad sin puntillo, bajón y desmayo a los 45 s.
+- **Paquete de tabaco**: fumar en combate baja el puntillo (te deja quieto y da tos si abusas).
+
 ## Próximas fases propuestas
 
 ### Fase 1 — Publicar y probar con amigos
@@ -25,7 +34,8 @@ Estado: **v0.2 jugable** (16/11/2026). Un jugador contra la CPU, en navegador de
 ### Fase 2 — Identidad de personajes
 - [ ] Arte propio para cada luchador (fotos de cada amigo → sprites como El Barbas).
 - [ ] Animaciones que faltan: caminar, salto, recibir golpe, caída/KO, victoria, beber.
-- [ ] Un movimiento especial por personaje (p. ej. bandeja del Camarero, carrera del Runner).
+- [ ] Ultimate propio para el resto de personajes (la estructura `special` ya existe; p. ej. bandeja del Camarero, sprint del Runner).
+- [ ] Pose propia de fumar y de lanzar el dardo.
 
 ### Fase 3 — Cinemáticas
 - [ ] Ilustraciones o vídeos cortos por combate en `assets/cinematics/` y registrarlos en `game/data/cinematics.js` (ya admite `image` y `video`).

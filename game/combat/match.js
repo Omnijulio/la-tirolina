@@ -32,6 +32,10 @@
       this.diff = R.DIFFICULTIES[opts.difficulty] || R.DIFFICULTIES.normal;
       this.timeScale = opts.timeScale || 1;
       const data = BottleAttack.install(root.FIGHTER_DATA);
+      // Ultimate de El Barbas: misma animación de lanzamiento, pero suelta un dardo.
+      const dartAnim = JSON.parse(JSON.stringify(data.animations.throwBottle));
+      for (const f of dartAnim.frames) for (const e of f.events || []) if (e.type === 'spawn-projectile') e.weapon = 'dart';
+      data.animations.throwDart = dartAnim;
       const mk = (side, sel, isCPU) => new Combatant({
         character: sel.character, image: this.assets.characters[sel.character.id], data,
         loadout: sel.loadout, isCPU, side
@@ -47,21 +51,23 @@
       this.round = 0; this.wins = [0, 0];
       this.matchTime = 0; this.t = 0;
       this.camera = 0; this.shake = 0; this.hitstop = 0; this.slowmo = 0;
-      this.sparks = []; this.popups = []; this.dusts = [];
-      this.stats = { perfectRounds: 0, timeLeft: 0, maxCombo: 0 };
+      this.sparks = []; this.popups = []; this.dusts = []; this.smokes = []; this.darts = [];
+      this.superFreeze = 0; this.superOwner = null;
+      this.stats = { perfectRounds: 0, timeLeft: 0, maxCombo: 0, ultimates: 0 };
       this.banner = null;
       this.ended = false;
       this.startRound();
     }
 
     sfx(name) { if (this.o.sfx) this.o.sfx.play(name); }
-    intoxOf(c) { return R.intoxAt(c.loadout, this.matchTime); }
+    intoxOf(c) { return R.intoxAt(c.loadout, this.matchTime, c.relief); }
 
     startRound() {
       this.round++;
       this.p1.reset(330, 1);
       this.p2.reset(630, -1);
       this.bottles.reset();
+      this.darts = []; this.smokes = []; this.superFreeze = 0;
       this.timer = R.ROUND_SECONDS;
       this.phase = 'intro'; this.phaseT = 0; this.fightCalled = false;
       this.roundWinner = null;
@@ -80,7 +86,73 @@
       for (let i = 0; i < 6; i++) this.dusts.push({ x: x + (Math.random() - 0.5) * 60, y, vx: (Math.random() - 0.5) * 120, r: 6 + Math.random() * 8 * (size || 1), t: 0, life: 420 });
     }
     spark(x, y, kind) {
-      this.sparks.push({ x, y, kind, t: 0, life: kind === 'block' ? 180 : 240, rot: Math.random() * Math.PI });
+      this.sparks.push({ x, y, kind, t: 0, life: kind === 'block' ? 180 : kind === 'dart' ? 420 : 240, rot: Math.random() * Math.PI });
+    }
+    smokePuff(c) {
+      const p = c.cigTip();
+      this.smokes.push({ x: p.x, y: p.y, vx: (Math.random() - 0.5) * 24 + c.facing * 14, r: 4 + Math.random() * 4, t: 0, life: 1300 });
+    }
+
+    /** Congelado de pantalla al activar el ultimate (como un "super" arcade). */
+    superFlash(c) {
+      this.superFreeze = 700; this.superOwner = c;
+      this.superText = { text: '¡' + c.char.special.name.toUpperCase() + '!', t: 0, c };
+      this.sfx('super');
+    }
+
+    spawnDart(owner, ev) {
+      const target = owner === this.p1 ? this.p2 : this.p1;
+      const hb = target.f.getHurtbox();
+      const tx = hb.x + hb.w / 2, ty = hb.y + hb.h * 0.35;
+      let dx = tx - ev.x, dy = ty - ev.y;
+      if (Math.sign(dx) !== owner.facing) { dx = owner.facing; dy = 0; }
+      const len = Math.hypot(dx, dy) || 1;
+      const speed = 1400;
+      this.darts.push({ owner, target, x: ev.x, y: ev.y, vx: dx / len * speed, vy: dy / len * speed, speed, age: 0, trail: [] });
+      this.sfx('dart');
+    }
+
+    updateDarts(dt) {
+      for (const d of this.darts) {
+        let remaining = dt;
+        while (remaining > 0 && !d.dead) {
+          const ms = Math.min(16, remaining); remaining -= ms;
+          const s = ms / 1000;
+          // Ultrapreciso: corrige la trayectoria hacia el rival mientras vuela.
+          if (d.target.state !== 'ko') {
+            const hb = d.target.f.getHurtbox();
+            const want = Math.atan2(hb.y + hb.h * 0.35 - d.y, hb.x + hb.w / 2 - d.x);
+            let ang = Math.atan2(d.vy, d.vx);
+            let diff = ((want - ang + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+            ang += Math.max(-4 * s, Math.min(4 * s, diff));
+            d.vx = Math.cos(ang) * d.speed; d.vy = Math.sin(ang) * d.speed;
+          }
+          const ax = d.x, ay = d.y;
+          d.x += d.vx * s; d.y += d.vy * s; d.age += ms;
+          d.trail.push({ x: d.x, y: d.y }); if (d.trail.length > 7) d.trail.shift();
+          if (this.phase === 'fight' && d.target.state !== 'ko') {
+            const t = BottleSystem.segmentBox(ax, ay, d.x, d.y, d.target.f.getHurtbox(), 6);
+            if (t !== null) {
+              d.x = ax + (d.x - ax) * t; d.y = ay + (d.y - ay) * t; d.dead = true;
+              this.applyHit(d.owner, d.target, 'dart', d.x, d.y);
+            }
+          }
+          if (d.x < -120 || d.x > 1080 || d.y < -100 || d.y > 560 || d.age > 2000) d.dead = true;
+        }
+      }
+      this.darts = this.darts.filter((d) => !d.dead);
+    }
+
+    /** Recoge los eventos de suelta del dardo que BottleSystem deja en la cola del actor. */
+    collectDartEvents() {
+      for (const c of this.fighters) {
+        const keep = [];
+        for (const ev of c.f.drainEvents()) {
+          if (ev.type === 'spawn-projectile' && ev.weapon === 'dart') this.spawnDart(c, ev);
+          else keep.push(ev);
+        }
+        c.f.events.push(...keep);
+      }
     }
 
     incomingBottle(c) {
@@ -105,6 +177,12 @@
       this.updateEffects(real);
       if (this.banner) this.banner.t += real;
       const actions = this.o.input ? this.o.input.take() : [];
+      if (this.superText) this.superText.t += real;
+      if (this.superFreeze > 0) {
+        this.superFreeze -= real;
+        if (actions.length && this.o.input) this.o.input.queue.unshift(...actions);
+        return;
+      }
       if (this.hitstop > 0) { this.hitstop -= real; return; }
       let dt = real;
       if (this.slowmo > 0) { this.slowmo -= real; dt *= 0.3; }
@@ -135,6 +213,9 @@
       if (this.phase === 'fight') this.checkMelee();
       const targets = this.phase === 'fight' ? [this.p1.f, this.p2.f] : [];
       this.bottles.update(dt, [this.p1.f, this.p2.f], targets);
+      this.collectDartEvents();
+      this.updateDarts(dt);
+      for (const c of this.fighters) if (c.dropCig) { c.dropCig = false; this.popup(c, '¡SE LE CAE EL PITILLO!', '#ff8a7a'); }
 
       const mid = (this.p1.cx + this.p2.cx) / 2;
       const target = Math.max(-24, Math.min(24, (mid - 480) / 2));
@@ -143,7 +224,8 @@
     }
 
     updateEffects(dt) {
-      for (const list of [this.sparks, this.popups, this.dusts]) for (const e of list) e.t += dt;
+      for (const list of [this.sparks, this.popups, this.dusts, this.smokes]) for (const e of list) e.t += dt;
+      this.smokes = this.smokes.filter((e) => e.t < e.life);
       this.sparks = this.sparks.filter((e) => e.t < e.life);
       this.popups = this.popups.filter((e) => e.t < e.life);
       this.dusts = this.dusts.filter((e) => e.t < e.life);
@@ -198,22 +280,32 @@
     }
 
     applyHit(att, def, kind, x, y) {
-      const dmg = R.damageFor(kind, att.loadout.power, att === this.p2 ? this.diff.cpuDamage : 1);
       const stunned = def.hitstun > 0;
-      const res = def.takeHit(kind, dmg, att.cx);
+      const n = kind === 'dart' ? (stunned ? att.combo + 1 : 1) : stunned ? att.combo + 1 : 1;
+      const sc = kind === 'dart' ? { damage: 1, knockback: 1, hitstun: 1 } : R.comboScale(n);
+      const mv = R.MOVES[kind];
+      const dmg = R.damageFor(kind, att.loadout.power, att === this.p2 ? this.diff.cpuDamage : 1) * sc.damage;
+      const res = def.takeHit(kind, dmg, att.cx, { hitstun: mv.hitstun * sc.hitstun, knockback: mv.knockback * sc.knockback });
       if (res === 'block') {
         this.spark(x, y, 'block'); this.sfx('block'); this.hitstop = 45;
         att.combo = 0;
         if (def.hp <= 0) this.onKO(att, def);
         return;
       }
-      this.spark(x, y, kind === 'bottle' ? 'bottle' : 'hit');
-      this.sfx(kind === 'kick' ? 'kick' : 'punch');
-      att.combo = stunned ? att.combo + 1 : 1;
-      if (att.combo >= 2) this.popup(att, att.combo + ' GOLPES', '#8bf2ce');
-      if (att === this.p1) this.stats.maxCombo = Math.max(this.stats.maxCombo, att.combo);
-      this.hitstop = res === 'ko' ? 170 : kind === 'kick' ? 85 : 65;
-      this.shake = res === 'ko' ? 14 : kind === 'punch' ? 5 : 8;
+      if (kind === 'punch' || kind === 'kick') att.hitConfirm = att.f.actionId;
+      this.spark(x, y, kind === 'bottle' ? 'bottle' : kind === 'dart' ? 'dart' : 'hit');
+      this.sfx(kind === 'kick' ? 'kick' : kind === 'dart' ? 'dartHit' : 'punch');
+      att.combo = n;
+      if (n >= 2) this.popup(att, n + ' GOLPES', '#8bf2ce');
+      if (att === this.p1) this.stats.maxCombo = Math.max(this.stats.maxCombo, n);
+      // El ultimate se carga encadenando golpes.
+      if (att.hasSpecial && kind !== 'dart' && !att.meterFull) {
+        att.meter = Math.min(R.METER_MAX, att.meter + R.meterGain(n));
+        if (att.meterFull) { this.popup(att, '¡' + att.char.special.short + ' LISTO!', '#f8ce73'); this.sfx('ready'); }
+      }
+      if (kind === 'dart' && att === this.p1) this.stats.ultimates++;
+      this.hitstop = res === 'ko' ? 170 : kind === 'dart' ? 220 : kind === 'kick' ? 85 : 65;
+      this.shake = res === 'ko' || kind === 'dart' ? 14 : kind === 'punch' ? 5 : 8;
       if (res === 'ko') this.onKO(att, def);
     }
 
@@ -267,6 +359,7 @@
         perfectRounds: this.stats.perfectRounds,
         timeLeft: Math.round(this.stats.timeLeft),
         maxCombo: this.stats.maxCombo,
+        ultimates: this.stats.ultimates,
         bottles: this.p1.loadout.bottles,
         difficulty: this.o.difficulty,
         matchSeconds: Math.round(this.matchTime)
@@ -291,6 +384,7 @@
       }
       this.terrace.draw(ctx, {
         cameraX: this.camera, drawActors: (c) => {
+          if (this.superFreeze > 0 && this.superOwner) this.drawSuperBack(c);
           for (const f of this.fighters) f.drawShadow(c);
           if (I > 0.15) {
             const g = { ghost: true, alpha: Math.min(0.4, 0.32 * I), dx: Math.sin(this.t / 420) * 22 * I, dy: Math.cos(this.t / 610) * 6 * I };
@@ -305,6 +399,7 @@
             }
           }
           this.bottles.draw(c, [this.p1.f, this.p2.f]);
+          this.drawDarts(c);
           this.drawWorldFx(c);
         }
       });
@@ -314,7 +409,50 @@
       this.drawBanner(ctx);
     }
 
+    drawSuperBack(c) {
+      const k = Math.min(1, (700 - this.superFreeze) / 120);
+      c.save();
+      c.fillStyle = 'rgba(6,4,14,' + (0.72 * k) + ')';
+      c.fillRect(-100, -50, 1160, 700);
+      const o = this.superOwner;
+      const g = c.createRadialGradient(o.cx, C.GROUND - 170, 10, o.cx, C.GROUND - 170, 260);
+      g.addColorStop(0, 'rgba(248,206,115,' + (0.55 * k) + ')'); g.addColorStop(1, 'rgba(248,206,115,0)');
+      c.fillStyle = g; c.fillRect(o.cx - 260, C.GROUND - 430, 520, 520);
+      c.strokeStyle = 'rgba(255,240,190,' + (0.5 * k) + ')'; c.lineWidth = 3;
+      for (let i = 0; i < 14; i++) {
+        const a = i / 14 * Math.PI * 2 + this.t / 400;
+        c.beginPath();
+        c.moveTo(o.cx + Math.cos(a) * 90, C.GROUND - 170 + Math.sin(a) * 90);
+        c.lineTo(o.cx + Math.cos(a) * 240, C.GROUND - 170 + Math.sin(a) * 240);
+        c.stroke();
+      }
+      c.restore();
+    }
+
+    drawDarts(c) {
+      for (const d of this.darts) {
+        c.save();
+        for (let i = 0; i < d.trail.length; i++) {
+          const p = d.trail[i];
+          c.globalAlpha = (i + 1) / d.trail.length * 0.5;
+          c.fillStyle = '#fff3c4';
+          c.fillRect(p.x - 3, p.y - 2, 6, 4);
+        }
+        c.globalAlpha = 1;
+        c.translate(d.x, d.y);
+        c.rotate(Math.atan2(d.vy, d.vx));
+        c.scale(C.S, C.S);
+        drawDartShape(c);
+        c.restore();
+      }
+    }
+
     drawWorldFx(c) {
+      for (const sm of this.smokes) {
+        const k = sm.t / sm.life;
+        c.fillStyle = 'rgba(225,225,232,' + (0.6 * (1 - k)) + ')';
+        c.beginPath(); c.arc(sm.x + sm.vx * sm.t / 1000 + Math.sin(sm.t / 200) * 4, sm.y - k * 70, sm.r * (1 + 2.2 * k), 0, Math.PI * 2); c.fill();
+      }
       for (const d of this.dusts) {
         const k = d.t / d.life;
         c.fillStyle = 'rgba(190,180,170,' + (0.45 * (1 - k)) + ')';
@@ -322,7 +460,8 @@
       }
       for (const s of this.sparks) {
         const k = s.t / s.life;
-        const col = s.kind === 'block' ? '#8fd6ff' : s.kind === 'bottle' ? '#ffd27a' : '#fff6c2';
+        const col = s.kind === 'block' ? '#8fd6ff' : s.kind === 'bottle' ? '#ffd27a' : s.kind === 'dart' ? '#ffe08a' : '#fff6c2';
+        if (s.kind === 'dart') { c.save(); c.translate(s.x, s.y); c.scale(1.8, 1.8); c.translate(-s.x, -s.y); }
         c.save(); c.translate(s.x, s.y); c.rotate(s.rot);
         c.globalAlpha = 1 - k; c.strokeStyle = col; c.lineWidth = 5 - 3 * k;
         const n = s.kind === 'block' ? 6 : 8;
@@ -333,6 +472,7 @@
         c.fillStyle = col; c.globalAlpha = (1 - k) * 0.8;
         c.beginPath(); c.arc(0, 0, 12 * (1 - k) + 2, 0, Math.PI * 2); c.fill();
         c.restore();
+        if (s.kind === 'dart') c.restore();
       }
       for (const p of this.popups) {
         const k = p.t / p.life;
@@ -426,6 +566,44 @@
           ctx.font = 'bold 11px ' + FONT; ctx.fillStyle = '#8a8f99';
           ctx.fillText('SIN BOTELLINES', ax, my + 9);
         }
+        // fila de estado: tabaco y azúcar
+        ctx.font = 'bold 12px ' + FONT; ctx.lineWidth = 3; ctx.strokeStyle = '#05070c';
+        let sx = side === 1 ? mx + 112 : mx + mw - 112;
+        const status = (txt, col) => {
+          ctx.fillStyle = col; ctx.textAlign = side === 1 ? 'left' : 'right';
+          ctx.strokeText(txt, sx, my + 27); ctx.fillText(txt, sx, my + 27);
+          sx += side * (ctx.measureText(txt).width + 12);
+        };
+        if (c.loadout.cigs) {
+          const ix = side === 1 ? sx : sx - 16;
+          ctx.fillStyle = '#f2efe6'; ctx.fillRect(ix, my + 19, 12, 4);
+          ctx.fillStyle = '#ff7a2e'; ctx.fillRect(ix + (side === 1 ? 12 : -2), my + 19, 3, 4);
+          sx += side * 20;
+          status('×' + c.cigs, c.smoking ? '#ffb347' : '#e8e6df');
+        }
+        if (c.loadout.sugar) {
+          const ph = R.sugarPhase(c.loadout, this.matchTime);
+          if (c.faintT > 0) status('FRITO ' + Math.ceil(c.faintT / 1000) + 's', '#ff6a5a');
+          else if (ph === 'boost') status('AZÚCAR ' + Math.ceil(R.SUGAR.boostSec - this.matchTime) + 's', '#9ee6ff');
+          else if (ph === 'fading') status('BAJÓN ' + Math.ceil(R.SUGAR.crashSec - this.matchTime) + 's', (this.t % 400) < 200 ? '#ff8a7a' : '#ffd0c8');
+        }
+        // medidor del ultimate
+        if (c.hasSpecial) {
+          const ey = my + 38, ew = 150;
+          const ex = side === 1 ? x : x + w - ew;
+          const full = c.meterFull;
+          ctx.fillStyle = 'rgba(5,7,12,0.8)'; ctx.fillRect(ex - 2, ey - 2, ew + 4, 12);
+          const eg = ctx.createLinearGradient(ex, 0, ex + ew, 0);
+          eg.addColorStop(0, '#5fd3ff'); eg.addColorStop(1, full ? '#ffffff' : '#8bf2ce');
+          ctx.fillStyle = eg; ctx.fillRect(ex, ey, ew * c.meter / R.METER_MAX, 8);
+          for (let i = 1; i < 4; i++) { ctx.fillStyle = '#05070c'; ctx.fillRect(ex + ew * i / 4, ey, 2, 8); }
+          ctx.textAlign = side === 1 ? 'left' : 'right';
+          ctx.font = 'bold 12px ' + FONT;
+          const label = full ? '¡' + c.char.special.short + ' LISTO!' + (c === this.p1 && !this.o.autoplay ? ' (U)' : '') : c.char.special.short + ' ' + Math.floor(c.meter) + '%';
+          ctx.fillStyle = full ? ((this.t % 500) < 250 ? '#f8ce73' : '#ffffff') : '#bfe9f5';
+          const lx = side === 1 ? ex + ew + 10 : ex - 10;
+          ctx.strokeText(label, lx, ey + 9); ctx.fillText(label, lx, ey + 9);
+        }
       }
       // reloj
       ctx.fillStyle = 'rgba(5,7,12,0.9)'; ctx.fillRect(446, 12, 68, 52);
@@ -436,12 +614,29 @@
       if (playerIntox > 0.55) {
         ctx.font = 'bold 13px ' + FONT; ctx.fillStyle = '#f8ce73';
         ctx.globalAlpha = 0.6 + 0.4 * Math.sin(this.t / 200);
-        ctx.fillText('VAS FINO…', 480, 122);
+        ctx.fillText('VAS FINO…', 480, 140);
       }
       ctx.restore();
     }
 
+    drawSuperText(ctx) {
+      const st = this.superText;
+      if (!st || st.t > 1300) return;
+      const k = Math.min(1, st.t / 160), out = st.t > 1000 ? 1 - (st.t - 1000) / 300 : 1;
+      ctx.save();
+      ctx.globalAlpha = out;
+      const y = 190;
+      ctx.fillStyle = 'rgba(5,7,12,0.75)'; ctx.fillRect(0, y - 34, 960, 62);
+      ctx.fillStyle = st.c.char.color; ctx.fillRect(0, y - 34, 960, 3); ctx.fillRect(0, y + 25, 960, 3);
+      ctx.font = 'bold 44px ' + FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const x = 480 + (1 - k) * (st.c === this.p1 ? -400 : 400);
+      ctx.lineWidth = 8; ctx.strokeStyle = '#0a0610'; ctx.strokeText(st.text, x, y);
+      ctx.fillStyle = '#f8ce73'; ctx.fillText(st.text, x, y);
+      ctx.restore();
+    }
+
     drawBanner(ctx) {
+      this.drawSuperText(ctx);
       const b = this.banner;
       if (!b) return;
       const k = Math.min(1, b.t / 180);

@@ -22,11 +22,15 @@
     <button id="pauseBtn" aria-label="Pausa">❚❚</button>
   </div>
   <div id="touch" aria-hidden="true">
-    <div class="dpad"><span data-dir="left">◀</span><span data-dir="up">▲</span><span data-dir="right">▶</span></div>
+    <div class="stick-zone">
+      <div class="stick-base"><i class="a-l">◀</i><i class="a-u">▲</i><i class="a-r">▶</i><i class="a-d">▼</i><div class="stick-knob"></div></div>
+    </div>
     <div class="abtns">
+      <button class="tbtn smoke" data-act="smoke">FUMAR<b class="count" id="cigCount">0</b></button>
       <button class="tbtn bottle" data-act="bottle"><img src="assets/bottle.png" alt="">BOTELLÍN</button>
-      <button class="tbtn kick" data-act="kick">PATADA</button>
+      <button class="tbtn special" data-act="special" id="specialBtn"><span>DARDO</span></button>
       <button class="tbtn block" data-act="block">GUARDIA</button>
+      <button class="tbtn kick" data-act="kick">PATADA</button>
       <button class="tbtn punch" data-act="punch">PUÑO</button>
     </div>
   </div>

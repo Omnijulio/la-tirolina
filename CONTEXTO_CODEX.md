@@ -1,6 +1,6 @@
 # Contexto para continuar en Codex
 
-Estado: **v0.2 — juego jugable de 1 jugador** (16 de noviembre de 2026), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
+Estado: **v0.3** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
 
 ## Objetivo del usuario y decisiones aceptadas
 
@@ -14,6 +14,8 @@ Peticiones incorporadas, en orden:
 4. Terraza nocturna de La Trolina en tres planos: pared, mesas/sillas, suelo con personajes delante.
 5. Traslado del proyecto a Codex.
 6. **v0.2**: juego jugable en móvil y en remoto; modo 1 jugador contra la CPU con desbloqueo progresivo de personajes y **dificultad ajustable**; mecánica troncal de **comprar botellines antes de cada pelea** (máx. 10 a 2,90 €; más fuerza pero más imprecisión con niebla creciente con el tiempo) y otros objetos que den otros efectos o los contrarresten; **ganar da muchísimo más dinero del necesario**; hueco para **cinemáticas cortas antes de cada combate** (se añadirán después); **selección de personajes** y **tienda**.
+
+7. **v0.3**: mecánica única por personaje empezando por El Barbas: un **ultimate** que se carga encadenando combos y lanza un **dardo ultrapreciso** de mucho daño; **peleas más largas** para poder cargarlo; **joystick** táctil que permite moverse sin levantar el pulgar; **bolsa de azúcar** (60 €: mucha velocidad y sin embriaguez, a los 30 s se pasa y a los 45 s te quedas inconsciente) y **paquete de tabaco** (fumar es una mecánica importante: baja el puntillo).
 
 El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
@@ -49,7 +51,10 @@ Flujo: Título → (Historia | Pelea rápida) → Selección (luchador; en pelea
 - Movimientos: andar adelante/atrás, salto, puñetazo, patada (también en el aire), lanzamiento de botellín y guardia (mantener atrás o botón de guardia). Pequeño búfer de entrada de 260 ms.
 - Golpes: daño × fuerza (personaje, mejoras, botellines; la CPU además × dificultad), aturdimiento, retroceso, pausa de impacto, temblor, chispas y combos. La guardia anula el daño cuerpo a cuerpo; el botellín hace un 25 % de daño a través de la guardia.
 - Poses sin arte propio: salto = fotograma 1 de la patada; golpe recibido = guardia inclinada; KO = caída girando sobre la cadera; victoria = fotograma 2 del lanzamiento con el botellín en alto.
-- Asaltos de 60 s, gana quien llegue a 2 (máx. 5). Al acabar el tiempo gana quien tenga más vida en porcentaje.
+- **Combos (v0.3)**: si un puñetazo o una patada conecta, desde su fotograma activo se puede cancelar en otro golpe o en el ultimate (`Combatant.canCancel`, máx. 6 encadenados). El aturdimiento (420/470 ms) cubre el arranque del siguiente golpe. Dentro de un combo el daño baja un 12 % por golpe (mín. 40 %), el retroceso sube un 40 % y el aturdimiento baja (`TrolinaRules.comboScale`), así que los combos terminan solos.
+- **Ultimate de El Barbas — Dardo certero**: medidor 0–100 que dura todo el combate y se carga al conectar golpes (+2 suelto; en combo +6, +10, +14…: `meterGain`). Con la barra llena (U/V o botón DARDO, también al final de un combo) congela la pantalla 0,7 s y lanza un dardo (`throwDart`, misma animación que el botellín con evento `weapon:'dart'`) a 1400 px/s que corrige su trayectoria hacia el rival, no se puede bloquear y hace 30 de daño base × fuerza. La CPU también lo usa si juega con El Barbas. Los demás personajes muestran «Ultimate: próximamente»; se definen con `special` en `game/data/characters.js`.
+- **Peleas más largas**: vida × 2 (`HP_SCALE`) y asaltos de 99 s. En pruebas CPU contra CPU un asalto en Normal dura unos 50–60 s y da para cargar un ultimate.
+- Asaltos de 99 s, gana quien llegue a 2 (máx. 5). Al acabar el tiempo gana quien tenga más vida en porcentaje.
 - El botellín sigue siendo el `BottleSystem` compartido, ahora con **munición**: botellines pedidos = lanzamientos por asalto. `MatchBottles` añade imprecisión al lanzar según el puntillo y la puntería.
 
 ### La Barra y el puntillo (mecánica troncal)
@@ -57,12 +62,14 @@ Flujo: Título → (Historia | Pelea rápida) → Selección (luchador; en pelea
 - Botellín: 2,90 €, máximo 10. Cada uno: +7 % de fuerza, +1 lanzamiento por asalto y +1 "botellín equivalente" de puntillo.
 - Nivel de puntillo = botellines equivalentes × 0,1 × multiplicadores (café, agua) × (1 − aguante). Durante la pelea empieza en el 30 % de ese nivel, llega al 100 % a los 45 s de combate acumulado y puede subir un 25 % más si se alarga: **cuanto más tiempo, más niebla**.
 - Efectos (`TrolinaRules.impairment`): niebla y viñeta, visión doble, balanceo de pantalla, tropiezos (“¡HIC!”), golpes al aire (“¡AL AIRE!”), dispersión del lanzamiento y retraso de controles. La puntería del personaje reduce fallos y dispersión.
+- **Tabaco** (5,50 €): 10 cigarrillos para todo el combate. Fumar (F/B o botón FUMAR) deja quieto 1,5 s y quita 0,15 de puntillo de forma progresiva (`relief`); si te golpean mientras fumas se cae el cigarrillo. A partir del 4.º cigarrillo hay tos ocasional (tropiezo «¡COF, COF!»). La CPU fuma cuando va cargada y está lejos.
+- **Bolsa de azúcar** (60 €): 0–30 s de combate sin puntillo, +40 % de velocidad y animaciones un 20 % más rápidas; 30–45 s vuelve el puntillo («¡BAJÓN DE AZÚCAR!»); a los 45 s el personaje se desmaya 6 s, tumbado e indefenso, y recibe un 50 % más de daño. Se puede cambiar a «pierde el asalto» en `faint()` de `combatant.js` si se prefiere más duro.
 - Objetos: café (−20 % puntillo, +4 % velocidad), agua (−10 % puntillo, +5 vida), tortilla (+12 vida, sube 30 % más lento), bocata (+25 vida, −8 % velocidad), orujo (+15 % fuerza, 2,5 de puntillo, sin envase), energética (+12 % velocidad, sube 20 % más rápido), gafas de sol (mitad de niebla visual).
 - La CPU también pide en la barra según dificultad y personalidad; se muestra en la pantalla VS.
 
 ### Economía, progreso y dificultad
 
-- Dinero en céntimos. Se empieza con 30 €. Victoria: 80 € × multiplicador de dificultad (1 / 1,5 / 2,2 / 3,2) + 20 € por asalto ganado + perfectos, tiempo sobrante, combos, “valor etílico” por botellines, jefe y primera vez. Derrota: 12 € + 6 € por asalto ganado.
+- Dinero en céntimos. Se empieza con 30 €. Victoria: 120 € × multiplicador de dificultad (1 / 1,5 / 2,2 / 3,2) + 30 € por asalto ganado + perfectos, tiempo sobrante, combos, ultimates acertados, “valor etílico” por botellines, jefe y primera vez. Derrota: 12 € + 6 € por asalto ganado.
 - Historia: Runner → Peñista → Camarero → Motero → Dueño (jefe). Ganar a cada uno lo desbloquea. Tienda: personajes (120–800 €) y 4 mejoras permanentes de 3 niveles.
 - Dificultad elegible en la selección y en Opciones; afecta a reacción, agresividad, guardia, antiaéreos, errores, daño y pedido de la CPU y a la recompensa.
 
@@ -91,8 +98,8 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 
 ## Controles
 
-- Teclado: ←/→ o A/D andar (atrás = cubrirse), ↑/W saltar, ↓/S/G guardia, J/Z puñetazo, K/X patada, L/C botellín, Esc/P pausa.
-- Táctil (aparece en dispositivos táctiles o forzándolo en Opciones): cruceta arrastrable a la izquierda (arriba = saltar) y botones Puño, Patada, Botellín y Guardia a la derecha. En vertical los controles van debajo del combate.
+- Teclado: ←/→ o A/D andar (atrás = cubrirse), ↑/W saltar (mantener = seguir saltando), ↓/S/G guardia, J/Z puñetazo, K/X patada, L/C botellín, U/V ultimate, F/B fumar, Esc/P pausa.
+- Táctil (aparece en dispositivos táctiles o forzándolo en Opciones): **joystick flotante** a la izquierda (aparece donde se apoya el pulgar y se maneja arrastrando sin levantarlo: lados = andar, arriba = saltar, en diagonal salta hacia ese lado, abajo = guardia; umbrales con histéresis) y botones Fumar, Botellín, Dardo (con aro de carga), Guardia, Patada y Puño a la derecha. Dardo y Fumar se ocultan si el personaje no tiene ultimate o no hay tabaco. En vertical los controles van debajo del combate.
 - `fighter-preview.html`: el antiguo Fighter Lab (inspección de animaciones, cajas y capas). `example.html`: integración mínima del kit.
 
 ## Fuentes de verdad y construcción
@@ -116,6 +123,11 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 - Utilidades de depuración por URL: `?autoplay=1&fast=3` (CPU contra CPU, acelerado), `?autoplay=story`, `?screen=barra|shop|options|help|vs|cinematic|fight`, parámetros `p1`, `p2`, `diff`, `bottles`.
 - Publicación y opciones para jugar en remoto: `PUBLICAR.md`. Hoja de ruta: `PLAN.md`.
 
+## Validación realizada en v0.3
+
+- `npm test`: 16 pruebas (nuevas: azúcar, tabaco, combos/medidor y duración).
+- Chrome sin interfaz: combo de 4 golpes con teclado, medidor, activación del dardo con congelado e impacto (−30), fumar (baja el puntillo), desmayo por azúcar a los 45 s; joystick en móvil horizontal y vertical (derecha anda, diagonal arriba salta, abajo guardia, al soltar se para); combates CPU contra CPU con El Barbas usando el ultimate. Sin errores de consola.
+
 ## Validación realizada en v0.2
 
 - `npm test`: 12 pruebas (incluidas 10 de reglas: precios, máximo de botellines, puntillo creciente, objetos que contrarrestan, aguante, imprecisión, recompensas frente a costes, escalado de dificultad, pedido de la CPU y orden de desbloqueo).
@@ -126,7 +138,7 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 
 - Las variantes de personaje son recoloreados con la misma cara; no hay arte propio por personaje.
 - No hay animaciones dedicadas de caminar, salto, recibir golpe, caída ni victoria (se simulan con poses existentes).
-- No hay agacharse, agarres, especiales ni barra de súper.
+- Solo El Barbas tiene ultimate; no hay agacharse, agarres ni especiales con comandos.
 - Cinemáticas: solo texto y retratos provisionales.
 - Sin música; los efectos de sonido son sintéticos.
 - Sin multijugador (ni local ni online).

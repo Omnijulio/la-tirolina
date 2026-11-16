@@ -10,6 +10,8 @@
  *     m.riseMult     multiplica la velocidad a la que sube el puntillo durante la pelea
  *     m.fogMult      multiplica solo el efecto visual de niebla
  *     m.ammo         botellines vacíos disponibles para lanzar en cada asalto
+ *     m.cigs         cigarrillos para todo el combate (fumar baja el puntillo)
+ *     m.sugar        bolsa de azúcar: subidón 30 s, bajón y desmayo a los 45 s
  *
  * UPGRADES: mejoras permanentes de la tienda, por niveles.
  */
@@ -63,6 +65,20 @@
       good: '+12 % de velocidad',
       bad: 'El puntillo sube un 20 % más rápido',
       effect: (m) => { m.speedPct += 12; m.riseMult *= 1.2; }
+    },
+    {
+      id: 'tabaco', name: 'Paquete de tabaco', short: 'Tabaco', icon: '🚬',
+      price: 550, max: 1,
+      good: '10 cigarrillos para el combate: cada uno que fumas (F) quita un 15 % de puntillo',
+      bad: 'Fumar te deja quieto 1,5 s y, a partir del 4.º, entra la tos',
+      effect: (m) => { m.cigs += 10; }
+    },
+    {
+      id: 'azucar', name: 'Bolsa de azúcar', short: 'Azúcar', icon: '🍬',
+      price: 6000, max: 1,
+      good: '+40 % de velocidad, golpes más rápidos y cero puntillo durante 30 s',
+      bad: 'A los 30 s se pasa el efecto y a los 45 s te quedas inconsciente unos segundos',
+      effect: (m) => { m.sugar = true; }
     },
     {
       id: 'gafas', name: 'Gafas de sol', short: 'Gafas', icon: '🕶️',

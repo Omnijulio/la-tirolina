@@ -1,5 +1,5 @@
-/* Entrada unificada: teclado + controles táctiles multitáctiles.
- * held: direcciones mantenidas. queue: acciones puntuales (punch, kick, bottle, jump).
+/* Entrada unificada: teclado + joystick y botones táctiles multitáctiles.
+ * held: direcciones mantenidas. queue: acciones puntuales (punch, kick, bottle, special, smoke, jump).
  */
 (function (root) {
   const MOVE_KEYS = {
@@ -8,7 +8,10 @@
     ArrowUp: 'up', KeyW: 'up',
     ArrowDown: 'block', KeyS: 'block', KeyG: 'block'
   };
-  const ACTION_KEYS = { KeyJ: 'punch', KeyK: 'kick', KeyL: 'bottle', KeyZ: 'punch', KeyX: 'kick', KeyC: 'bottle' };
+  const ACTION_KEYS = {
+    KeyJ: 'punch', KeyK: 'kick', KeyL: 'bottle', KeyU: 'special', KeyF: 'smoke',
+    KeyZ: 'punch', KeyX: 'kick', KeyC: 'bottle', KeyV: 'special', KeyB: 'smoke'
+  };
 
   class Input {
     constructor() {
@@ -48,47 +51,78 @@
     releaseAll() {
       for (const k of Object.keys(this.held)) { this.keys[k] = false; this.touch[k] = false; this.held[k] = false; }
       document.querySelectorAll('.tbtn.on').forEach((b) => b.classList.remove('on'));
-      this.dpadPointers && this.dpadPointers.clear();
+      this.btnBlock = false;
+      if (this.releaseStick) this.releaseStick();
     }
     take() { const q = this.queue; this.queue = []; return q; }
     clear() { this.queue = []; }
 
-    /** Conecta la cruceta (arrastrable) y los botones de acción táctiles. */
+    /**
+     * Joystick flotante: al tocar la zona izquierda aparece bajo el pulgar y se
+     * maneja arrastrando, sin levantar el dedo. Izquierda/derecha andan (atrás =
+     * cubrirse), arriba salta (mantener = seguir saltando, en diagonal salta hacia
+     * ese lado) y abajo pone la guardia.
+     */
     bindTouch(container) {
-      const dpad = container.querySelector('.dpad');
-      this.dpadPointers = new Map();
-      const recompute = () => {
-        const wasUp = this.touch.up;
-        let left = false, right = false, up = false;
-        const r = dpad.getBoundingClientRect();
-        for (const p of this.dpadPointers.values()) {
-          const nx = (p.x - r.left) / r.width - 0.5, ny = (p.y - r.top) / r.height - 0.5;
-          if (nx < -0.12) left = true;
-          if (nx > 0.12) right = true;
-          if (ny < -0.16) up = true;
-        }
-        Object.assign(this.touch, { left, right, up });
-        if (up && !wasUp) this.queue.push('jump');
-        dpad.querySelector('[data-dir=left]').classList.toggle('on', left);
-        dpad.querySelector('[data-dir=right]').classList.toggle('on', right);
-        dpad.querySelector('[data-dir=up]').classList.toggle('on', up);
+      const zone = container.querySelector('.stick-zone');
+      const base = zone.querySelector('.stick-base');
+      const knob = zone.querySelector('.stick-knob');
+      const st = { id: null, cx: 0, cy: 0, r: 60, dir: { left: false, right: false, up: false, down: false } };
+      this.stick = st;
+      this.btnBlock = false;
+      const setDir = (nx, ny) => {
+        const d = st.dir, was = { ...d };
+        // Umbrales con histéresis para que no tiemble al pasar por el borde.
+        d.left = was.left ? nx < -0.22 : nx < -0.35;
+        d.right = was.right ? nx > 0.22 : nx > 0.35;
+        d.up = was.up ? ny < -0.32 : ny < -0.5;
+        d.down = was.down ? ny > 0.4 : ny > 0.55;
+        if (d.up && !was.up) this.queue.push('jump');
+        this.touch.left = d.left; this.touch.right = d.right; this.touch.up = d.up;
+        this.touch.block = d.down || this.btnBlock;
+        base.classList.toggle('l', d.left); base.classList.toggle('r', d.right);
+        base.classList.toggle('u', d.up); base.classList.toggle('d', d.down);
         this.sync();
       };
-      dpad.addEventListener('pointerdown', (e) => {
+      const place = (x, y) => {
+        const zr = zone.getBoundingClientRect();
+        st.r = base.offsetWidth / 2 || 60;
+        // El centro queda donde se apoya el pulgar, sin salirse de la zona.
+        st.cx = Math.max(zr.left + st.r, Math.min(zr.right - st.r, x));
+        st.cy = Math.max(zr.top + st.r, Math.min(zr.bottom - st.r, y));
+        base.style.left = (st.cx - zr.left - st.r) + 'px';
+        base.style.top = (st.cy - zr.top - st.r) + 'px';
+        base.style.bottom = 'auto';
+      };
+      const move = (x, y) => {
+        let dx = x - st.cx, dy = y - st.cy;
+        const len = Math.hypot(dx, dy), max = st.r * 0.9;
+        if (len > max) { dx = dx / len * max; dy = dy / len * max; }
+        knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+        setDir(dx / st.r, dy / st.r);
+      };
+      const release = () => {
+        st.id = null;
+        knob.style.transform = '';
+        base.classList.remove('active');
+        base.style.left = ''; base.style.top = ''; base.style.bottom = '';
+        setDir(0, 0);
+      };
+      zone.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        try { dpad.setPointerCapture(e.pointerId); } catch (err) { /* sin captura */ }
-        this.dpadPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-        recompute();
+        if (st.id !== null) return;
+        st.id = e.pointerId;
+        try { zone.setPointerCapture(e.pointerId); } catch (err) { /* sin captura */ }
+        base.classList.add('active');
+        place(e.clientX, e.clientY);
+        move(e.clientX, e.clientY);
       });
-      dpad.addEventListener('pointermove', (e) => {
-        if (!this.dpadPointers.has(e.pointerId)) return;
-        this.dpadPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-        recompute();
-      });
-      const end = (e) => { if (this.dpadPointers.delete(e.pointerId)) recompute(); };
-      dpad.addEventListener('pointerup', end);
-      dpad.addEventListener('pointercancel', end);
-      dpad.addEventListener('lostpointercapture', end);
+      zone.addEventListener('pointermove', (e) => { if (e.pointerId === st.id) { e.preventDefault(); move(e.clientX, e.clientY); } });
+      const end = (e) => { if (e.pointerId === st.id) release(); };
+      zone.addEventListener('pointerup', end);
+      zone.addEventListener('pointercancel', end);
+      zone.addEventListener('lostpointercapture', end);
+      this.releaseStick = release;
 
       container.querySelectorAll('[data-act]').forEach((btn) => {
         const act = btn.dataset.act;
@@ -96,12 +130,12 @@
           e.preventDefault();
           try { btn.setPointerCapture(e.pointerId); } catch (err) { /* sin captura */ }
           btn.classList.add('on');
-          if (act === 'block') { this.touch.block = true; this.sync(); } else this.queue.push(act);
+          if (act === 'block') { this.btnBlock = true; this.touch.block = true; this.sync(); } else this.queue.push(act);
           if (navigator.vibrate) try { navigator.vibrate(8); } catch (err) { /* opcional */ }
         });
         const up = () => {
           btn.classList.remove('on');
-          if (act === 'block') { this.touch.block = false; this.sync(); }
+          if (act === 'block') { this.btnBlock = false; this.touch.block = !!(this.stick && this.stick.dir.down); this.sync(); }
         };
         btn.addEventListener('pointerup', up);
         btn.addEventListener('pointercancel', up);

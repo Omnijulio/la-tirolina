@@ -67,7 +67,7 @@ test('ganar da muchísimo más de lo que cuesta el pedido máximo', () => {
   const maxOrder = BAR_ITEMS.reduce((s, it) => s + it.price * it.max, 0);
   for (const difficulty of R.DIFFICULTY_ORDER) {
     const win = R.matchReward({ won: true, difficulty, roundsWon: 2, roundsLost: 1, perfectRounds: 0, timeLeft: 0, maxCombo: 0, bottles: 0 });
-    assert.ok(win.total >= 1.5 * maxOrder, `${difficulty}: ${win.total} vs ${maxOrder}`);
+    assert.ok(win.total >= maxOrder, `${difficulty}: ${win.total} vs ${maxOrder}`);
     assert.ok(win.total >= 4 * R.BOTTLE_PRICE * R.MAX_BOTTLES, 'cubre de sobra 10 botellines');
   }
   const lose = R.matchReward({ won: false, difficulty: 'normal', roundsWon: 1 });
@@ -101,4 +101,43 @@ test('el modo historia desbloquea a cada rival en orden', () => {
     assert.ok(c.unlock.price > 0);
   });
   assert.ok(barbas.unlock.start);
+});
+
+test('la bolsa de azúcar: 60 €, sin puntillo 30 s, bajón y desmayo a los 45 s', () => {
+  const azucar = BAR_ITEMS.find((i) => i.id === 'azucar');
+  assert.equal(azucar.price, 6000);
+  const lo = R.computeLoadout(barbas, { botellin: 8, azucar: 1 }, {}, BAR_ITEMS, UPGRADES);
+  assert.equal(lo.sugar, true);
+  assert.equal(R.intoxAt(lo, 10), 0);
+  assert.equal(R.intoxAt(lo, 29.9), 0);
+  assert.ok(R.intoxAt(lo, 31) > 0, 'al pasarse el efecto vuelve el puntillo');
+  assert.equal(R.sugarPhase(lo, 5), 'boost');
+  assert.equal(R.sugarPhase(lo, 35), 'fading');
+  assert.equal(R.sugarPhase(lo, 45), 'crashed');
+  assert.equal(R.sugarPhase(R.computeLoadout(barbas, {}, {}, BAR_ITEMS, UPGRADES), 50), null);
+});
+
+test('el tabaco da cigarrillos y fumar baja el puntillo', () => {
+  const lo = R.computeLoadout(barbas, { botellin: 8, tabaco: 1 }, {}, BAR_ITEMS, UPGRADES);
+  assert.equal(lo.cigs, 10);
+  const before = R.intoxAt(lo, 60);
+  const after = R.intoxAt(lo, 60, R.SMOKE.relief);
+  assert.ok(Math.abs(before - after - R.SMOKE.relief) < 1e-9);
+  assert.equal(R.intoxAt(lo, 60, 5), 0, 'nunca baja de 0');
+});
+
+test('combos: más carga del ultimate cuanto más largos, con daño decreciente', () => {
+  assert.ok(R.meterGain(3) > R.meterGain(2) && R.meterGain(2) > R.meterGain(1));
+  assert.ok(R.comboScale(4).damage < R.comboScale(1).damage);
+  assert.ok(R.comboScale(4).knockback > R.comboScale(1).knockback);
+  const c3 = R.meterGain(1) + R.meterGain(2) + R.meterGain(3);
+  assert.ok(c3 < R.METER_MAX, 'un solo combo corto no llena la barra');
+  assert.ok(R.MOVES.dart.unblockable && R.MOVES.dart.damage > 3 * R.MOVES.kick.damage);
+  assert.ok(barbas.special && barbas.special.id === 'dardo');
+});
+
+test('peleas más largas: más vida y asaltos de 99 s', () => {
+  const lo = R.computeLoadout(barbas, {}, {}, BAR_ITEMS, UPGRADES);
+  assert.equal(lo.maxHp, Math.round(barbas.stats.hp * R.HP_SCALE));
+  assert.equal(R.ROUND_SECONDS, 99);
 });

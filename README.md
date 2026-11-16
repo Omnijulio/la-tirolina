@@ -1,4 +1,4 @@
-# La Trolina Fighters — v0.2
+# La Trolina Fighters — v0.3
 
 Juego de lucha 2D arcade (estilo finales de los 90) en la terraza de La Trolina. **1 jugador contra la CPU**, en navegador de escritorio y móvil.
 
@@ -6,9 +6,9 @@ Juego de lucha 2D arcade (estilo finales de los 90) en la terraza de La Trolina.
 
 - **Local**: abre `index.html`, o ejecuta `npm run serve` y entra en `http://localhost:8000/`.
 - **En remoto / en el móvil de un amigo**: publícalo como web estática. Opciones y pasos en [`PUBLICAR.md`](PUBLICAR.md) (recomendado: GitHub Pages).
-- Teclado: ←/→ andar (atrás = cubrirse), ↑ saltar, ↓ o G guardia, J puñetazo, K patada, L botellín, Esc pausa. En pantallas táctiles aparecen cruceta y botones.
+- Teclado: ←/→ andar (atrás = cubrirse), ↑ saltar, ↓ o G guardia, J puñetazo, K patada, L botellín, U ultimate, F fumar, Esc pausa. En pantallas táctiles aparecen joystick y botones.
 
-Qué incluye: modo historia con desbloqueo progresivo de 5 rivales, pelea rápida, 4 dificultades, **La Barra** (pedir hasta 10 botellines a 2,90 € antes de cada combate: más fuerza, pero más *puntillo*, niebla e imprecisión cuanto más dura la pelea; y objetos que lo compensan), tienda de personajes y mejoras, cinemáticas provisionales y guardado automático. Detalles técnicos en [`CONTEXTO_CODEX.md`](CONTEXTO_CODEX.md); hoja de ruta en [`PLAN.md`](PLAN.md).
+Qué incluye: modo historia con desbloqueo progresivo de 5 rivales, pelea rápida, 4 dificultades, **La Barra** (pedir hasta 10 botellines a 2,90 € antes de cada combate: más fuerza, pero más *puntillo*, niebla e imprecisión cuanto más dura la pelea; y objetos que lo compensan), tienda de personajes y mejoras, cinemáticas provisionales y guardado automático. En v0.3: combos encadenables, ultimate de El Barbas (dardo certero), tabaco y bolsa de azúcar, joystick táctil y peleas más largas. Detalles técnicos en [`CONTEXTO_CODEX.md`](CONTEXTO_CODEX.md); hoja de ruta en [`PLAN.md`](PLAN.md).
 
 ## Kit base (v1.3)
 

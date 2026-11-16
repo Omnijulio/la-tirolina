@@ -8,21 +8,41 @@
   const START_COINS = 3000;
 
   const DIFFICULTIES = {
-    facil:     { id: 'facil', name: 'Fácil', reactionMs: 650, aggression: 0.30, block: 0.10, antiAir: 0.05, cpuDamage: 0.75, cpuBottles: [0, 2], reward: 1.0, mistakes: 0.35 },
-    normal:    { id: 'normal', name: 'Normal', reactionMs: 420, aggression: 0.50, block: 0.30, antiAir: 0.20, cpuDamage: 1.0, cpuBottles: [1, 4], reward: 1.5, mistakes: 0.18 },
-    dificil:   { id: 'dificil', name: 'Difícil', reactionMs: 250, aggression: 0.66, block: 0.50, antiAir: 0.40, cpuDamage: 1.15, cpuBottles: [2, 6], reward: 2.2, mistakes: 0.08 },
-    pesadilla: { id: 'pesadilla', name: 'Pesadilla', reactionMs: 150, aggression: 0.80, block: 0.70, antiAir: 0.60, cpuDamage: 1.3, cpuBottles: [3, 8], reward: 3.2, mistakes: 0.03 }
+    facil:     { id: 'facil', name: 'Fácil', reactionMs: 650, aggression: 0.30, block: 0.10, antiAir: 0.05, combo: 0.10, cpuDamage: 0.75, cpuBottles: [0, 2], reward: 1.0, mistakes: 0.35 },
+    normal:    { id: 'normal', name: 'Normal', reactionMs: 420, aggression: 0.50, block: 0.30, antiAir: 0.20, combo: 0.35, cpuDamage: 1.0, cpuBottles: [1, 4], reward: 1.5, mistakes: 0.18 },
+    dificil:   { id: 'dificil', name: 'Difícil', reactionMs: 250, aggression: 0.66, block: 0.50, antiAir: 0.40, combo: 0.60, cpuDamage: 1.15, cpuBottles: [2, 6], reward: 2.2, mistakes: 0.08 },
+    pesadilla: { id: 'pesadilla', name: 'Pesadilla', reactionMs: 150, aggression: 0.80, block: 0.70, antiAir: 0.60, combo: 0.85, cpuDamage: 1.3, cpuBottles: [3, 8], reward: 3.2, mistakes: 0.03 }
   };
   const DIFFICULTY_ORDER = ['facil', 'normal', 'dificil', 'pesadilla'];
 
   const MOVES = {
-    punch: { damage: 5, hitstun: 300, knockback: 520, blockstun: 180 },
-    kick: { damage: 7, hitstun: 380, knockback: 700, blockstun: 230 },
-    bottle: { damage: 9, hitstun: 460, knockback: 600, blockstun: 260, chip: 0.25 }
+    // Golpes encadenables: el aturdimiento dura más que lo que tarda el siguiente
+    // puñetazo en llegar si se cancela al conectar (ver Combatant.update).
+    punch: { damage: 5, hitstun: 420, knockback: 260, blockstun: 180 },
+    kick: { damage: 7, hitstun: 470, knockback: 420, blockstun: 230 },
+    bottle: { damage: 9, hitstun: 480, knockback: 520, blockstun: 260, chip: 0.25 },
+    // Ultimate de El Barbas: no se puede bloquear.
+    dart: { damage: 30, hitstun: 800, knockback: 950, blockstun: 0, unblockable: true }
   };
 
-  const ROUND_SECONDS = 60;
+  /** Escalado dentro de un combo (n = número de golpe del combo, 1 = primero). */
+  function comboScale(n) {
+    const k = Math.max(0, (n || 1) - 1);
+    return { damage: Math.max(0.4, 1 - 0.12 * k), knockback: 1 + 0.4 * k, hitstun: Math.max(0.6, 1 - 0.08 * k) };
+  }
+  const MAX_CHAIN = 6;           // a partir de aquí ya no se puede cancelar
+  const METER_MAX = 100;
+  /** Carga del ultimate por golpe conectado: poco suelto, mucho en combo. */
+  function meterGain(n) { return n <= 1 ? 2 : 6 + 4 * (n - 2); }
+
+  const ROUND_SECONDS = 99;
   const ROUNDS_TO_WIN = 2;
+  const HP_SCALE = 2.0;          // peleas más largas para poder cargar el ultimate
+
+  // Bolsa de azúcar: subidón, bajón y desmayo (segundos de combate desde el inicio).
+  const SUGAR = { boostSec: 30, crashSec: 45, speedMult: 1.4, animMult: 1.2, faintMs: 6000, faintDamage: 1.5 };
+  // Tabaco: cada cigarrillo tarda en fumarse y baja el puntillo.
+  const SMOKE = { durationMs: 1500, relief: 0.15, coughFrom: 3, coughPerSec: 0.05 };
 
   function formatMoney(cents) {
     const v = (cents / 100).toFixed(2).replace('.', ',');
@@ -67,7 +87,7 @@
       const lvl = (upgradesLevels || {})[up.id] || 0;
       if (lvl) up.apply(base, lvl);
     }
-    const m = { hp: 0, powerPct: 0, speedPct: 0, intox: 0, intoxMult: 1, riseMult: 1, fogMult: 1, ammo: 0 };
+    const m = { hp: 0, powerPct: 0, speedPct: 0, intox: 0, intoxMult: 1, riseMult: 1, fogMult: 1, ammo: 0, cigs: 0, sugar: false };
     const map = itemsById(items);
     const clean = sanitizeOrder(order, items);
     for (const [id, qty] of Object.entries(clean)) {
@@ -77,7 +97,7 @@
     // 10 botellines equivalen a puntillo 1,0 (máximo) para alguien sin aguante extra.
     const intoxLevel = Math.max(0, Math.min(1, m.intox * 0.1 * m.intoxMult * (1 - tolerance)));
     return {
-      maxHp: Math.round(base.hp + m.hp),
+      maxHp: Math.round((base.hp + m.hp) * HP_SCALE),
       power: base.power * (1 + m.powerPct / 100),
       speed: Math.max(0.6, base.speed * (1 + m.speedPct / 100)),
       aim: base.aim,
@@ -86,6 +106,8 @@
       intoxLevel,
       riseMult: m.riseMult,
       fogMult: m.fogMult,
+      cigs: m.cigs,
+      sugar: !!m.sugar,
       bottles: clean.botellin || 0,
       order: clean
     };
@@ -93,14 +115,25 @@
 
   /**
    * Puntillo actual (0..1) a partir del tiempo de combate acumulado (s).
-   * Empieza en el 30 % del nivel, llega al 100 % a los 45 s y puede subir
+   * Empieza en el 30 % del nivel, llega al 100 % al minuto y puede subir
    * hasta un 25 % más si la pelea se alarga: cuanto más tiempo, más niebla.
+   * La bolsa de azúcar lo anula mientras dura el subidón. `relief` es lo que
+   * se ha quitado fumando.
    */
-  function intoxAt(loadout, seconds) {
+  function intoxAt(loadout, seconds, relief) {
     if (!loadout.intoxLevel) return 0;
+    if (loadout.sugar && seconds < SUGAR.boostSec) return 0;
     const t = Math.max(0, seconds) * (loadout.riseMult || 1);
-    const ramp = 0.3 + 0.7 * Math.min(1, t / 45) + 0.25 * Math.min(1, Math.max(0, t - 45) / 60);
-    return Math.max(0, Math.min(1, loadout.intoxLevel * ramp));
+    const ramp = 0.3 + 0.7 * Math.min(1, t / 60) + 0.25 * Math.min(1, Math.max(0, t - 60) / 90);
+    return Math.max(0, Math.min(1, loadout.intoxLevel * ramp - (relief || 0)));
+  }
+
+  /** Fase de la bolsa de azúcar: 'boost' (0–30 s), 'fading' (30–45 s), 'crashed' (45 s+) o null. */
+  function sugarPhase(loadout, seconds) {
+    if (!loadout.sugar) return null;
+    if (seconds < SUGAR.boostSec) return 'boost';
+    if (seconds < SUGAR.crashSec) return 'fading';
+    return 'crashed';
   }
 
   /** Efectos negativos derivados del puntillo y la puntería. */
@@ -124,8 +157,9 @@
     const diff = DIFFICULTIES[r.difficulty] || DIFFICULTIES.normal;
     const lines = [];
     if (r.won) {
-      lines.push({ label: 'Victoria (' + diff.name + ')', cents: Math.round(8000 * diff.reward) });
-      if (r.roundsWon) lines.push({ label: 'Asaltos ganados ×' + r.roundsWon, cents: 2000 * r.roundsWon });
+      lines.push({ label: 'Victoria (' + diff.name + ')', cents: Math.round(12000 * diff.reward) });
+      if (r.roundsWon) lines.push({ label: 'Asaltos ganados ×' + r.roundsWon, cents: 3000 * r.roundsWon });
+      if (r.ultimates) lines.push({ label: 'Ultimate acertado ×' + r.ultimates, cents: 2500 * r.ultimates });
       if (r.perfectRounds) lines.push({ label: '¡Perfecto! ×' + r.perfectRounds, cents: 3000 * r.perfectRounds });
       if (r.timeLeft > 0) lines.push({ label: 'Tiempo sobrante', cents: Math.round(r.timeLeft) * 20 });
       if (r.maxCombo >= 3) lines.push({ label: 'Combo de ' + r.maxCombo + ' golpes', cents: 400 * r.maxCombo });
@@ -148,6 +182,7 @@
     bottles = Math.max(0, Math.min(MAX_BOTTLES, bottles));
     const order = { botellin: bottles };
     if (bottles >= 5 && r() < 0.5) order.cafe = 1;
+    if (bottles >= 3 && r() < 0.5) order.tabaco = 1;
     if (r() < 0.3) order.tortilla = 1;
     if (difficulty === 'pesadilla' && r() < 0.5) order.orujo = 1;
     return order;
@@ -167,7 +202,8 @@
 
   const Rules = {
     BOTTLE_PRICE, MAX_BOTTLES, START_COINS, DIFFICULTIES, DIFFICULTY_ORDER, MOVES,
-    ROUND_SECONDS, ROUNDS_TO_WIN,
+    ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX,
+    comboScale, meterGain, sugarPhase,
     formatMoney, orderCost, sanitizeOrder, computeLoadout, intoxAt, impairment,
     damageFor, matchReward, cpuOrder, describeOrder, clampQty
   };

@@ -130,7 +130,7 @@
           <div class="roster"></div>
           <div class="detail">
             <canvas class="big" width="192" height="176"></canvas>
-            <div class="info"><h3></h3><p class="tag"></p><div class="statwrap"></div><p class="lock muted"></p></div>
+            <div class="info"><h3></h3><p class="tag"></p><div class="statwrap"></div><p class="special-info"></p><p class="lock muted"></p></div>
           </div>
         </div>
         <footer class="actions">
@@ -175,6 +175,9 @@
         node.querySelector('.info h3').style.color = c.color;
         node.querySelector('.tag').textContent = c.tagline;
         node.querySelector('.statwrap').innerHTML = statBars(c.stats);
+        node.querySelector('.special-info').innerHTML = c.special
+          ? '<b>Ultimate · ' + esc(c.special.name) + ':</b> ' + esc(c.special.desc)
+          : '<span class="muted">Ultimate: próximamente</span>';
         const locked = !g.save.isUnlocked(c.id);
         const lockTxt = locked ? (c.unlock.story !== undefined ? 'Se desbloquea al ganar el combate ' + (c.unlock.story + 1) + ' de la historia · o en la tienda por ' + money(c.unlock.price) : '') : '';
         node.querySelector('.lock').textContent = step === 'p1' ? lockTxt : (locked ? 'Como rival puedes elegirlo aunque esté bloqueado.' : '');
@@ -215,7 +218,7 @@
       }
       const node = el(`<div class="scr barra">
         ${this.header('La Barra', 'back')}
-        <p class="intro">Antes de pelear contra <b style="color:${rival.color}">${esc(rival.name)}</b>, pide algo. Cada <b>botellín (2,90 €)</b> te da fuerza y un envase para lanzar, pero sube el <b>puntillo</b>: niebla, mareo, golpes al aire y controles lentos. Cuanto más dure la pelea, peor.</p>
+        <p class="intro">Antes de pelear contra <b style="color:${rival.color}">${esc(rival.name)}</b>, pide algo. Cada <b>botellín (2,90 €)</b> te da fuerza y un envase para lanzar, pero sube el <b>puntillo</b>: niebla, mareo, golpes al aire y controles lentos. Cuanto más dure la pelea, peor. <b>Fumar</b> lo baja; la <b>bolsa de azúcar</b> lo borra… un rato.</p>
         <div class="barra-body">
           <div class="items"></div>
           <aside class="summary">
@@ -275,6 +278,8 @@
           <div class="kv"><span>Fuerza</span><b>${pct(lo.power / base.power - 1)}</b></div>
           <div class="kv"><span>Velocidad</span><b>${pct(lo.speed / base.speed - 1)}</b></div>
           <div class="kv"><span>Botellines para lanzar</span><b>${lo.ammo} por asalto</b></div>
+          ${lo.cigs ? `<div class="kv"><span>Cigarrillos (F)</span><b>${lo.cigs} · −15 % cada uno</b></div>` : ''}
+          ${lo.sugar ? '<div class="kv"><span>Azúcar</span><b class="warn">+40 % vel. 30 s · desmayo a los 45 s</b></div>' : ''}
           <div class="kv"><span>Puntillo</span><b class="${i1 > 0.5 ? 'warn' : ''}">${Math.round(i0 * 100)} % → ${Math.round(i1 * 100)} % <em>(1 min)</em> → ${Math.round(i2 * 100)} %</b></div>
           <div class="meter"><i style="width:${Math.round(i1 * 100)}%"></i></div>
           <p class="muted">${lo.fogMult < 1 ? 'Gafas de sol: ves la mitad de niebla. ' : ''}${i1 > 0.6 ? 'Vas a ver doble.' : i1 > 0.3 ? 'Empezarás a notar la niebla.' : i1 > 0 ? 'Un puntillo controlado.' : 'Fresco como una lechuga.'}</p>`;
@@ -454,6 +459,7 @@
             const card = el(`<div class="shop-card" style="--c:${c.color}">
               <canvas width="96" height="96"></canvas>
               <div class="txt"><b>${esc(c.name)}</b><p>${esc(c.tagline)}</p>${statBars(c.stats)}
+              ${c.special ? '<p class="special-info"><b>Ultimate · ' + esc(c.special.name) + '</b></p>' : ''}
               ${!owned && c.unlock.story !== undefined ? '<p class="muted">Gratis al ganar el combate ' + (c.unlock.story + 1) + ' de la historia</p>' : ''}</div>
               <div class="buy">${owned ? '<span class="owned">✓ Disponible</span>' : `<button class="primary" data-buy="${c.id}" data-silent="1">${money(c.unlock.price)}</button>`}</div>
             </div>`);
@@ -532,19 +538,25 @@
       const node = el(`<div class="scr help">
         ${this.header('Cómo se juega', back)}
         <div class="help-grid">
-          <section><h3>Objetivo</h3><p>Combates al mejor de 3 asaltos de 60 s contra la máquina. Gana quien deje al rival sin vida o tenga más al acabar el tiempo.</p>
+          <section><h3>Objetivo</h3><p>Combates al mejor de 3 asaltos de 99 s contra la máquina. Gana quien deje al rival sin vida o tenga más al acabar el tiempo.</p>
           <p>En el <b>modo historia</b> cada victoria desbloquea al rival como luchador. En <b>pelea rápida</b> eliges rival y dificultad.</p></section>
-          <section><h3>La Barra y el puntillo</h3><p>Antes de cada combate puedes pedir hasta <b>10 botellines a 2,90 €</b>. Cada uno da <b>+7 % de fuerza</b> y un envase para lanzar por asalto, pero sube tu <b>puntillo</b>.</p>
-          <p>Con puntillo: niebla que crece con el tiempo, visión doble, pantalla que se balancea, tropiezos, golpes al aire y controles con retraso. El café, el agua, la tortilla o las gafas de sol lo compensan.</p></section>
+          <section><h3>Combos y ultimate</h3><p>Si un puñetazo o una patada <b>conecta</b>, puedes encadenar otro golpe enseguida: pulsa rápido puño, puño, patada…</p>
+          <p><b>El Barbas</b> carga su ultimate, el <b>Dardo certero</b>, encadenando combos (cuanto más largo el combo, más carga). Con la barra llena, pulsa <b>DARDO</b>: un dardo ultrapreciso que busca al rival, no se puede bloquear y quita muchísima vida. También puedes lanzarlo al final de un combo.</p></section>
+          <section><h3>La Barra y el puntillo</h3><p>Antes de cada combate puedes pedir hasta <b>10 botellines a 2,90 €</b>. Cada uno da <b>+7 % de fuerza</b> y un envase para lanzar por asalto, pero sube tu <b>puntillo</b>: niebla que crece con el tiempo, visión doble, pantalla que se balancea, tropiezos, golpes al aire y controles con retraso.</p>
+          <p><b>Tabaco</b>: cada cigarrillo que fumas (botón FUMAR) quita un 15 % de puntillo, pero te quedas quieto 1,5 s y, si te pegan, se te cae. A partir del cuarto, tos.</p>
+          <p><b>Bolsa de azúcar (60 €)</b>: 30 s a toda velocidad y sin puntillo; luego se pasa y a los 45 s te quedas inconsciente unos segundos.</p></section>
           <section><h3>Teclado</h3><table>
             <tr><td>← → / A D</td><td>Andar (atrás = cubrirse)</td></tr>
-            <tr><td>↑ / W</td><td>Saltar</td></tr>
+            <tr><td>↑ / W</td><td>Saltar (mantener = seguir saltando)</td></tr>
             <tr><td>↓ / S / G</td><td>Guardia</td></tr>
             <tr><td>J / Z</td><td>Puñetazo</td></tr>
             <tr><td>K / X</td><td>Patada</td></tr>
             <tr><td>L / C</td><td>Lanzar botellín</td></tr>
+            <tr><td>U / V</td><td>Ultimate (Dardo)</td></tr>
+            <tr><td>F / B</td><td>Fumar</td></tr>
             <tr><td>Esc / P</td><td>Pausa</td></tr></table></section>
-          <section><h3>Móvil</h3><p>Cruceta a la izquierda (arrastra el dedo; arriba para saltar). A la derecha: <b>Puño</b>, <b>Patada</b>, <b>Botellín</b> y <b>Guardia</b> (mantener). Mejor en horizontal y a pantalla completa.</p>
+          <section><h3>Móvil</h3><p><b>Joystick</b> a la izquierda: apoya el pulgar en cualquier punto y arrastra sin levantarlo. Lados = andar, arriba = saltar (en diagonal, hacia ese lado), abajo = guardia.</p>
+          <p>A la derecha: <b>Puño</b>, <b>Patada</b>, <b>Botellín</b>, <b>Guardia</b> (mantener), <b>Fumar</b> y <b>Dardo</b> (el aro se llena con los combos). Mejor en horizontal y a pantalla completa.</p>
           <p>Ganar da mucho dinero: úsalo en la tienda para desbloquear luchadores y mejoras.</p></section>
         </div>
       </div>`);

@@ -142,6 +142,10 @@
       this.input.capture = true;
       this.input.releaseAll();
       document.body.classList.add('fighting');
+      document.body.classList.toggle('no-special', !c1.special);
+      document.body.classList.toggle('no-smoke', !this.match.p1.loadout.cigs);
+      if (c1.special) document.querySelector('#specialBtn span').textContent = c1.special.short;
+      this.touchHud = {};
       UI.hide();
     },
 
@@ -187,6 +191,19 @@
       if (this.paused) { if (UI.current === 'pause') this.resume(); } else this.pause();
     },
 
+    /** Carga del ultimate y cigarrillos en los botones táctiles (solo si cambian). */
+    updateTouchHud() {
+      const p = this.match.p1, h = this.touchHud || (this.touchHud = {});
+      const charge = Math.floor(p.meter);
+      if (h.charge !== charge) {
+        h.charge = charge;
+        const btn = document.getElementById('specialBtn');
+        btn.style.setProperty('--charge', charge);
+        btn.classList.toggle('ready', p.meterFull);
+      }
+      if (h.cigs !== p.cigs) { h.cigs = p.cigs; document.getElementById('cigCount').textContent = p.cigs; }
+    },
+
     /* ---------- fondo animado de los menús ---------- */
 
     makeAttract() {
@@ -223,6 +240,7 @@
       if (this.match) {
         if (!this.paused) this.match.update(dt);
         this.match.draw(this.ctx);
+        this.updateTouchHud();
       } else if (this.attract) this.drawAttract(dt);
       UI.tick(dt);
       requestAnimationFrame((t) => this.loop(t));

@@ -64,6 +64,14 @@
           case 'win': [523, 659, 784, 1046].forEach((f, i) => this.tone('square', f, f, 0.14, 0.15, i * 0.12)); break;
           case 'lose': [392, 330, 262].forEach((f, i) => this.tone('triangle', f, f * 0.98, 0.25, 0.2, i * 0.2)); break;
           case 'land': this.tone('sine', 90, 50, 0.08, 0.3); break;
+          case 'super': this.tone('sawtooth', 180, 900, 0.5, 0.18); this.tone('square', 440, 1760, 0.45, 0.12, 0.05); this.hiss(0.5, 0.25, 'bandpass', 800, 5000); break;
+          case 'dart': this.hiss(0.18, 0.35, 'highpass', 5000, 9000); this.tone('sine', 1800, 900, 0.15, 0.1); break;
+          case 'dartHit': this.tone('sine', 140, 50, 0.3, 0.9); this.tone('triangle', 2400, 2300, 0.25, 0.2, 0.02); this.hiss(0.2, 0.6, 'lowpass', 2500); break;
+          case 'ready': [880, 1175, 1568].forEach((f, i) => this.tone('square', f, f, 0.08, 0.12, i * 0.07)); break;
+          case 'lighter': this.hiss(0.05, 0.3, 'highpass', 6000); this.hiss(0.35, 0.12, 'bandpass', 1200, 900, 0.06); break;
+          case 'cough': this.hiss(0.12, 0.4, 'bandpass', 700, 400); this.hiss(0.12, 0.35, 'bandpass', 650, 380, 0.2); break;
+          case 'faintWarn': this.tone('sine', 600, 300, 0.4, 0.2); break;
+          case 'faint': this.tone('triangle', 500, 80, 1.0, 0.3); this.tone('sine', 120, 40, 0.6, 0.5, 0.3); break;
         }
       } catch (e) { /* audio opcional */ }
     }

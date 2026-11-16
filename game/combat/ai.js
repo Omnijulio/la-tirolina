@@ -23,6 +23,12 @@
       if (me.state !== 'fight') { this.actions = []; return ctl; }
       const dist = Math.abs(opp.cx - me.cx);
       const toward = Math.sign(opp.cx - me.cx) || me.facing;
+      // Combos: cuando un golpe conecta, la CPU puede encadenar otro (o el ultimate).
+      if (me.canCancel() && this.comboAction !== me.f.actionId) {
+        this.comboAction = me.f.actionId;
+        if (me.meterFull && Math.random() < this.d.combo) this.act('special');
+        else if (Math.random() < this.d.combo) this.act(Math.random() < 0.6 ? 'punch' : 'kick');
+      }
       this.timer -= dt;
       if (this.timer <= 0) {
         const intox = match.intoxOf(me);
@@ -51,6 +57,14 @@
         else this.set('idle', 400);
         return;
       }
+      // Rival desmayado por el azúcar: a por él.
+      if (opp.faintT > 0) {
+        if (dist < 230) this.act(r() < 0.5 ? 'punch' : 'kick'); else this.set('approach', 300);
+        return;
+      }
+      if (me.meterFull && opp.state === 'fight' && dist < 850 && (opp.hitstun > 0 || r() < 0.45)) { this.act('special'); return; }
+      const intox = match.intoxOf(me);
+      if (me.cigs > 0 && intox > 0.3 && dist > 400 && !match.incomingBottle(me) && r() < 0.4) { this.act('smoke'); return; }
       const incoming = match.incomingBottle(me);
       const threat = (opp.attacking && opp.f.animation !== 'throwBottle' && dist < 380) || incoming;
       if (threat && r() < d.block) { this.set('block', 320 + r() * 160); return; }

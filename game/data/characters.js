@@ -9,6 +9,8 @@
  *   speed      multiplicador de velocidad al andar/saltar
  *   tolerance  aguante al alcohol (0 = normal, positivo reduce el "puntillo")
  *   aim        puntería: reduce fallos e imprecisión del lanzamiento (1 = normal)
+ * special: ultimate propio del personaje (se carga encadenando golpes). Por ahora
+ *   solo El Barbas tiene uno; el resto lo recibirá más adelante.
  * unlock:
  *   start: true  -> disponible desde el principio
  *   story: n     -> se desbloquea al ganar el combate n del modo historia
@@ -22,6 +24,10 @@
       tagline: 'El de toda la vida. Equilibrado y fiel a la terraza.',
       stats: { hp: 100, power: 1.0, speed: 1.0, tolerance: 0.10, aim: 1.0 },
       unlock: { start: true, price: 0 },
+      special: {
+        id: 'dardo', name: 'Dardo certero', short: 'DARDO',
+        desc: 'Lanza un dardo ultrapreciso que busca al rival, no se puede bloquear y hace muchísimo daño. Se carga encadenando combos.'
+      },
       cpu: { bottles: 0, style: 'balanced' }
     },
     {
