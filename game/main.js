@@ -252,6 +252,8 @@
       const rival = this.charById(s.p2);
       const firstClear = story && result.won && !d.story.cleared.includes(s.storyIndex);
       const reward = R.matchReward({ ...result, boss: story && rival.boss, firstClear });
+      const score = R.finalScore({ raw: result.score, won: result.won, difficulty: result.difficulty, wild: result.wild });
+      const entry = { char: s.p1, mode: story ? 'story' : s.wild ? 'wild' : 'quick', difficulty: result.difficulty, won: result.won, rounds: result.roundsWon + '-' + result.roundsLost };
       Save.earn(reward.total);
       if (result.won) d.stats.wins++; else d.stats.losses++;
       d.police.strikes = 0; // terminar una pelea corta la racha de intervenciones
@@ -263,7 +265,7 @@
         if (d.story.stage >= root.TROLINA_STORY.length) { d.story.completed = true; d.story.stage = 0; storyFinished = true; }
       }
       Save.save();
-      this.lastResult = { result, reward, unlocked, storyFinished };
+      this.lastResult = { result, reward, unlocked, storyFinished, score, entry };
       UI.show('results', this.lastResult);
     },
 
@@ -316,6 +318,24 @@
         btn.classList.toggle('ready', p.meterFull);
       }
       if (h.cigs !== p.cigs) { h.cigs = p.cigs; document.getElementById('cigCount').textContent = p.cigs; }
+    },
+
+    /* ---------- ranking ---------- */
+
+    /** Guarda una puntuación con nombre. Devuelve { position, bonus } o { error }. */
+    saveRanking(name, total, entry) {
+      const clean = R.cleanName(name);
+      if (!clean) return { error: 'Escribe un nombre (hasta 14 letras)' };
+      const rk = Save.ranking;
+      const e = { ...entry, name: clean, score: Math.round(total), at: Date.now() };
+      const { list, position } = R.rankInsert(rk.list, e);
+      if (!position) return { error: 'Esta vez no entra en el ranking' };
+      rk.list = list; rk.name = clean; rk.lastAt = e.at;
+      Save.saveRanking();
+      const bonus = R.SCORE.signBonusCents;
+      Save.earn(bonus);
+      Save.save();
+      return { position, bonus };
     },
 
     /* ---------- multijugador (experimental) ---------- */
@@ -430,7 +450,10 @@
       d.stats.online = d.stats.online || { wins: 0, losses: 0 };
       if (mine > theirs) d.stats.online.wins++; else if (theirs > mine) d.stats.online.losses++;
       Save.save();
-      UI.show('netresults', { mine, theirs, desync: this.match && this.match.netDesync });
+      const score = R.finalScore({ raw: r.score, won: mine > theirs, online: true });
+      const rival = this.charById(side === 0 ? this.netCfg.p2.char : this.netCfg.p1.char);
+      const entry = { char: side === 0 ? this.netCfg.p1.char : this.netCfg.p2.char, mode: 'online', difficulty: 'online', won: mine > theirs, rounds: mine + '-' + theirs, vs: rival ? rival.name : '' };
+      UI.show('netresults', { mine, theirs, desync: this.match && this.match.netDesync, score, entry });
     },
 
     netAgain() {

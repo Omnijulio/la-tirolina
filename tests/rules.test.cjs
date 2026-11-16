@@ -247,3 +247,30 @@ test('La Barra solo sirve bebida: chupitos, Peterete, Red Bull y Marlboro a 6,20
   // Pedidos viejos con comida se limpian solos.
   assert.deepEqual(R.sanitizeOrder({ tortilla: 1, bocata: 1, botellin: 2 }, BAR_ITEMS), { botellin: 2 });
 });
+
+test('puntuación: combos y puntillo suben los puntos; multiplicadores al final', () => {
+  assert.equal(R.hitPoints('punch', 1, 0), 100);
+  assert.ok(R.hitPoints('punch', 3, 0) > R.hitPoints('punch', 1, 0), 'combo');
+  assert.ok(R.hitPoints('kick', 1, 1) === 2 * R.hitPoints('kick', 1, 0), 'estilo: el doble con el puntillo a tope');
+  assert.ok(R.hitPoints('fountain', 1, 0) > R.hitPoints('dart', 1, 0));
+  assert.ok(R.roundPoints({ perfect: true, timeLeft: 30 }) > R.roundPoints({ perfect: false, timeLeft: 30 }));
+  const easy = R.finalScore({ raw: 10000, won: true, difficulty: 'facil' });
+  const hard = R.finalScore({ raw: 10000, won: true, difficulty: 'pesadilla', wild: true });
+  assert.equal(easy.total, Math.round((10000 + R.SCORE.matchWin) * 0.5));
+  assert.equal(hard.total, Math.round((10000 + R.SCORE.matchWin) * 2 * 1.5));
+  assert.equal(R.finalScore({ raw: 777, won: false, online: true }).total, 777);
+});
+
+test('ranking: orden, puesto, tope de 20 y nombres limpios', () => {
+  let list = [];
+  for (let i = 0; i < 25; i++) list = R.rankInsert(list, { name: 'J' + i, score: i * 100, at: i }).list;
+  assert.equal(list.length, 20);
+  assert.equal(list[0].score, 2400);
+  assert.equal(R.rankPosition(list, 99999), 1);
+  assert.equal(R.rankPosition(list, 0), 0, 'no entra');
+  const r = R.rankInsert(list, { name: 'Nuevo', score: 1850, at: 99 });
+  assert.equal(r.position, 7);
+  assert.equal(R.cleanName('   Julio   el   Barbas   de   La Trolina '), 'Julio el Barba');
+  assert.equal(R.cleanName('<script>'), 'script');
+  assert.equal(R.formatPoints(1234567), '1.234.567');
+});

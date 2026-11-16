@@ -1,6 +1,7 @@
 /* Partida guardada en localStorage. Si el navegador lo bloquea, funciona en memoria. */
 (function (root) {
   const KEY = 'trolina.save.v1';
+  const RANK_KEY = 'trolina.ranking.v1';   // aparte: «Borrar progreso» no borra el ranking
 
   function defaults() {
     return {
@@ -31,7 +32,21 @@
   const Save = {
     data: defaults(),
     persistent: true,
+    /** Ranking de este dispositivo: { list: [{name, score, char, mode, difficulty, won, rounds, at}], name }. */
+    ranking: { list: [], name: '' },
+    loadRanking() {
+      try {
+        const raw = root.localStorage && root.localStorage.getItem(RANK_KEY);
+        const r = raw ? JSON.parse(raw) : null;
+        this.ranking = { list: Array.isArray(r && r.list) ? r.list : [], name: (r && r.name) || '' };
+      } catch (e) { this.ranking = { list: [], name: '' }; }
+      return this.ranking;
+    },
+    saveRanking() {
+      try { root.localStorage.setItem(RANK_KEY, JSON.stringify(this.ranking)); } catch (e) { /* solo en memoria */ }
+    },
     load() {
+      this.loadRanking();
       try {
         const raw = root.localStorage && root.localStorage.getItem(KEY);
         this.data = merge(defaults(), raw ? JSON.parse(raw) : null);

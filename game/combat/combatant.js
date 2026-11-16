@@ -49,6 +49,7 @@
       this.seed = Math.random() * 1000;
       // Lo que dura todo el combate (no se reinicia entre asaltos).
       this.meter = 0;                   // carga del ultimate (0..100)
+      this.score = 0;                   // puntos del combate (todos los asaltos)
       // Lo que lleva para fumar (1 o 2 huecos): cada cosa con sus unidades, tiempo y efectos.
       const bag = loadout.smokes && loadout.smokes.length ? loadout.smokes
         : loadout.cigs ? [{ id: 'tabaco', short: 'Tabaco', units: loadout.cigs, ms: 1500, relief: 0.15, heal: 6, coughFrom: 3, look: 'cig' }] : [];

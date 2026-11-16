@@ -78,6 +78,54 @@
       node.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => (fn ? fn() : this.show(b.dataset.back))));
       this.keyHandler = (e) => { if (e.key === 'Escape') { const b = node.querySelector('[data-back]'); if (b) b.click(); } };
     },
+    /** Bloque de puntuación del final de un combate. */
+    scoreBlock(score) {
+      const parts = score.lines.map((l) => l.mult ? '×' + String(l.mult).replace('.', ',') + ' ' + l.label.toLowerCase() : (l.label === 'Puntos del combate' ? R.formatPoints(l.pts) + ' del combate' : '+' + R.formatPoints(l.pts) + ' ' + l.label.toLowerCase()));
+      return `<div class="points"><span>PUNTUACIÓN</span><b>${R.formatPoints(score.total)}</b><small>${esc(parts.join(' · '))}</small></div><div class="rank-slot"></div>`;
+    },
+
+    /** Invitación a firmar en el ranking (opcional, con premio). */
+    rankForm(node, total, entry) {
+      const g = this.game, rk = g.save.ranking;
+      const slot = node.querySelector('.rank-slot');
+      if (!slot) return;
+      const online = g.session.mode === 'online';
+      const see = (at) => { g.leaveMatch(); this.show('ranking', { highlight: at }); };
+      const seeLink = online ? '' : ' <button class="link" data-see>Ver ranking</button>';
+      const bindSee = (at) => { const b = slot.querySelector('[data-see]'); if (b) b.addEventListener('click', () => see(at)); };
+      const pos = R.rankPosition(rk.list, total);
+      if (!pos) {
+        const last = rk.list[rk.list.length - 1];
+        slot.innerHTML = `<p class="muted">Para entrar en el top ${R.SCORE.rankSize} te faltan <b>${R.formatPoints(last.score - total + 1)}</b> puntos.${seeLink}</p>`;
+        bindSee();
+        return;
+      }
+      const open = () => {
+        slot.innerHTML = `<div class="rank-form ${pos === 1 ? 'best' : ''}">
+          <p class="rank-hook">${pos === 1 ? (rk.list.length ? '🏆 ¡NUEVO RÉCORD! Puesto #1' : '🏆 ¡Estrena el ranking! Puesto #1') : '¡Entras en el ranking! Puesto #' + pos}</p>
+          <div class="rank-row"><input data-name maxlength="14" placeholder="Tu nombre" value="${esc(rk.name || '')}" autocomplete="nickname" enterkeyhint="done"><button class="primary" data-sign>✍️ Firmar · +${money(R.SCORE.signBonusCents)}</button></div>
+          <p class="muted small">Es opcional: si firmas, la casa te invita a una ronda (+${money(R.SCORE.signBonusCents)}). <button class="link" data-skip>Ahora no</button></p>
+        </div>`;
+        const input = slot.querySelector('[data-name]');
+        const sign = () => {
+          const r = g.saveRanking(input.value, total, entry);
+          if (r.error) { this.flashError(node, r.error); input.focus(); return; }
+          root.TrolinaSfx.play('coin');
+          slot.innerHTML = `<p class="rank-done">✍️ Firmado como <b>${esc(g.save.ranking.name)}</b> · puesto <b>#${r.position}</b> · +${money(r.bonus)} de invitación${seeLink}</p>`;
+          bindSee(g.save.ranking.lastAt);
+          const sum = node.querySelector('.sum b:last-child');
+          if (sum) sum.textContent = money(g.save.data.coins);
+        };
+        slot.querySelector('[data-sign]').addEventListener('click', sign);
+        input.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); sign(); } });
+        slot.querySelector('[data-skip]').addEventListener('click', () => {
+          slot.innerHTML = `<p class="muted"><button class="link" data-open>✍️ Firmar en el ranking (puesto #${pos}, +${money(R.SCORE.signBonusCents)})</button></p>`;
+          slot.querySelector('[data-open]').addEventListener('click', open);
+        });
+      };
+      open();
+    },
+
     /** Aviso suelto sobre la pantalla actual. */
     toast(msg) {
       const node = this.root.firstElementChild;
@@ -113,6 +161,7 @@
           <button data-go="wild" class="wild">Modo salvaje <small>Experimental · desde el segundo 30, tú verás</small></button>
           <button data-go="online" class="online">Multijugador <small>Experimental · contra un amigo en otro móvil</small></button>
           <button data-go="shop">Tienda <small>Personajes y mejoras</small></button>
+          <button data-go="ranking">Ranking <small>${g.save.ranking.list.length ? '🏆 ' + esc(g.save.ranking.list[0].name) + ' · ' + R.formatPoints(g.save.ranking.list[0].score) : 'Firma tu puntuación'}</small></button>
           <button data-go="help">Cómo se juega</button>
           <button data-go="options">Opciones</button>
         </nav>
@@ -466,6 +515,7 @@
         <p class="score">${result.roundsWon} – ${result.roundsLost} · ${esc(R.DIFFICULTIES[result.difficulty].name)}</p>
         <ul class="reward">${reward.lines.map((l, i) => `<li style="animation-delay:${i * 0.18}s"><span>${esc(l.label)}</span><b>+${money(l.cents)}</b></li>`).join('')}</ul>
         <p class="sum">Ganado: <b>${money(reward.total)}</b> · Cartera: <b>${money(d.coins)}</b></p>
+        ${p.score ? this.scoreBlock(p.score) : ''}
         ${unlockedChar ? `<div class="unlock" style="--c:${unlockedChar.color}"><canvas width="96" height="96"></canvas><div><small>¡Nuevo luchador desbloqueado!</small><b>${esc(unlockedChar.name)}</b></div></div>` : ''}
         ${storyFinished ? '<div class="unlock gold"><div><small>Modo historia completado</small><b>Eres el rey de La Trolina</b></div></div>' : ''}
         <nav class="menu row"></nav>
@@ -486,6 +536,7 @@
       add('Tienda', () => this.show('shop'));
       add('Menú', () => this.show('title'));
       reward.lines.forEach((_, i) => setTimeout(() => root.TrolinaSfx.play('coin'), 200 + i * 180));
+      if (p.score) this.rankForm(node, p.score.total, p.entry);
       return node;
     },
 
@@ -664,6 +715,41 @@
       return node;
     },
 
+    /** Pantalla de ranking (en este dispositivo). */
+    ranking(p) {
+      const g = this.game, rk = g.save.ranking;
+      const modes = [['all', 'Todo'], ['story', 'Historia'], ['quick', 'Rápida'], ['wild', 'Salvaje'], ['online', 'Multijugador']];
+      const modeName = { story: 'Historia', quick: 'Rápida', wild: 'Salvaje', online: 'Multi' };
+      let filter = p.mode || 'all';
+      const node = el(`<div class="scr ranking">
+        ${this.header('🏆 Ranking', 'title')}
+        <div class="rank-tabs">${modes.map(([id, n]) => `<button data-m="${id}" data-silent="1">${n}</button>`).join('')}</div>
+        <div class="rank-list"></div>
+        <p class="muted small center">Ranking de este móvil. Al acabar cada pelea puedes firmar con tu nombre (+${money(R.SCORE.signBonusCents)} de invitación).</p>
+      </div>`);
+      const paint = () => {
+        node.querySelectorAll('[data-m]').forEach((b) => b.classList.toggle('on', b.dataset.m === filter));
+        const list = rk.list.filter((e) => filter === 'all' || e.mode === filter);
+        const box = node.querySelector('.rank-list');
+        if (!list.length) { box.innerHTML = '<p class="empty">Todavía no hay nadie. Termina una pelea y firma con tu nombre.</p>'; return; }
+        box.innerHTML = '<ol>' + list.map((e, i) => {
+          const c = g.charById(e.char);
+          const date = new Date(e.at || 0).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+          const diff = e.mode === 'online' ? (e.vs ? 'vs ' + esc(e.vs) : '') : (R.DIFFICULTIES[e.difficulty] ? R.DIFFICULTIES[e.difficulty].name : '');
+          return `<li class="${e.at === (p.highlight || rk.lastAt) ? 'me' : ''}${i < 3 ? ' top' + (i + 1) : ''}">
+            <span class="pos">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span>
+            <canvas width="40" height="40" data-c="${c ? c.id : ''}"></canvas>
+            <span class="who"><b>${esc(e.name)}</b><small>${c ? esc(c.name) : ''} · ${modeName[e.mode] || ''}${diff ? ' · ' + diff : ''} · ${e.won ? 'ganó' : 'perdió'} ${esc(e.rounds || '')} · ${date}</small></span>
+            <span class="pts">${R.formatPoints(e.score)}</span></li>`;
+        }).join('') + '</ol>';
+        box.querySelectorAll('canvas[data-c]').forEach((cv) => { if (cv.dataset.c && g.assets.characters[cv.dataset.c]) drawPortrait(cv, g.assets.characters[cv.dataset.c]); });
+      };
+      node.querySelectorAll('[data-m]').forEach((b) => b.addEventListener('click', () => { filter = b.dataset.m; paint(); root.TrolinaSfx.play('select'); }));
+      paint();
+      this.bindBack(node);
+      return node;
+    },
+
     /** Multijugador (experimental): crear sala o unirse con un código. */
     online(p) {
       const g = this.game;
@@ -741,6 +827,7 @@
       const node = el(`<div class="scr results ${won ? 'win' : 'lose'}">
         <h1>${draw ? 'EMPATE' : won ? '¡HAS GANADO!' : 'HAS PERDIDO'}</h1>
         <p class="score">${p.mine} – ${p.theirs} · Multijugador (experimental)</p>
+        ${p.score ? this.scoreBlock(p.score) : ''}
         ${p.desync ? '<p class="muted">Aviso: las dos partidas se desincronizaron durante la pelea. Si lo ves a menudo, dímelo.</p>' : ''}
         <p class="wait muted"></p>
         <nav class="menu row"><button class="primary" data-again>Revancha</button><button data-leave>Salir</button></nav>
@@ -754,6 +841,7 @@
       node.querySelector('[data-leave]').addEventListener('click', () => { g.leaveMatch(); g.netLeave(); });
       this.onNet = paint;
       paint();
+      if (p.score) this.rankForm(node, p.score.total, p.entry);
       return node;
     },
 
@@ -771,6 +859,8 @@
           <p><b>Bolsa de azúcar (60 €)</b>: 30 s a toda velocidad y sin puntillo; luego se pasa y a los 45 s te quedas inconsciente unos segundos.</p></section>
           <section><h3>Modo salvaje (experimental)</h3><p>Una pelea rápida donde los objetos pegan más (para bien y para mal) y, <b>a partir del segundo 30</b>, todo se desmorona para los dos: controles que se invierten, golpes que cambian solos, pasos sin querer, caídas sin que nadie te toque, botellas hacia atrás, micro-siestas y una pantalla que no se está quieta.</p>
           <p>Cada fallo te lo recuerdan en grande, con todo el cariño. A cambio, cuando un golpe entra, pega más fuerte, y si ganas te llevas una prima.</p></section>
+          <section><h3>Puntuación y ranking</h3><p>Cada golpe da puntos: más si es parte de un combo y más cuanto más <b>puntillo</b> llevas al pegar (estilo). También puntúan los bloqueos, los ultimates, cada asalto ganado (más si es perfecto y con el tiempo que sobre) y la victoria. Al final se multiplica por la dificultad (fácil ×0,5, difícil ×1,5, pesadilla ×2) y el modo salvaje (×1,5).</p>
+          <p>Si entras en el top 20 puedes <b>firmar con tu nombre</b> en el ranking. Es opcional, pero la casa te invita a una ronda (+10 €).</p></section>
           <section><h3>Multijugador (experimental)</h3><p>Contra un amigo en otro móvil: uno pulsa <b>Crear sala</b> y le pasa el código de 4 letras (o el enlace); el otro pulsa <b>Unirse</b> y lo escribe. Cada uno elige luchador y pide en la barra (gratis) y la pelea empieza cuando los dos están listos. Sin policía ni modo salvaje.</p></section>
           <section><h3>Ambientes</h3><p>La terraza cambia de una pelea a otra: noche, día, lluvia, nieve o Navidad (o el que fijes en Opciones). De día la luz de la fuente no se nota. Si la jardinera aparece llena de botellines (opción, y siempre en el modo salvaje), cada uno tiene 2 más para lanzar.</p></section>
           <section><h3>Huecos de La Barra</h3><p>Puedes tomar hasta <b>7 bebidas</b> por pelea (botellines, chupitos, Peterete, Red Bull, café, agua…) y llevar <b>1 cosa para fumar</b>. Más huecos en la Tienda: <b>Hígado de hierro</b> (+1 bebida por nivel, hasta 10) y <b>Pitillera de plata</b> (segundo hueco para fumar).</p>

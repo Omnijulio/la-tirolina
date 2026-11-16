@@ -164,6 +164,16 @@
 
     setBanner(text, color, sub) { this.banner = { text, color: color || '#fff', sub: sub || '', t: 0 }; }
 
+    /** Suma puntos a un luchador y los enseña flotando donde ha pasado. */
+    addScore(c, pts, x, y, big) {
+      if (!pts) return;
+      c.score += pts;
+      if (x === undefined || !this.isHuman(c)) return;
+      this.popups.push({ x, y, text: '+' + R.formatPoints(pts), color: big ? '#ffe08a' : '#fff3b0', t: 0, life: big ? 1400 : 800, small: !big, big });
+    }
+    /** ¿Lo maneja una persona? (para enseñar su marcador) */
+    isHuman(c) { return this.net ? true : c === this.p1; }
+
     popup(c, text, color) {
       this.popups.push({ x: c.cx, y: C.GROUND + c.y - 330, text, color: color || '#fff', t: 0, life: 900 });
     }
@@ -305,6 +315,7 @@
           const dmg = R.damageFor('fountain', att.powerNow, att === this.p2 ? this.diff.cpuDamage : 1);
           def.grabRot = 0;
           const res = def.splashHit(dmg);
+          this.addScore(att, R.hitPoints('fountain', 1, this.intoxOf(att)), def.cx, fo.waterY - 200, true);
           if (att === this.p1) this.stats.ultimates++;
           this.popups.push({ x: def.cx, y: fo.waterY - 150, text: '¡CALADO!', color: '#9ff0ff', t: 0, life: 1100 });
           if (res === 'ko') {
@@ -604,6 +615,7 @@
       this.addNoise(res === 'block' ? R.NOISE.block : res === 'ko' ? R.NOISE.ko : kind === 'dart' ? R.NOISE.dart : R.NOISE.hit);
       if (res === 'block') {
         this.spark(x, y, 'block'); this.sfx('block'); this.hitstop = 45;
+        this.addScore(def, R.SCORE.block);
         att.combo = 0;
         if (def.hp <= 0) this.onKO(att, def);
         return;
@@ -612,6 +624,7 @@
       this.spark(x, y, kind === 'bottle' ? 'bottle' : kind === 'dart' ? 'dart' : 'hit');
       this.sfx(kind === 'kick' ? 'kick' : kind === 'dart' ? 'dartHit' : 'punch');
       att.combo = n;
+      this.addScore(att, R.hitPoints(kind, n, this.intoxOf(att)), x, y - 40);
       if (n >= 2) this.popup(att, n + ' GOLPES', '#8bf2ce');
       if (att === this.p1) this.stats.maxCombo = Math.max(this.stats.maxCombo, n);
       // El ultimate se carga encadenando golpes.
@@ -631,6 +644,7 @@
       this.roundWinner = winner;
       const wi = winner === this.p1 ? 0 : 1;
       this.wins[wi]++;
+      this.addScore(winner, R.roundPoints({ perfect: winner.hp >= winner.maxHp - 0.01, timeLeft: this.timer }), winner.cx, C.GROUND + winner.y - 400, true);
       if (winner === this.p1) {
         if (winner.hp >= winner.maxHp - 0.01) { this.stats.perfectRounds++; this.setBanner('K.O.', '#ff4d5e', '¡PERFECTO!'); }
         else this.setBanner('K.O.', '#ff4d5e');
@@ -650,6 +664,7 @@
       else {
         this.roundWinner = r1 > r2 ? this.p1 : this.p2;
         this.wins[this.roundWinner === this.p1 ? 0 : 1]++;
+        this.addScore(this.roundWinner, R.roundPoints({ perfect: false, timeLeft: 0 }), this.roundWinner.cx, C.GROUND + this.roundWinner.y - 400, true);
         this.setBanner('¡TIEMPO!', '#f8ce73');
       }
       this.sfx('bell');
@@ -679,6 +694,8 @@
         maxCombo: this.stats.maxCombo,
         ultimates: this.stats.ultimates,
         bottles: this.p1.loadout.bottles,
+        score: this.viewer.score,
+        scores: [this.p1.score, this.p2.score],
         difficulty: this.o.difficulty,
         wild: this.wild,
         matchSeconds: Math.round(this.matchTime)
@@ -905,9 +922,9 @@
       for (const p of this.popups) {
         const k = p.t / p.life;
         c.save(); c.globalAlpha = k < 0.75 ? 1 : 1 - (k - 0.75) / 0.25;
-        c.font = 'bold 24px ' + FONT; c.textAlign = 'center';
+        c.font = 'bold ' + (p.small ? 18 : p.big ? 30 : 24) + 'px ' + FONT; c.textAlign = 'center';
         c.lineWidth = 5; c.strokeStyle = '#120a14'; c.fillStyle = p.color;
-        const y = p.y - 40 * k;
+        const y = p.y - (p.small ? 30 : 40) * k;
         c.strokeText(p.text, p.x, y); c.fillText(p.text, p.x, y);
         c.restore();
       }
@@ -956,6 +973,13 @@
         const nx = side === 1 ? x : x + w;
         const label = c.char.name.toUpperCase() + (this.net ? (c === this.viewer ? '  · TÚ' : '  · RIVAL') : c === this.p2 ? '  · CPU' : '');
         ctx.strokeText(label, nx, y + h + 24); ctx.fillText(label, nx, y + h + 24);
+        // marcador de puntos (solo de quien juega)
+        if (this.isHuman(c)) {
+          ctx.font = 'bold 17px ' + FONT; ctx.textAlign = side === 1 ? 'right' : 'left';
+          ctx.lineWidth = 4; ctx.strokeStyle = '#05070c'; ctx.fillStyle = '#ffe08a';
+          const sx2 = side === 1 ? x + w - 66 : x + 66, txt = R.formatPoints(c.score) + ' PTS';
+          ctx.strokeText(txt, sx2, y + h + 23); ctx.fillText(txt, sx2, y + h + 23);
+        }
         // asaltos ganados
         const wi = c === this.p1 ? 0 : 1;
         for (let i = 0; i < R.ROUNDS_TO_WIN; i++) {

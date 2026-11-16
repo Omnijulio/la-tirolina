@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.9** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.10** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -59,6 +59,12 @@ Estado: **v0.9** (16/11/2026). Un jugador contra la CPU, en navegador de escrito
 ## Hecho en v0.9
 
 - **Multijugador (experimental)**: sala con código de 4 letras (o enlace), cada uno en su móvil, barra libre, todos los luchadores, revancha. Ver `MULTIJUGADOR.md`.
+
+## Hecho en v0.10
+
+- **Puntuación** en cada combate: golpes (más con combos y con puntillo: «estilo»), ultimates, bloqueos, asaltos (perfecto y tiempo), victoria; ×dificultad y ×modo salvaje. Marcador en pantalla y desglose al final.
+- **Ranking** (top 20 en este dispositivo) con firma opcional: se recuerda el nombre, te dice qué puesto conseguirías y la casa invita a una ronda (+10 €) por firmar. Pantalla Ranking en el menú con filtros por modo.
+- Pendiente opcional: **ranking compartido online** entre móviles (necesita una base de datos externa).
 
 ## Próximas fases propuestas
 

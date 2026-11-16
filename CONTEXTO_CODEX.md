@@ -1,6 +1,6 @@
 # Contexto para continuar en Codex
 
-Estado: **v0.9** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
+Estado: **v0.10** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
 
 ## Objetivo del usuario y decisiones aceptadas
 
@@ -28,6 +28,8 @@ Peticiones incorporadas, en orden:
 12. **v0.8 — Huecos y tabacos**: máximo de 7 bebidas por pelea y 1 hueco para fumar; el Hígado de hierro da +1 bebida por nivel (hasta 10) y la Pitillera de plata un segundo hueco para fumar. Para fumar: Marlboro, Ducados, tabaco de liar, puro, habano y chiflo, cada uno con su tiempo y efectos; fumar devuelve vida. Con la jardinera llena, +2 botellines para lanzar cada uno. Botón de pantalla completa siempre visible.
 
 13. **v0.9 — Multijugador (experimental)**: dos móviles por WebRTC con código de sala (PeerJS), pelea en lockstep con semilla común. Ver `MULTIJUGADOR.md`.
+
+14. **v0.10 — Puntuación y ranking**: puntos en cada combate y ranking (en el dispositivo) con firma opcional premiada.
 
 El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
@@ -79,6 +81,13 @@ Flujo: Título → (Historia | Pelea rápida) → Selección (luchador; en pelea
 - **Bolsa de azúcar** (60 €): 0–30 s de combate sin puntillo, +40 % de velocidad y animaciones un 20 % más rápidas; 30–45 s vuelve el puntillo («¡BAJÓN DE AZÚCAR!»); a los 45 s el personaje se desmaya 6 s, tumbado e indefenso, y recibe un 50 % más de daño. Se puede cambiar a «pierde el asalto» en `faint()` de `combatant.js` si se prefiere más duro.
 - Objetos (v0.7, solo bebida): Peterete (+9 % fuerza, 1,5 de puntillo, −15 % niebla), chupito de Jägermeister (+14 % fuerza, +4 % velocidad, 2,5 de puntillo, sube un 10 % más rápido), licor café (+10 % fuerza, +6 % velocidad, 2 de puntillo), tequila (+20 % fuerza, 3 de puntillo, +25 % niebla); los chupitos y el Peterete no dan envase. Red Bull (+12 % velocidad, sube 20 % más rápido), café (−20 % puntillo, +4 % velocidad), agua (−10 % puntillo, +5 vida), paquete de Marlboro (6,20 €, 10 cigarrillos), bolsa de azúcar y gafas de sol (mitad de niebla visual). Iconos de las bebidas nuevas: `tools/build_drink_icons.py` → `assets/icons/drinks/`.
 - La CPU también pide en la barra según dificultad y personalidad; se muestra en la pantalla VS.
+
+### Puntuación y ranking (v0.10)
+
+- `rules.js`: `SCORE` (puntos por golpe, combo, «estilo» por puntillo, bloqueo, asalto, perfecto, tiempo, victoria, multiplicadores por dificultad y modo salvaje, tamaño del ranking, premio por firmar), `hitPoints`, `roundPoints`, `finalScore`, `rankPosition`, `rankInsert`, `cleanName`, `formatPoints`.
+- `Combatant.score` (todo el combate); `Match.addScore()` suma y enseña «+puntos» de los luchadores humanos; marcador «N PTS» junto al nombre. `result()` incluye `score` (de quien mira) y `scores`.
+- Ranking local en `localStorage` con clave propia `trolina.ranking.v1` (`Save.ranking`, `loadRanking`, `saveRanking`): «Borrar progreso» no lo borra. `Game.saveRanking(nombre, total, entrada)` da `SCORE.signBonusCents` (10 €) al firmar.
+- Pantallas: bloque de puntuación y formulario de firma en `results` y `netresults` (`UI.scoreBlock`, `UI.rankForm`), pantalla `ranking` con filtros por modo, entrada en el menú con el líder actual.
 
 ### Multijugador (v0.9, experimental)
 

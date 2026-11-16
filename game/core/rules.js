@@ -68,6 +68,72 @@
     return { on, lit };
   }
 
+  /* ---------- Puntuación y ranking ----------
+   * Puntos por golpe (más si es parte de un combo y más cuanto más puntillo llevas al
+   * pegar: «estilo»), por bloquear, por ganar asaltos (perfecto y tiempo de sobra) y por
+   * la victoria. Al final se multiplica por la dificultad y por el modo salvaje.
+   */
+  const SCORE = {
+    hit: { punch: 100, kick: 150, bottle: 200, dart: 1500, fountain: 2000 },
+    comboStep: 0.5,       // cada golpe más del combo vale un 50 % más
+    styleMax: 1,          // hasta +100 % con el puntillo al máximo
+    block: 20,
+    roundWin: 2000, perfect: 5000, timePerSec: 50,
+    matchWin: 5000,
+    diffMult: { facil: 0.5, normal: 1, dificil: 1.5, pesadilla: 2 },
+    wildMult: 1.5,
+    rankSize: 20,
+    signBonusCents: 1000  // invitación por firmar en el ranking: 10 €
+  };
+
+  function hitPoints(kind, comboN, intox) {
+    const base = SCORE.hit[kind] || 0;
+    const combo = 1 + SCORE.comboStep * Math.max(0, (comboN || 1) - 1);
+    const style = 1 + SCORE.styleMax * Math.max(0, Math.min(1, intox || 0));
+    return Math.round(base * combo * style / 10) * 10;
+  }
+
+  function roundPoints({ perfect, timeLeft }) {
+    return SCORE.roundWin + (perfect ? SCORE.perfect : 0) + Math.max(0, Math.round(timeLeft || 0)) * SCORE.timePerSec;
+  }
+
+  /** Puntuación final: los puntos del combate, la victoria y los multiplicadores. */
+  function finalScore({ raw, won, difficulty, wild, online }) {
+    const lines = [{ label: 'Puntos del combate', pts: Math.round(raw || 0) }];
+    let sum = Math.round(raw || 0);
+    if (won) { lines.push({ label: 'Victoria', pts: SCORE.matchWin }); sum += SCORE.matchWin; }
+    let mult = 1;
+    if (!online) {
+      const dm = SCORE.diffMult[difficulty] || 1;
+      if (dm !== 1) lines.push({ label: 'Dificultad', mult: dm });
+      mult *= dm;
+    }
+    if (wild) { lines.push({ label: 'Modo salvaje', mult: SCORE.wildMult }); mult *= SCORE.wildMult; }
+    return { lines, total: Math.round(sum * mult) };
+  }
+
+  /** Puesto (1, 2…) que tendría una puntuación en el ranking, o 0 si no entra. */
+  function rankPosition(list, score, size) {
+    const n = size || SCORE.rankSize;
+    const pos = (list || []).filter((e) => e.score >= score).length + 1;
+    return pos <= n ? pos : 0;
+  }
+
+  /** Mete una entrada en el ranking (de mayor a menor; a igualdad, el más antiguo primero). */
+  function rankInsert(list, entry, size) {
+    const n = size || SCORE.rankSize;
+    const out = (list || []).concat([entry]).sort((a, b) => b.score - a.score || (a.at || 0) - (b.at || 0)).slice(0, n);
+    const pos = out.indexOf(entry) + 1;
+    return { list: out, position: pos };
+  }
+
+  /** Nombre limpio para el ranking: 1–14 caracteres visibles. */
+  function cleanName(name) {
+    return String(name || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 14);
+  }
+
+  function formatPoints(n) { return Math.round(n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+
   /** Ambiente del combate: el fijado en Opciones o uno al azar de la lista. */
   function pickStage(pref, ids, rng) {
     if (ids.includes(pref)) return pref;
@@ -345,6 +411,7 @@
     WILD, chaosAt, wildLevel,
     comboScale, meterGain, sugarPhase, bottleNoise, policeOutcome, pickFountain, pickStage,
     SLOTS, JARDINERA_AMMO, slotsFor, orderUsage, cpuSlots,
+    SCORE, hitPoints, roundPoints, finalScore, rankPosition, rankInsert, cleanName, formatPoints,
     formatMoney, orderCost, sanitizeOrder, computeLoadout, intoxAt, impairment,
     damageFor, matchReward, cpuOrder, describeOrder, clampQty
   };
