@@ -22,7 +22,8 @@ Se ha tomado como referencia de los clásicos que funcionan con pocos botones: *
 
 - **Joystick**: lados = andar; arriba = saltar; **abajo = guardia**. Andar hacia atrás **ya no cubre**.
 - **Paso rápido en el móvil**: un **toque rápido** en la zona del joystick (apoyar y soltar sin mover, ≤220 ms) y, en menos de 350 ms, volver a apoyar el pulgar y **deslizarlo hacia un lado** (antes de 450 ms). Tras el toque, la base del joystick se ilumina mientras se puede hacer. Hacia el rival es paso adelante; hacia el otro lado, paso atrás. Tiempos en `DASH` (`touchTapMs`, `touchGapMs`, `touchSwipeMs`).
-- **Botones**: PUÑO, PATADA, **AGARRE** (sustituye a GUARDIA), BOTELLÍN, ULTIMATE y FUMAR.
+- **Botón DASH**: se pulsa y el **siguiente movimiento del joystick** decide. Hacia un lado da paso rápido; **hacia arriba, salto doble**: al llegar arriba hay un segundo impulso, se sube más y, en diagonal, se avanza más, para escapar de la esquina o pasar por encima del rival. Hacia abajo no hace nada y sigue armado. Dura 1,2 s armado y, mientras, el botón y el joystick brillan. Si ya vas hacia un lado o arriba al pulsarlo, sale en el acto. El salto doble gasta 8 de fuelle; sin fuelle sale un salto normal. Teclado: E o Mayúsculas y luego ←/→/↑. Ajustes en `DASH` (`armMs`, `highV2`, `highVx`, `highFuelle`).
+- **Botones**: PUÑO, PATADA, **AGARRE** (sustituye a GUARDIA), **DASH**, BOTELLÍN, ULTIMATE y FUMAR.
 - **Teclado**: J/Z puño, K/X patada, **H/N agarre**, ↓/S/G guardia, L/C botellín, U/V ultimate, F/B fumar. Doble pulsación de ← o → = paso rápido.
 
 ## Golpes

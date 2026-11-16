@@ -1,8 +1,11 @@
 /* Entrada unificada: teclado + joystick y botones táctiles multitáctiles.
  * held: direcciones mantenidas (block = joystick abajo / ↓ S G).
- * queue: acciones puntuales (punch, kick, grab, bottle, special, smoke, jump, dashLeft, dashRight).
+ * queue: acciones puntuales (punch, kick, grab, bottle, special, smoke, jump, jumpHigh, dashLeft, dashRight).
  * Paso rápido: en el móvil, toque rápido en el joystick y enseguida apoyar y deslizar hacia un
  * lado; en teclado, doble pulsación de ← o →. Tiempos en TrolinaRules.DASH.
+ * Botón DASH (o E / Mayúsculas): lo arma y el siguiente movimiento decide: a un lado, paso
+ * rápido; arriba, salto doble; abajo, nada (sigue armado). Si ya vas hacia un lado o arriba
+ * al pulsarlo, sale en el acto.
  */
 (function (root) {
   const MOVE_KEYS = {
@@ -24,6 +27,8 @@
       this.queue = [];
       this.onPause = null;
       this.lastSide = { dir: 0, at: -1e9 };   // para la doble pulsación de ← / →
+      this.dashArmUntil = 0;                  // botón DASH armado hasta este momento
+      this.armLookTimer = null;
       root.addEventListener('keydown', (e) => this.keydown(e));
       root.addEventListener('keyup', (e) => this.keyup(e));
       root.addEventListener('blur', () => this.releaseAll());
@@ -35,8 +40,11 @@
     keydown(e) {
       if (this.isTyping()) return;
       if (e.code === 'Escape' || e.code === 'KeyP') { if (this.onPause && !e.repeat) this.onPause(); return; }
+      if ((e.code === 'KeyE' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') && !e.repeat) { this.armDash(); if (this.capture) e.preventDefault(); return; }
       const mv = MOVE_KEYS[e.code];
       if (mv) {
+        // Botón DASH armado: este movimiento decide (lado = paso rápido, arriba = salto doble).
+        if (!this.keys[mv] && !e.repeat && this.armedMove(mv)) { this.keys[mv] = true; this.sync(); if (this.capture) e.preventDefault(); return; }
         if (!this.keys[mv] && mv === 'up') this.queue.push('jump');
         if (!e.repeat && (mv === 'left' || mv === 'right')) {
           const now = performance.now(), D = root.TrolinaRules.DASH;
@@ -61,9 +69,35 @@
       for (const k of Object.keys(this.held)) { this.keys[k] = false; this.touch[k] = false; this.held[k] = false; }
       document.querySelectorAll('.tbtn.on').forEach((b) => b.classList.remove('on'));
       this.btnBlock = false;
+      this.disarmDash();
       if (this.releaseStick) this.releaseStick();
     }
     take() { const q = this.queue; this.queue = []; return q; }
+
+    /** Botón DASH: si ya vas hacia un lado o arriba sale en el acto; si no, espera al siguiente movimiento. */
+    armDash() {
+      const h = this.held;
+      if (h.up) { this.queue.push('jumpHigh'); this.disarmDash(); return; }
+      if (h.left !== h.right) { this.queue.push(h.left ? 'dashLeft' : 'dashRight'); this.disarmDash(); return; }
+      this.dashArmUntil = performance.now() + root.TrolinaRules.DASH.armMs;
+      this.armLook(true);
+    }
+    disarmDash() { this.dashArmUntil = 0; this.armLook(false); }
+    /** Movimiento que empieza ahora (left/right/up/block). Si el DASH estaba armado, lo usa y devuelve true. */
+    armedMove(dir) {
+      if (!this.dashArmUntil) return false;
+      if (performance.now() > this.dashArmUntil) { this.disarmDash(); return false; }
+      if (dir === 'block' || dir === 'down') return false;     // hacia abajo no hace nada (sigue armado)
+      this.queue.push(dir === 'up' ? 'jumpHigh' : dir === 'left' ? 'dashLeft' : 'dashRight');
+      this.disarmDash();
+      return true;
+    }
+    armLook(on) {
+      if (this.dashBtn) this.dashBtn.classList.toggle('armed', on);
+      if (this.stickBase) this.stickBase.classList.toggle('armed', on);
+      clearTimeout(this.armLookTimer);
+      if (on) this.armLookTimer = setTimeout(() => this.disarmDash(), root.TrolinaRules.DASH.armMs);
+    }
     clear() { this.queue = []; }
 
     /**
@@ -83,11 +117,14 @@
       const D = () => root.TrolinaRules.DASH;
       let armTimer = null;
       const setArmedLook = (on) => {
+        if (this.dashArmUntil) return;   // el botón DASH manda en el brillo
         base.classList.toggle('armed', on);
         clearTimeout(armTimer);
-        if (on) armTimer = setTimeout(() => base.classList.remove('armed'), D().touchGapMs);
+        if (on) armTimer = setTimeout(() => { if (!this.dashArmUntil) base.classList.remove('armed'); }, D().touchGapMs);
       };
       this.stick = st;
+      this.stickBase = base;
+      this.dashBtn = container.querySelector('[data-act="dashArm"]');
       this.btnBlock = false;
       const setDir = (nx, ny) => {
         const d = st.dir, was = { ...d };
@@ -96,11 +133,16 @@
         d.right = was.right ? nx > 0.22 : nx > 0.35;
         d.up = was.up ? ny < -0.32 : ny < -0.5;
         d.down = was.down ? ny > 0.4 : ny > 0.55;
-        if (d.up && !was.up) this.queue.push('jump');
+        // Botón DASH armado: el primer movimiento hacia un lado o arriba lo usa.
+        let usedArm = false;
+        if (d.up && !was.up) usedArm = this.armedMove('up');
+        else if (d.left && !was.left) usedArm = this.armedMove('left');
+        else if (d.right && !was.right) usedArm = this.armedMove('right');
+        if (d.up && !was.up && !usedArm) this.queue.push('jump');
         if (d.left || d.right || d.up || d.down) st.anyDir = true;
         // Paso rápido: tras un toque rápido, el primer deslizamiento hacia un lado.
         const side = d.left && !was.left ? 'dashLeft' : d.right && !was.right ? 'dashRight' : null;
-        if (side && st.armed && !st.dashDone && performance.now() - st.downAt <= D().touchSwipeMs) {
+        if (side && !usedArm && st.armed && !st.dashDone && performance.now() - st.downAt <= D().touchSwipeMs) {
           st.dashDone = true; this.queue.push(side);
         }
         this.touch.left = d.left; this.touch.right = d.right; this.touch.up = d.up;
@@ -163,7 +205,9 @@
           e.preventDefault();
           try { btn.setPointerCapture(e.pointerId); } catch (err) { /* sin captura */ }
           btn.classList.add('on');
-          if (act === 'block') { this.btnBlock = true; this.touch.block = true; this.sync(); } else this.queue.push(act);
+          if (act === 'block') { this.btnBlock = true; this.touch.block = true; this.sync(); }
+          else if (act === 'dashArm') this.armDash();
+          else this.queue.push(act);
           if (navigator.vibrate) try { navigator.vibrate(8); } catch (err) { /* opcional */ }
         });
         const up = () => {

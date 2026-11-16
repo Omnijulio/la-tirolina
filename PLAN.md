@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.12.2** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.12.3** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -105,6 +105,10 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - **Misma versión obligatoria**: los móviles comparan versión y huella del código al conectar. Archivos con `?v=` para no mezclar caché vieja y nueva.
 - **Nadie se queda «esperando a tu rival»** si las partidas se separan: el que termina avisa y el otro cierra con su resultado. Sin respuesta en 20 s, se cancela.
 - **Trigonometría determinista** en todo lo que mueve la pelea (tropiezos, bamboleo del puntillo, dardo, agarre del pilón), porque iPhone y Android no calculan `Math.sin` exactamente igual.
+
+## Hecho en v0.12.3
+
+- **Botón DASH**: lo pulsas y el siguiente movimiento del joystick decide. Hacia un lado da paso rápido; hacia arriba, **salto doble** (segundo impulso arriba, más alto y más lejos). Hacia abajo no hace nada. Teclado: E o Mayúsculas.
 
 ## Próximas fases propuestas
 

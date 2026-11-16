@@ -84,7 +84,7 @@
       this.blockInput = false; this.blockPressT = -1e9; this.blockReleaseT = -1e9; this.parryIdle = 1e9; this.parryUsed = false;
       this.dizzyT = 0; this.downT = 0; this.getupT = 0; this.downPending = false;
       this.dashT = 0; this.dashDir = 0; this.dashRec = 0;
-      this.landRecT = 0; this.landRecNext = 0; this.diving = false; this.diveT = 0; this.airAttacked = false;
+      this.landRecT = 0; this.landRecNext = 0; this.diving = false; this.diveT = 0; this.airAttacked = false; this.doubleJump = false;
       this.sweatAt = 0;
       this.f.enabled = true;
       this.f.play('idle', true);
@@ -336,6 +336,7 @@
               match.say(this, 'swap');
             } else if (imp.inputDelayMs > 150 && Math.random() < 0.2) match.say(this, 'delay');
             if (a === 'jump') { this.jump(dir, speed); break; }
+            if (a === 'jumpHigh') { this.superJump(dir, speed, match); break; }
             if (a === 'punch') { this.chain = 0; this.startPunch(opp, imp, match); break; }
             if (a === 'kick') { this.chain = 0; this.startAttack('kick', imp, match, false); break; }
             if (a === 'grab') { this.chain = 0; this.startAttack('grab', imp, match, false); break; }
@@ -362,6 +363,13 @@
           if (a === 'kick' && -this.y >= rules.DIVE.minHeight) { consume(a); this.chain = 0; this.startDive(imp, match); break; }
         }
       }
+      if (this.doubleJump && this.air && this.vy >= -40) {
+        // Salto doble: al llegar arriba, segundo impulso.
+        this.doubleJump = false;
+        this.vy = -rules.DASH.highV2;
+        match.dust(this.cx, C.GROUND + this.y + 10, 0.7);
+        match.sfx('dash');
+      }
       if (this.diving) {
         // Un instante quieto en el aire y luego cae en diagonal muy rápido.
         this.diveT += dt;
@@ -375,7 +383,18 @@
       this.sync();
     }
 
+    /** Botón DASH + arriba: salto doble (sin fuelle, salto normal). */
+    superJump(dir, speed, match) {
+      if (this.exhausted) return this.jump(dir, speed);
+      this.spend(R().DASH.highFuelle, match);
+      this.jump(dir, speed);
+      this.vx = dir * R().DASH.highVx * speed;
+      this.doubleJump = true;
+      match.sfx('dash');
+    }
+
     jump(dir, speed) {
+      this.doubleJump = false;
       this.air = true; this.airAttacked = false;
       this.vy = C.JUMP_V * (0.92 + 0.08 * Math.min(1.3, speed));
       this.vx = dir * 250 * speed;
@@ -575,7 +594,7 @@
       this.flash = 140; this.flashColor = kind === 'dart' ? '#ffe08a' : '#ffffff';
       this.f.play('idle', true); // interrumpe el ataque (y un lanzamiento aún no soltado)
       this.pending = [];
-      this.stumble = 0; this.dashT = 0; this.dashRec = 0; this.landRecT = 0; this.diving = false;
+      this.stumble = 0; this.dashT = 0; this.dashRec = 0; this.landRecT = 0; this.diving = false; this.doubleJump = false;
       this.dizzyT = 0;      // un golpe le despierta del mareo
       if (this.smoking) { this.smoking = null; this.dropCig = true; }
       this.hitstun = o.hitstun || mv.hitstun;

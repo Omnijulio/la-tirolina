@@ -66,7 +66,11 @@
    * touchGapMs: tiempo para volver a apoyar; touchSwipeMs: tiempo para deslizar). En teclado:
    * doble pulsación de ← o → (doubleTapMs). La CPU lo pide directamente (dashF/dashB). */
   const DASH = { fwdMs: 180, fwdV: 640, backMs: 200, backV: 560, recoverMs: 90, doubleTapMs: 260,
-    touchTapMs: 220, touchGapMs: 350, touchSwipeMs: 450 };
+    touchTapMs: 220, touchGapMs: 350, touchSwipeMs: 450,
+    /* Botón DASH: lo arma y el siguiente movimiento del joystick decide (armMs para hacerlo).
+     * A un lado: paso rápido. Arriba: salto doble (al llegar arriba, un segundo impulso de
+     * highV2, con highVx de avance si va en diagonal; gasta highFuelle). Abajo no hace nada. */
+    armMs: 1200, highV2: 640, highVx: 300, highFuelle: 8 };
   // Agarre: muy de cerca y con el rival en el suelo, libre y sin estar bloqueando o aturdido.
   const GRAB = { range: 135, holdMs: 320, techMs: 260, throwVx: 380, throwVy: -520, techPush: 360, techStunMs: 260 };
   // Patada en picado: desde un poco de altura; bloqueada o fallada aterrizas vendido.
@@ -521,7 +525,7 @@
   function dhypot(x, y) { return Math.sqrt(x * x + y * y); }
 
   /** Versión del juego: se muestra en el multijugador y se compara con la del rival. */
-  const GAME_VERSION = '0.12.2';
+  const GAME_VERSION = '0.12.3';
 
   const Rules = {
     GAME_VERSION, dsin, dcos, datan2, dhypot,
