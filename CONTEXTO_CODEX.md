@@ -1,6 +1,6 @@
 # Contexto para continuar en Codex
 
-Estado: **v0.10** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
+Estado: **v0.11** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
 
 ## Objetivo del usuario y decisiones aceptadas
 
@@ -30,6 +30,8 @@ Peticiones incorporadas, en orden:
 13. **v0.9 — Multijugador (experimental)**: dos móviles por WebRTC con código de sala (PeerJS), pelea en lockstep con semilla común. Ver `MULTIJUGADOR.md`.
 
 14. **v0.10 — Puntuación y ranking**: puntos en cada combate y ranking (en el dispositivo) con firma opcional premiada.
+
+15. **v0.11 — Ranking compartido**: preparado para Supabase (tabla y reglas en `supabase/ranking.sql`, configuración en `game/data/online-config.js`); sin configurar, solo hay ranking por móvil. Ver `SUPABASE.md`.
 
 El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
@@ -88,6 +90,10 @@ Flujo: Título → (Historia | Pelea rápida) → Selección (luchador; en pelea
 - `Combatant.score` (todo el combate); `Match.addScore()` suma y enseña «+puntos» de los luchadores humanos; marcador «N PTS» junto al nombre. `result()` incluye `score` (de quien mira) y `scores`.
 - Ranking local en `localStorage` con clave propia `trolina.ranking.v1` (`Save.ranking`, `loadRanking`, `saveRanking`): «Borrar progreso» no lo borra. `Game.saveRanking(nombre, total, entrada)` da `SCORE.signBonusCents` (10 €) al firmar.
 - Pantallas: bloque de puntuación y formulario de firma en `results` y `netresults` (`UI.scoreBlock`, `UI.rankForm`), pantalla `ranking` con filtros por modo, entrada en el menú con el líder actual.
+
+### Ranking compartido (v0.11)
+
+Ver `SUPABASE.md`. `TrolinaOnlineRanking` (`enabled`, `top`, `position`, `submit`, `flush`); `Game.onlineRanking()` y `Game.saveRanking()` (lo firmado va a `Save.ranking.pending` y se sube; si falla, se reintenta al arrancar y al abrir el ranking). La columna del luchador en la base se llama `fighter`.
 
 ### Multijugador (v0.9, experimental)
 

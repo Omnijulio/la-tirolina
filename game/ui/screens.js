@@ -93,8 +93,9 @@
       const see = (at) => { g.leaveMatch(); this.show('ranking', { highlight: at }); };
       const seeLink = online ? '' : ' <button class="link" data-see>Ver ranking</button>';
       const bindSee = (at) => { const b = slot.querySelector('[data-see]'); if (b) b.addEventListener('click', () => see(at)); };
+      const world = g.onlineRanking();
       const pos = R.rankPosition(rk.list, total);
-      if (!pos) {
+      if (!pos && !world) {
         const last = rk.list[rk.list.length - 1];
         slot.innerHTML = `<p class="muted">Para entrar en el top ${R.SCORE.rankSize} te faltan <b>${R.formatPoints(last.score - total + 1)}</b> puntos.${seeLink}</p>`;
         bindSee();
@@ -102,24 +103,36 @@
       }
       const open = () => {
         slot.innerHTML = `<div class="rank-form ${pos === 1 ? 'best' : ''}">
-          <p class="rank-hook">${pos === 1 ? (rk.list.length ? '🏆 ¡NUEVO RÉCORD! Puesto #1' : '🏆 ¡Estrena el ranking! Puesto #1') : '¡Entras en el ranking! Puesto #' + pos}</p>
+          <p class="rank-hook">${!pos ? '¡Firma tu puntuación!' : pos === 1 ? (rk.list.length ? '🏆 ¡NUEVO RÉCORD! Puesto #1' : '🏆 ¡Estrena el ranking! Puesto #1') : '¡Entras en el ranking! Puesto #' + pos}${world && pos ? ' <small>en este móvil</small>' : ''}</p>
+          ${world ? '<p class="rank-world">🌍 Ranking de La Trolina: calculando tu puesto…</p>' : ''}
           <div class="rank-row"><input data-name maxlength="14" placeholder="Tu nombre" value="${esc(rk.name || '')}" autocomplete="nickname" enterkeyhint="done"><button class="primary" data-sign>✍️ Firmar · +${money(R.SCORE.signBonusCents)}</button></div>
           <p class="muted small">Es opcional: si firmas, la casa te invita a una ronda (+${money(R.SCORE.signBonusCents)}). <button class="link" data-skip>Ahora no</button></p>
         </div>`;
         const input = slot.querySelector('[data-name]');
+        const worldLine = slot.querySelector('.rank-world');
+        if (world && worldLine) {
+          world.position(total)
+            .then((n) => { if (worldLine.isConnected && n) worldLine.innerHTML = '🌍 En el ranking de La Trolina (todos los móviles): puesto <b>#' + n + '</b>'; })
+            .catch(() => { if (worldLine.isConnected) worldLine.textContent = '🌍 El ranking de La Trolina no responde ahora; se subirá cuando haya conexión.'; });
+        }
         const sign = () => {
           const r = g.saveRanking(input.value, total, entry);
           if (r.error) { this.flashError(node, r.error); input.focus(); return; }
           root.TrolinaSfx.play('coin');
-          slot.innerHTML = `<p class="rank-done">✍️ Firmado como <b>${esc(g.save.ranking.name)}</b> · puesto <b>#${r.position}</b> · +${money(r.bonus)} de invitación${seeLink}</p>`;
+          slot.innerHTML = `<p class="rank-done">✍️ Firmado como <b>${esc(g.save.ranking.name)}</b>${r.position ? ' · puesto <b>#' + r.position + '</b>' + (world ? ' en este móvil' : '') : ''} · +${money(r.bonus)} de invitación${seeLink}</p>${r.upload ? '<p class="rank-world">🌍 Subiendo al ranking de La Trolina…</p>' : ''}`;
           bindSee(g.save.ranking.lastAt);
+          if (r.upload) {
+            const line = slot.querySelector('.rank-world');
+            r.upload.then((sent) => { if (line.isConnected) line.textContent = sent ? '🌍 ¡Subido al ranking de La Trolina!' : '🌍 Sin conexión: se subirá solo más tarde.'; })
+              .catch(() => { if (line.isConnected) line.textContent = '🌍 Sin conexión: se subirá solo más tarde.'; });
+          }
           const sum = node.querySelector('.sum b:last-child');
           if (sum) sum.textContent = money(g.save.data.coins);
         };
         slot.querySelector('[data-sign]').addEventListener('click', sign);
         input.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); sign(); } });
         slot.querySelector('[data-skip]').addEventListener('click', () => {
-          slot.innerHTML = `<p class="muted"><button class="link" data-open>✍️ Firmar en el ranking (puesto #${pos}, +${money(R.SCORE.signBonusCents)})</button></p>`;
+          slot.innerHTML = `<p class="muted"><button class="link" data-open>✍️ Firmar en el ranking (${pos ? 'puesto #' + pos + ', ' : ''}+${money(R.SCORE.signBonusCents)})</button></p>`;
           slot.querySelector('[data-open]').addEventListener('click', open);
         });
       };
@@ -721,22 +734,45 @@
       const modes = [['all', 'Todo'], ['story', 'Historia'], ['quick', 'Rápida'], ['wild', 'Salvaje'], ['online', 'Multijugador']];
       const modeName = { story: 'Historia', quick: 'Rápida', wild: 'Salvaje', online: 'Multi' };
       let filter = p.mode || 'all';
+      const world = g.onlineRanking();
+      let scope = world && !p.local ? 'world' : 'local';
       const node = el(`<div class="scr ranking">
         ${this.header('🏆 Ranking', 'title')}
+        ${world ? '<div class="rank-tabs scope"><button data-s="world" data-silent="1">🌍 La Trolina (todos)</button><button data-s="local" data-silent="1">📱 Este móvil</button></div>' : ''}
         <div class="rank-tabs">${modes.map(([id, n]) => `<button data-m="${id}" data-silent="1">${n}</button>`).join('')}</div>
         <div class="rank-list"></div>
-        <p class="muted small center">Ranking de este móvil. Al acabar cada pelea puedes firmar con tu nombre (+${money(R.SCORE.signBonusCents)} de invitación).</p>
+        <p class="muted small center rank-note"></p>
       </div>`);
+      const box = node.querySelector('.rank-list');
+      let req = 0;
       const paint = () => {
         node.querySelectorAll('[data-m]').forEach((b) => b.classList.toggle('on', b.dataset.m === filter));
-        const list = rk.list.filter((e) => filter === 'all' || e.mode === filter);
-        const box = node.querySelector('.rank-list');
-        if (!list.length) { box.innerHTML = '<p class="empty">Todavía no hay nadie. Termina una pelea y firma con tu nombre.</p>'; return; }
+        node.querySelectorAll('[data-s]').forEach((b) => b.classList.toggle('on', b.dataset.s === scope));
+        node.querySelector('.rank-note').textContent = scope === 'world'
+          ? 'Ranking compartido de todos los que juegan a La Trolina Fighters. Firma al acabar una pelea para salir aquí.'
+          : 'Ranking de este móvil. Al acabar cada pelea puedes firmar con tu nombre (+' + money(R.SCORE.signBonusCents) + ' de invitación).';
+        if (scope === 'world') {
+          const my = ++req;
+          box.innerHTML = '<p class="empty">Cargando el ranking de La Trolina…</p>';
+          world.flush(g.save).catch(() => {}).then(() => world.top({ mode: filter, limit: 50 }))
+            .then((rows) => {
+              if (my !== req || !box.isConnected) return;
+              const list = rows.map((e) => ({ ...e, char: e.fighter, at: Date.parse(e.created_at) || 0 }));
+              const me = (rk.name || '').toLowerCase();
+              renderList(list, (e) => me && e.name.toLowerCase() === me, 'Todavía no ha firmado nadie. ¡Sé el primero!');
+            })
+            .catch(() => { if (my === req && box.isConnected) box.innerHTML = '<p class="empty">No se puede cargar el ranking de La Trolina ahora mismo (¿sin conexión?). Prueba «Este móvil».</p>'; });
+          return;
+        }
+        renderList(rk.list.filter((e) => filter === 'all' || e.mode === filter), (e) => e.at === (p.highlight || rk.lastAt), 'Todavía no hay nadie. Termina una pelea y firma con tu nombre.');
+      };
+      const renderList = (list, isMe, emptyText) => {
+        if (!list.length) { box.innerHTML = '<p class="empty">' + emptyText + '</p>'; return; }
         box.innerHTML = '<ol>' + list.map((e, i) => {
           const c = g.charById(e.char);
           const date = new Date(e.at || 0).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
           const diff = e.mode === 'online' ? (e.vs ? 'vs ' + esc(e.vs) : '') : (R.DIFFICULTIES[e.difficulty] ? R.DIFFICULTIES[e.difficulty].name : '');
-          return `<li class="${e.at === (p.highlight || rk.lastAt) ? 'me' : ''}${i < 3 ? ' top' + (i + 1) : ''}">
+          return `<li class="${isMe(e) ? 'me' : ''}${i < 3 ? ' top' + (i + 1) : ''}">
             <span class="pos">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span>
             <canvas width="40" height="40" data-c="${c ? c.id : ''}"></canvas>
             <span class="who"><b>${esc(e.name)}</b><small>${c ? esc(c.name) : ''} · ${modeName[e.mode] || ''}${diff ? ' · ' + diff : ''} · ${e.won ? 'ganó' : 'perdió'} ${esc(e.rounds || '')} · ${date}</small></span>
@@ -745,6 +781,7 @@
         box.querySelectorAll('canvas[data-c]').forEach((cv) => { if (cv.dataset.c && g.assets.characters[cv.dataset.c]) drawPortrait(cv, g.assets.characters[cv.dataset.c]); });
       };
       node.querySelectorAll('[data-m]').forEach((b) => b.addEventListener('click', () => { filter = b.dataset.m; paint(); root.TrolinaSfx.play('select'); }));
+      node.querySelectorAll('[data-s]').forEach((b) => b.addEventListener('click', () => { scope = b.dataset.s; paint(); root.TrolinaSfx.play('select'); }));
       paint();
       this.bindBack(node);
       return node;
@@ -860,7 +897,7 @@
           <section><h3>Modo salvaje (experimental)</h3><p>Una pelea rápida donde los objetos pegan más (para bien y para mal) y, <b>a partir del segundo 30</b>, todo se desmorona para los dos: controles que se invierten, golpes que cambian solos, pasos sin querer, caídas sin que nadie te toque, botellas hacia atrás, micro-siestas y una pantalla que no se está quieta.</p>
           <p>Cada fallo te lo recuerdan en grande, con todo el cariño. A cambio, cuando un golpe entra, pega más fuerte, y si ganas te llevas una prima.</p></section>
           <section><h3>Puntuación y ranking</h3><p>Cada golpe da puntos: más si es parte de un combo y más cuanto más <b>puntillo</b> llevas al pegar (estilo). También puntúan los bloqueos, los ultimates, cada asalto ganado (más si es perfecto y con el tiempo que sobre) y la victoria. Al final se multiplica por la dificultad (fácil ×0,5, difícil ×1,5, pesadilla ×2) y el modo salvaje (×1,5).</p>
-          <p>Si entras en el top 20 puedes <b>firmar con tu nombre</b> en el ranking. Es opcional, pero la casa te invita a una ronda (+10 €).</p></section>
+          <p>Al acabar puedes <b>firmar con tu nombre</b>: quedas en el ranking de este móvil (top 20) y, si está activado, en el <b>ranking de La Trolina</b>, compartido entre todos los móviles. Es opcional, pero la casa te invita a una ronda (+10 €).</p></section>
           <section><h3>Multijugador (experimental)</h3><p>Contra un amigo en otro móvil: uno pulsa <b>Crear sala</b> y le pasa el código de 4 letras (o el enlace); el otro pulsa <b>Unirse</b> y lo escribe. Cada uno elige luchador y pide en la barra (gratis) y la pelea empieza cuando los dos están listos. Sin policía ni modo salvaje.</p></section>
           <section><h3>Ambientes</h3><p>La terraza cambia de una pelea a otra: noche, día, lluvia, nieve o Navidad (o el que fijes en Opciones). De día la luz de la fuente no se nota. Si la jardinera aparece llena de botellines (opción, y siempre en el modo salvaje), cada uno tiene 2 más para lanzar.</p></section>
           <section><h3>Huecos de La Barra</h3><p>Puedes tomar hasta <b>7 bebidas</b> por pelea (botellines, chupitos, Peterete, Red Bull, café, agua…) y llevar <b>1 cosa para fumar</b>. Más huecos en la Tienda: <b>Hígado de hierro</b> (+1 bebida por nivel, hasta 10) y <b>Pitillera de plata</b> (segundo hueco para fumar).</p>

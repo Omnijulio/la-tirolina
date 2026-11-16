@@ -33,12 +33,15 @@
     data: defaults(),
     persistent: true,
     /** Ranking de este dispositivo: { list: [{name, score, char, mode, difficulty, won, rounds, at}], name }. */
-    ranking: { list: [], name: '' },
+    ranking: { list: [], name: "", pending: [], lastAt: 0 },
     loadRanking() {
       try {
         const raw = root.localStorage && root.localStorage.getItem(RANK_KEY);
         const r = raw ? JSON.parse(raw) : null;
-        this.ranking = { list: Array.isArray(r && r.list) ? r.list : [], name: (r && r.name) || '' };
+        this.ranking = {
+          list: Array.isArray(r && r.list) ? r.list : [], name: (r && r.name) || '',
+          pending: Array.isArray(r && r.pending) ? r.pending.slice(-50) : [], lastAt: (r && r.lastAt) || 0
+        };
       } catch (e) { this.ranking = { list: [], name: '' }; }
       return this.ranking;
     },

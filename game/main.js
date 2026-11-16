@@ -48,6 +48,7 @@
         throw err;
       }
       this.attract = this.makeAttract();
+      if (this.onlineRanking()) this.onlineRanking().flush(Save).catch(() => {});
       requestAnimationFrame((t) => this.loop(t));
       if (params.has('autoplay')) this.debugQuick(true);
       else if (params.get('sala')) UI.show('online', { join: params.get('sala') });
@@ -326,16 +327,29 @@
     saveRanking(name, total, entry) {
       const clean = R.cleanName(name);
       if (!clean) return { error: 'Escribe un nombre (hasta 14 letras)' };
-      const rk = Save.ranking;
+      const rk = Save.ranking, online = this.onlineRanking();
       const e = { ...entry, name: clean, score: Math.round(total), at: Date.now() };
       const { list, position } = R.rankInsert(rk.list, e);
-      if (!position) return { error: 'Esta vez no entra en el ranking' };
-      rk.list = list; rk.name = clean; rk.lastAt = e.at;
+      if (!position && !online) return { error: 'Esta vez no entra en el ranking' };
+      if (position) rk.list = list;
+      rk.name = clean; rk.lastAt = e.at;
+      let upload = null;
+      if (online) {
+        // Se apunta como pendiente y se sube; si no hay conexión, se reintenta más tarde.
+        rk.pending = (rk.pending || []).concat([e]);
+        upload = online.flush(Save);
+      }
       Save.saveRanking();
       const bonus = R.SCORE.signBonusCents;
       Save.earn(bonus);
       Save.save();
-      return { position, bonus };
+      return { position, bonus, upload };
+    },
+
+    /** El ranking compartido, si está configurado (game/data/online-config.js). */
+    onlineRanking() {
+      const o = root.TrolinaOnlineRanking;
+      return o && o.enabled ? o : null;
     },
 
     /* ---------- multijugador (experimental) ---------- */

@@ -331,6 +331,9 @@ body.online #pauseBtn { display: none; }
 .rank-row { display: flex; gap: 8px; width: 100%; justify-content: center; }
 .rank-row input { flex: 1; max-width: 240px; padding: 9px 12px; border-radius: 10px; border: 1px solid #ffffff33; background: #0b111c; color: #fff; font: 700 17px system-ui, sans-serif; }
 .rank-done { color: #8bf2ce; }
+.rank-world { margin: 0; color: #9ff0ff; font-size: 14px; }
+.rank-hook small { font-weight: 600; color: #c9d3df; font-size: 13px; }
+.rank-tabs.scope button { font-weight: 800; }
 button.link { background: none; border: 0; padding: 0 4px; color: #9ff0ff; text-decoration: underline; font: inherit; cursor: pointer; min-height: 0; box-shadow: none; }
 .rank-tabs { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 4px 0 10px; }
 .rank-tabs button { padding: 6px 12px; border-radius: 999px; }
