@@ -84,8 +84,11 @@
       this.blockInput = false; this.blockPressT = -1e9; this.blockReleaseT = -1e9; this.parryIdle = 1e9; this.parryUsed = false;
       this.dizzyT = 0; this.downT = 0; this.getupT = 0; this.downPending = false;
       this.dashT = 0; this.dashDir = 0; this.dashRec = 0;
-      this.landRecT = 0; this.landRecNext = 0; this.diving = false; this.diveT = 0; this.airAttacked = false; this.doubleJump = false;
+      this.landRecT = 0; this.landRecNext = 0; this.diving = false; this.diveT = 0; this.airAttacked = false; this.doubleJump = false; this.secondJumpAt = -1;
       this.sweatAt = 0;
+      // Para las animaciones de estado: cuándo empezó cada cosa.
+      this.hitAt = -1e9; this.hitHeavy = false; this.parryAt = -1e9; this.guardAt = -1e9; this.dashAt = -1e9;
+      this.landAt = -1e9; this.thrownAt = -1; this.throwPose = null; this.koLandAt = 0; this.walkBack = false;
       this.f.enabled = true;
       this.f.play('idle', true);
       this.sync();
@@ -312,7 +315,7 @@
       this.guard = !this.air && (this.blockstun > 0 || (!this.attacking && this.hitstun <= 0 && this.stumble <= 0 &&
         this.dashT <= 0 && this.landRecT <= 0 && !!ctl.block));
       // Ponerse en guardia cuesta un poco de fuelle (machacarla te vacía la barra).
-      if (this.guard && !this.guardWas && this.blockstun <= 0) this.fuelle = Math.max(0, this.fuelle - rules.FUELLE.guardEnter);
+      if (this.guard && !this.guardWas && this.blockstun <= 0) { this.fuelle = Math.max(0, this.fuelle - rules.FUELLE.guardEnter); this.guardAt = this.t; }
       this.guardWas = this.guard;
       this.walking = false;
 
@@ -325,6 +328,7 @@
           if (ctl.block) this.vx = 0;
           else if (dir) {
             this.vx = dir * (dir === this.facing ? C.WALK_F : C.WALK_B) * speed;
+            this.walkBack = dir !== this.facing;
             if (intox > 0.1) this.vx += R().dsin(this.t / 170 + this.seed) * 80 * intox;
             this.walking = true;
           } else this.vx = 0;
@@ -365,9 +369,9 @@
       }
       if (this.doubleJump && this.air && this.vy >= -40) {
         // Salto doble: al llegar arriba, segundo impulso.
-        this.doubleJump = false;
+        this.doubleJump = false; this.secondJumpAt = this.t;
         this.vy = -rules.DASH.highV2;
-        match.dust(this.cx, C.GROUND + this.y + 10, 0.7);
+        match.dust(this.cx, C.GROUND + this.y + 10, 0.5);   // en el aire: nubecilla, no salpicadura del suelo
         match.sfx('dash');
       }
       if (this.diving) {
@@ -394,7 +398,7 @@
     }
 
     jump(dir, speed) {
-      this.doubleJump = false;
+      this.doubleJump = false; this.secondJumpAt = -1;
       this.air = true; this.airAttacked = false;
       this.vy = C.JUMP_V * (0.92 + 0.08 * Math.min(1.3, speed));
       this.vx = dir * 250 * speed;
@@ -407,7 +411,8 @@
         this.y += this.vy * s;
         this.cx += this.vx * s;
         if (this.y >= 0) {
-          this.y = 0; this.vy = 0; this.air = false; this.airAttacked = false;
+          this.y = 0; this.vy = 0; this.air = false; this.airAttacked = false; this.secondJumpAt = -1;
+          this.landAt = this.t; this.thrownAt = -1;
           // Aterrizar de un ataque aéreo: si no ha entrado, te quedas vendido un momento.
           const a = this.f.animation;
           if (this.diving || a === 'dive' || a === 'airPunch') {
@@ -465,7 +470,7 @@
       if (this.air || !this.canSpend(match)) return false;
       this.spend(R().FUELLE.dash, match);
       const fwd = dir === this.facing;
-      this.dashT = fwd ? D.fwdMs : D.backMs;
+      this.dashT = fwd ? D.fwdMs : D.backMs; this.dashAt = this.t;
       this.dashDir = dir;
       this.vx = dir * (fwd ? D.fwdV : D.backV) * Math.min(1.25, speed);
       this.walking = false;
@@ -570,7 +575,7 @@
       const canGuard = this.guard && !this.air && this.state === 'fight' && !mv.unblockable;
       if (canGuard && this.canParryNow()) {
         // Guardia justa: ni vida ni fuelle, y devuelve un poco.
-        this.parryUsed = true;
+        this.parryUsed = true; this.parryAt = this.t;
         this.blockstun = rules.PARRY.defenderStunMs;
         this.fuelle = Math.min(rules.FUELLE.max, this.fuelle + rules.PARRY.refund);
         this.facing = -away; this.vx = 0;
@@ -594,10 +599,11 @@
       this.flash = 140; this.flashColor = kind === 'dart' ? '#ffe08a' : '#ffffff';
       this.f.play('idle', true); // interrumpe el ataque (y un lanzamiento aún no soltado)
       this.pending = [];
-      this.stumble = 0; this.dashT = 0; this.dashRec = 0; this.landRecT = 0; this.diving = false; this.doubleJump = false;
+      this.stumble = 0; this.dashT = 0; this.dashRec = 0; this.landRecT = 0; this.diving = false; this.doubleJump = false; this.secondJumpAt = -1;
       this.dizzyT = 0;      // un golpe le despierta del mareo
       if (this.smoking) { this.smoking = null; this.dropCig = true; }
       this.hitstun = o.hitstun || mv.hitstun;
+      this.hitAt = this.t; this.hitHeavy = kind !== 'punch' && kind !== 'airPunch' && kind !== 'bottle';
       const knock = mv.knockdown || o.knockdown;
       if (this.air || (knock && mv.launch)) {
         // En el aire (o lanzado): sale despedido y cae.
@@ -622,7 +628,7 @@
 
     knockOut(away) {
       this.hp = 0;
-      this.state = 'ko'; this.koT = 0;
+      this.state = 'ko'; this.koT = 0; this.koLandAt = 0;
       this.f.play('idle', true);
       this.f.enabled = false;
       this.smoking = null; this.faintT = 0;
@@ -637,7 +643,7 @@
       const s = dt / 1000;
       if (this.air) {
         this.vy += C.GRAVITY * s; this.y += this.vy * s; this.cx += this.vx * s;
-        if (this.y >= 0) { this.y = 0; this.air = false; this.vy = 0; this.vx *= 0.4; this.landedKO = true; }
+        if (this.y >= 0) { this.y = 0; this.air = false; this.vy = 0; this.vx *= 0.4; this.landedKO = true; this.koLandAt = this.koT; }
       } else {
         const dec = 900 * s;
         this.vx = Math.abs(this.vx) <= dec ? 0 : this.vx - Math.sign(this.vx) * dec;
@@ -653,42 +659,58 @@
       this.dizzyT = 0; this.downT = 0; this.getupT = 0; this.diving = false; this.dashT = 0; this.landRecT = 0; this.f.enabled = true;
     }
 
-    /** Fotograma y transformaciones de la pose actual. */
+    /** Fotograma y transformaciones de la pose actual.
+     * Con el arte de Combate 2.0 cada estado tiene su animación (desde que empezó); sin él, se
+     * usan fotogramas del atlas original con giros provisionales. */
     pose() {
       const data = this.f.data, anims = data.animations, Mv = M();
+      const at = (name, since, reverse) => Mv.poseFrame(data, name, this.t - (since === undefined ? 0 : since), reverse);
       const st = (name) => Mv.poseFrame(data, name, this.t);
       const art = (name) => Mv.hasArt(data, name);
+      const K = R().KNOCKDOWN;
       let frame, rot = 0, dy = 0, shield = 0, item = null, pivot = null, cig = false, dart = null;
       const lying = (k) => { rot = -k * Math.PI / 2; pivot = { x: 20, y: -70, drop: 45 * k }; };
       if (this.state === 'ko') {
-        // Cae de espaldas girando alrededor de la cadera (coordenadas locales desde el ancla).
-        frame = anims.idle.frames[0];
-        lying(Math.min(1, this.koT / 520));
+        if (art('ko')) {
+          // Cae de espaldas, golpe contra el suelo y tumbado.
+          frame = this.air || !this.koLandAt ? Mv.poseFrame(data, 'ko', 0) : Mv.poseFrame(data, 'ko', 260 + Math.min(this.koT - this.koLandAt, 1000));
+        } else {
+          frame = anims.idle.frames[0];
+          lying(Math.min(1, this.koT / 520));
+        }
       } else if (this.state === 'grabbed') {
-        frame = st('grabbed');
-        rot = this.grabRot;
+        if (this.throwPose && art(this.throwPose)) frame = st(this.throwPose);    // agarre normal
+        else { frame = anims.idle.frames[0]; rot = this.grabRot; }               // el pilón lo levanta y lo gira
       } else if (this.state === 'soaked') {
         frame = anims.idle.frames[0];
         lying(1); dy = Math.sin(this.t / 180) * 3;
       } else if (this.poseOverride) {
         frame = this.poseOverride.state ? st(this.poseOverride.state) : anims[this.poseOverride.anim].frames[this.poseOverride.frame];
       } else if (this.faintT > 0) {
-        frame = anims.idle.frames[0];
         const since = this.faintTotal - this.faintT;
-        lying(Math.min(1, since / 420, this.faintT / 380));
+        if (art('down')) {
+          // Desmayo o caída: se desploma, tumbado y se levanta al final.
+          frame = since < 140 ? at('fall', this.t) : this.faintT < K.getupMs ? at('getup', this.t - (K.getupMs - this.faintT)) : at('down', this.t - (since - 140));
+        } else {
+          frame = anims.idle.frames[0];
+          lying(Math.min(1, since / 420, this.faintT / 380));
+        }
       } else if (this.downT > 0) {
-        frame = st('down');
-        if (!art('down')) lying(Math.min(1, (R().KNOCKDOWN.downMs - this.downT) / 200 + 0.6));
+        frame = at('down', this.t - (K.downMs - this.downT));
+        if (!art('down')) lying(Math.min(1, (K.downMs - this.downT) / 200 + 0.6));
       } else if (this.getupT > 0) {
-        frame = st('getup');
-        if (!art('getup')) lying(Math.min(1, this.getupT / R().KNOCKDOWN.getupMs));
+        frame = at('getup', this.t - (K.getupMs - this.getupT));
+        if (!art('getup')) lying(Math.min(1, this.getupT / K.getupMs));
       } else if (this.dizzyT > 0) {
         frame = st('dizzy');
         if (!art('dizzy')) { rot = Math.sin(this.t / 140) * 0.08; dy = Math.abs(Math.sin(this.t / 280)) * 3; }
       } else if (this.state === 'win') {
-        frame = anims.throwBottle.frames[2];
-        dy = -Math.abs(Math.sin(this.winT / 240)) * 10;
-        item = frame.itemSocket;
+        if (art('win')) frame = Mv.poseFrame(data, 'win', this.winT);
+        else {
+          frame = anims.throwBottle.frames[2];
+          dy = -Math.abs(Math.sin(this.winT / 240)) * 10;
+          item = frame.itemSocket;
+        }
       } else if (this.attacking) {
         frame = this.f.frame;
         if (this.f.animation === 'throwDart' && frame.itemSocket) dart = frame.itemSocket;
@@ -696,27 +718,46 @@
           rot = frame.pose.rot; dy = frame.pose.dy;
           if (frame.pose.pivot) pivot = { x: frame.pose.pivot.x, y: frame.pose.pivot.y, drop: 0 };
         }
+      } else if (this.air && (this.hitstun > 0 || this.downPending)) {
+        // Por los aires: lanzado por un agarre, cayendo de espaldas (gancho, dardo) o recibiendo en el aire.
+        frame = this.thrownAt >= 0 && this.downPending && art('thrown') ? st('thrown') : this.downPending && art('fall') ? st('fall') : at('hitAir', this.hitAt);
+        if (!art('hitAir')) rot = -0.16;
       } else if (this.air) {
-        frame = st('jump');
+        if (this.secondJumpAt !== undefined && this.secondJumpAt >= 0) {
+          // Salto doble: con arte propio, su animación; si no, una voltereta con la pose de salto.
+          frame = Mv.poseFrame(data, 'doubleJump', this.t - this.secondJumpAt);
+          if (!art('doubleJump')) {
+            frame = Mv.poseFrame(data, 'jumpApex', 0);
+            rot = Math.min(1, (this.t - this.secondJumpAt) / 420) * Math.PI * 2; pivot = { x: 24, y: -65, drop: 0 };
+          }
+        } else frame = st(this.vy < -360 ? 'jumpRise' : this.vy > 360 ? 'jumpFall' : 'jumpApex');
       } else if (this.landRecT > 0) {
-        frame = st('land');
+        frame = at('land', this.landAt);
         if (!art('land')) dy = 4;
       } else if (this.hitstun > 0) {
-        frame = st('hit');
+        frame = at(this.hitHeavy ? 'hitHeavy' : 'hit', this.hitAt);
         if (!art('hit')) rot = -0.16 * Math.min(1, this.hitstun / 200);
       } else if (this.blockstun > 0) {
-        frame = st('guard'); shield = 1;
+        const parried = this.t - (this.parryAt === undefined ? -1e9 : this.parryAt) < 260;
+        frame = at(parried ? 'parry' : 'guardHit', parried ? this.parryAt : this.t);
+        shield = art('guardHit') ? 0.5 : 1;
       } else if (this.dashT > 0) {
-        frame = st('dash');
-        if (!art('dash')) rot = this.dashDir === this.facing ? 0.12 : -0.1;
+        const fwd = this.dashDir === this.facing;
+        frame = at(fwd ? 'dash' : 'backdash', this.dashAt);
+        if (!art('dash')) rot = fwd ? 0.12 : -0.1;
       } else if (this.smoking) {
         frame = anims.idle.frames[0]; cig = true;
         dy = Math.sin(this.smoking.t / 260) * 1.5;
       } else if (this.guard) {
-        frame = st('guard'); shield = 0.35;
+        frame = this.t - this.guardAt < 130 ? at('guardEnter', this.guardAt) : at('guard', this.guardAt + 130);
+        shield = art('guard') ? 0.15 : 0.35;
       } else if (this.exhausted && !this.walking) {
         frame = st('tired');
         if (!art('tired')) dy = 3 + Math.sin(this.t / 190) * 3;
+      } else if (this.walking && art('walk')) {
+        frame = at('walk', 0, this.walkBack);
+      } else if (this.t - this.landAt < 90 && art('jumpLand')) {
+        frame = st('jumpLand');     // amortigua al caer de un salto
       } else {
         frame = this.f.frame;
         if (this.walking) dy = -Math.abs(Math.sin(this.t / 110)) * 4;
@@ -821,7 +862,7 @@
         ctx.stroke();
         ctx.restore();
       }
-      if (!o.ghost && this.state === 'fight') {
+      if (!o.ghost && !o.fx && this.state === 'fight') {
         const head = { x: this.cx + this.facing * 8, y: C.GROUND + this.y + p.dy - 290 };
         if (this.dizzyT > 0) {
           // Guardia rota: chapas dando vueltas sobre la cabeza.

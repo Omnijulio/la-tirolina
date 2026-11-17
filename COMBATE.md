@@ -100,7 +100,13 @@ En Fácil casi no hace nada de esto; en Pesadilla castiga casi todo y hace guard
 
 ## Arte
 
-Mientras no llegue el arte propio, los golpes nuevos reutilizan fotogramas del atlas actual con giros (gancho, picado, puño aéreo) y los estados se dibujan con poses aproximadas: guardia rota, derribo, cansancio y paso rápido. Lo que hace falta y cómo entregarlo está en [`ASSETS_COMBATE.md`](ASSETS_COMBATE.md). Al añadir una animación con su nombre al atlas, el juego la usa sola (`TrolinaMoves.install` / `poseFrame`).
+Desde v0.12.4 el combate usa el **arte propio de Combate 2.0** (paquete en `source-art/combate-2.0`, encargo en [`ASSETS_COMBATE.md`](ASSETS_COMBATE.md)):
+
+- **Golpes:** gancho, puño aéreo, patada en picado y agarre, con los mismos tiempos de la tabla y cajas de golpe ajustadas a la mano o al pie de cada dibujo.
+- **Estados:** guardia (entrar, mantener, encajar y guardia justa), recibir golpe (flojo, fuerte, en el aire), agarrado y lanzado, caída de espaldas, en el suelo y levantarse, salto (subir, cima, bajar, amortiguar), aterrizaje vendido, mareo, sin fuelle, paso rápido adelante y atrás, andar (al revés si retrocede), KO y victoria.
+- **Efectos:** destello de guardia justa, guardia rota, chapas del mareo, impactos flojo y fuerte, polvo del suelo y sudor. **Iconos** de AGARRE y del fuelle.
+
+Lo que aún va con pose provisional: el **salto doble** (voltereta con la pose de cima) y el **icono de DASH**, que se encargaron después (`combat-doublejump.png`, `fx-doublejump.png`, `ui-dash.png`). Al añadir una animación con su nombre al atlas, el juego la usa sola (`TrolinaMoves.install` / `poseFrame`).
 
 ## Multijugador
 

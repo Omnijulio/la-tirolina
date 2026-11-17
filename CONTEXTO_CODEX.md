@@ -37,6 +37,8 @@ Peticiones incorporadas, en orden:
 
 17. **v0.12.2 — Multijugador**: registro de partidas en red (ver/copiar/compartir), instantáneas detalladas cada 0,5 s con diferencias campo a campo, versión y huella obligatorias, fin avisado al rival y trigonometría determinista en la simulación. Ver `MULTIJUGADOR.md`.
 
+18. **v0.12.4 — Arte de Combate 2.0**: atlas 6×16 con 12 tiras nuevas (`source-art/combate-2.0`, `tools/integrate_combat_assets.py`), poses de estado por tiempo en `Combatant.pose()` / `TrolinaMoves.poseFrame`, efectos e iconos (`assets/fx/combat`, `assets/ui`, `assets/fx/combat-fx-data.js`). Ver `COMBATE.md` § Arte.
+
 El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
 ## Cómo está organizado el juego (v0.2)

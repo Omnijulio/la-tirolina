@@ -95,5 +95,28 @@ test('con arte propio se usa su animación en vez de la provisional', () => {
   M.install(d);
   assert.equal(d.animations.dive.frames[1].y, 704);
   assert.ok(!d.animations.dive.frames[1].pose, 'sin giros provisionales');
-  assert.ok(data.animations.dive.frames[1].pose, 'la provisional sí gira');
+  // Sin arte propio, la provisional sí gira.
+  const bare = JSON.parse(fs.readFileSync(path.join(__dirname, '../assets/fighter.json'), 'utf8'));
+  for (const k of Object.keys(bare.animations)) if (bare.animations[k].art) delete bare.animations[k];
+  M.install(bare);
+  assert.ok(bare.animations.dive.frames[1].pose, 'la provisional sí gira');
+});
+
+test('el arte de Combate 2.0 está en el atlas y respeta los tiempos del diseño', () => {
+  const raw = JSON.parse(fs.readFileSync(path.join(__dirname, '../assets/fighter.json'), 'utf8'));
+  assert.equal(raw.rows, 16);
+  for (const k of ['guard', 'guardEnter', 'guardHit', 'parry', 'hit', 'hitHeavy', 'hitAir', 'grab', 'grabHold', 'grabbed', 'grabbedLift', 'thrown',
+    'gancho', 'airPunch', 'dive', 'land', 'fall', 'down', 'getup', 'jumpRise', 'jumpApex', 'jumpFall', 'dizzy', 'tired', 'dash', 'backdash', 'walk', 'ko', 'win', 'throw']) {
+    assert.ok(raw.animations[k] && raw.animations[k].art, 'falta ' + k);
+    for (const f of raw.animations[k].frames) assert.ok(f.y >= 704 && f.y < 16 * 176 && f.x % 192 === 0, k + ': celda fuera de las filas nuevas');
+  }
+  // Los tiempos que importan al combate no cambian con el arte.
+  assert.deepEqual([fd('gancho').startup, fd('gancho').active, fd('gancho').recovery], [90, 120, 270]);
+  assert.deepEqual([fd('grab').startup, fd('grab').active, fd('grab').recovery], [120, 80, 420]);
+  assert.deepEqual([fd('airPunch').startup, fd('airPunch').active], [40, 170]);
+  assert.equal(fd('dive').startup, 60);
+  // Las poses de arte tienen dónde elegir: con arte, la animación propia.
+  assert.ok(M.hasArt(data, 'guard') && M.hasArt(data, 'walk') && M.hasArt(data, 'ko'));
+  assert.equal(M.poseFrame(data, 'ko', 5000).x, data.animations.ko.frames[2].x, 'el KO se queda tumbado (sin bucle)');
+  assert.equal(M.poseFrame(data, 'walk', 110 * 6 + 5).x, data.animations.walk.frames[0].x, 'andar va en bucle');
 });

@@ -75,6 +75,12 @@
         for (const [k, src] of Object.entries(root.TROLINA_FOUNTAIN_DATA.images)) jobs.push([src, (img) => { this.assets.fountain[k] = img; }]);
       }
       if (root.TROLINA_STAGE_EXTRAS) jobs.push([root.TROLINA_STAGE_EXTRAS.jardinera, (img) => { this.assets.jardinera = img; }]);
+      // Efectos e iconos del arte de Combate 2.0 (si faltan, el combate dibuja los suyos).
+      if (root.TROLINA_COMBAT_FX) {
+        this.assets.combatFx = {}; this.assets.combatUi = {};
+        for (const [k, src] of Object.entries(root.TROLINA_COMBAT_FX.images)) jobs.push([src, (img) => { this.assets.combatFx[k] = img; }]);
+        for (const [k, src] of Object.entries(root.TROLINA_COMBAT_FX.ui)) jobs.push([src, (img) => { this.assets.combatUi[k] = img; }]);
+      }
       if (root.POLICE_DATA) {
         this.assets.police = {};
         jobs.push([root.POLICE_DATA.officer.image, (img) => { this.assets.police.officer = img; }]);

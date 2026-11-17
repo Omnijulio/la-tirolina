@@ -1,0 +1,3040 @@
+{
+  "schemaVersion": 1,
+  "description": "Assets gráficos independientes; no modifican el juego. Coordenadas en píxeles de celda, índices desde cero.",
+  "character": {
+    "name": "El Barbas",
+    "cellSize": [
+      192,
+      176
+    ],
+    "columns": 6,
+    "anchor": [
+      56,
+      160
+    ],
+    "facing": "right",
+    "alpha": "binary",
+    "reference": "assets/fighter.png (atlas anterior de 6 x 4)",
+    "animations": {
+      "guard": {
+        "file": "combat-guard.png",
+        "guide": "combat-guard-guia.png",
+        "frameCount": 6,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              52,
+              20,
+              132,
+              161
+            ],
+            "sourceAnchor": [
+              127,
+              485
+            ],
+            "exportOffset": [
+              17,
+              13
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              22,
+              131,
+              161
+            ],
+            "sourceAnchor": [
+              127,
+              485
+            ],
+            "exportOffset": [
+              16,
+              13
+            ]
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              23,
+              131,
+              161
+            ],
+            "sourceAnchor": [
+              127,
+              485
+            ],
+            "exportOffset": [
+              16,
+              13
+            ]
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              22,
+              131,
+              161
+            ],
+            "sourceAnchor": [
+              128,
+              486
+            ],
+            "exportOffset": [
+              16,
+              13
+            ]
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              25,
+              131,
+              161
+            ],
+            "sourceAnchor": [
+              127,
+              486
+            ],
+            "exportOffset": [
+              16,
+              13
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              19,
+              138,
+              161
+            ],
+            "sourceAnchor": [
+              127,
+              486
+            ],
+            "exportOffset": [
+              16,
+              13
+            ],
+            "activePoint": {
+              "kind": "parry",
+              "point": [
+                133,
+                48
+              ]
+            }
+          }
+        ]
+      },
+      "hit": {
+        "file": "combat-hit.png",
+        "guide": "combat-hit-guia.png",
+        "frameCount": 6,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              52,
+              20,
+              130,
+              161
+            ],
+            "sourceAnchor": [
+              136,
+              492
+            ],
+            "exportOffset": [
+              13,
+              9
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              19,
+              131,
+              161
+            ],
+            "sourceAnchor": [
+              135,
+              492
+            ],
+            "exportOffset": [
+              13,
+              9
+            ]
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              49,
+              28,
+              132,
+              161
+            ],
+            "sourceAnchor": [
+              136,
+              492
+            ],
+            "exportOffset": [
+              13,
+              9
+            ]
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              52,
+              30,
+              127,
+              161
+            ],
+            "sourceAnchor": [
+              136,
+              492
+            ],
+            "exportOffset": [
+              13,
+              9
+            ]
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              42,
+              23,
+              153,
+              142
+            ],
+            "sourceAnchor": [
+              136,
+              493
+            ],
+            "exportOffset": [
+              14,
+              8
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              33,
+              19,
+              155,
+              131
+            ],
+            "sourceAnchor": [
+              136,
+              493
+            ],
+            "exportOffset": [
+              14,
+              8
+            ]
+          }
+        ]
+      },
+      "grab": {
+        "file": "combat-grab.png",
+        "guide": "combat-grab-guia.png",
+        "frameCount": 6,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              50,
+              20,
+              146,
+              161
+            ],
+            "sourceAnchor": [
+              107,
+              483
+            ],
+            "exportOffset": [
+              21,
+              9
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              50,
+              25,
+              159,
+              161
+            ],
+            "sourceAnchor": [
+              71,
+              483
+            ],
+            "exportOffset": [
+              32,
+              9
+            ]
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              50,
+              25,
+              168,
+              161
+            ],
+            "sourceAnchor": [
+              72,
+              483
+            ],
+            "exportOffset": [
+              32,
+              9
+            ],
+            "activePoint": {
+              "kind": "mano",
+              "point": [
+                165,
+                50
+              ]
+            }
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              50,
+              18,
+              150,
+              161
+            ],
+            "sourceAnchor": [
+              105,
+              483
+            ],
+            "exportOffset": [
+              21,
+              9
+            ]
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              48,
+              18,
+              158,
+              161
+            ],
+            "sourceAnchor": [
+              79,
+              483
+            ],
+            "exportOffset": [
+              29,
+              9
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              20,
+              170,
+              161
+            ],
+            "sourceAnchor": [
+              60,
+              483
+            ],
+            "exportOffset": [
+              36,
+              9
+            ]
+          }
+        ]
+      },
+      "grabbed": {
+        "file": "combat-grabbed.png",
+        "guide": "combat-grabbed-guia.png",
+        "frameCount": 4,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              45,
+              20,
+              101,
+              161
+            ],
+            "sourceAnchor": [
+              225,
+              499
+            ],
+            "exportOffset": [
+              -18,
+              1
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              42,
+              11,
+              99,
+              147
+            ],
+            "sourceAnchor": [
+              225,
+              500
+            ],
+            "exportOffset": [
+              -16,
+              0
+            ]
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              18,
+              32,
+              126,
+              143
+            ],
+            "sourceAnchor": [
+              225,
+              500
+            ],
+            "exportOffset": [
+              -16,
+              0
+            ]
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              18,
+              82,
+              167,
+              150
+            ],
+            "sourceAnchor": [
+              150,
+              500
+            ],
+            "exportOffset": [
+              8,
+              28
+            ]
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": true,
+            "airborne": false,
+            "bbox": null,
+            "sourceAnchor": [
+              0,
+              0
+            ],
+            "exportOffset": [
+              0,
+              0
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": true,
+            "airborne": false,
+            "bbox": null,
+            "sourceAnchor": [
+              0,
+              0
+            ],
+            "exportOffset": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "gancho": {
+        "file": "combat-gancho.png",
+        "guide": "combat-gancho-guia.png",
+        "frameCount": 6,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              52,
+              51,
+              121,
+              161
+            ],
+            "sourceAnchor": [
+              146,
+              483
+            ],
+            "exportOffset": [
+              4,
+              -8
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              52,
+              30,
+              125,
+              161
+            ],
+            "sourceAnchor": [
+              146,
+              483
+            ],
+            "exportOffset": [
+              3,
+              -8
+            ]
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              62,
+              18,
+              131,
+              155
+            ],
+            "sourceAnchor": [
+              149,
+              485
+            ],
+            "exportOffset": [
+              4,
+              -2
+            ],
+            "activePoint": {
+              "kind": "puno",
+              "point": [
+                126,
+                22
+              ]
+            }
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              61,
+              5,
+              127,
+              141
+            ],
+            "sourceAnchor": [
+              149,
+              485
+            ],
+            "exportOffset": [
+              4,
+              -2
+            ]
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              57,
+              20,
+              128,
+              156
+            ],
+            "sourceAnchor": [
+              149,
+              485
+            ],
+            "exportOffset": [
+              4,
+              -2
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              40,
+              30,
+              115,
+              161
+            ],
+            "sourceAnchor": [
+              149,
+              484
+            ],
+            "exportOffset": [
+              -8,
+              -9
+            ]
+          }
+        ]
+      },
+      "air": {
+        "file": "combat-air.png",
+        "guide": "combat-air-guia.png",
+        "frameCount": 6,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              60,
+              8,
+              139,
+              143
+            ],
+            "sourceAnchor": [
+              117,
+              460
+            ],
+            "exportOffset": [
+              18,
+              -2
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              57,
+              12,
+              157,
+              136
+            ],
+            "sourceAnchor": [
+              117,
+              460
+            ],
+            "exportOffset": [
+              18,
+              -2
+            ],
+            "activePoint": {
+              "kind": "puno",
+              "point": [
+                151,
+                65
+              ]
+            }
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              66,
+              12,
+              130,
+              117
+            ],
+            "sourceAnchor": [
+              117,
+              460
+            ],
+            "exportOffset": [
+              18,
+              -2
+            ]
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              39,
+              14,
+              165,
+              136
+            ],
+            "sourceAnchor": [
+              117,
+              460
+            ],
+            "exportOffset": [
+              18,
+              -2
+            ],
+            "activePoint": {
+              "kind": "pie",
+              "point": [
+                160,
+                130
+              ]
+            }
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              49,
+              52,
+              160,
+              161
+            ],
+            "sourceAnchor": [
+              100,
+              444
+            ],
+            "exportOffset": [
+              22,
+              16
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              20,
+              137,
+              161
+            ],
+            "sourceAnchor": [
+              117,
+              459
+            ],
+            "exportOffset": [
+              16,
+              11
+            ]
+          }
+        ]
+      },
+      "knockdown": {
+        "file": "combat-knockdown.png",
+        "guide": "combat-knockdown-guia.png",
+        "frameCount": 6,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              31,
+              52,
+              167,
+              159
+            ],
+            "sourceAnchor": [
+              150,
+              447
+            ],
+            "exportOffset": [
+              5,
+              1
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              16,
+              104,
+              163,
+              161
+            ],
+            "sourceAnchor": [
+              150,
+              479
+            ],
+            "exportOffset": [
+              5,
+              -3
+            ]
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              9,
+              132,
+              164,
+              161
+            ],
+            "sourceAnchor": [
+              150,
+              479
+            ],
+            "exportOffset": [
+              5,
+              -3
+            ]
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              25,
+              91,
+              166,
+              161
+            ],
+            "sourceAnchor": [
+              150,
+              448
+            ],
+            "exportOffset": [
+              5,
+              8
+            ]
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              42,
+              60,
+              139,
+              161
+            ],
+            "sourceAnchor": [
+              134,
+              448
+            ],
+            "exportOffset": [
+              9,
+              8
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              20,
+              131,
+              161
+            ],
+            "sourceAnchor": [
+              111,
+              446
+            ],
+            "exportOffset": [
+              16,
+              8
+            ]
+          }
+        ]
+      },
+      "jump": {
+        "file": "combat-jump.png",
+        "guide": "combat-jump-guia.png",
+        "frameCount": 6,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              50,
+              37,
+              129,
+              161
+            ],
+            "sourceAnchor": [
+              135,
+              482
+            ],
+            "exportOffset": [
+              8,
+              -3
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              58,
+              11,
+              128,
+              154
+            ],
+            "sourceAnchor": [
+              135,
+              486
+            ],
+            "exportOffset": [
+              10,
+              -5
+            ]
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              59,
+              2,
+              125,
+              116
+            ],
+            "sourceAnchor": [
+              135,
+              486
+            ],
+            "exportOffset": [
+              10,
+              -5
+            ]
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              62,
+              6,
+              128,
+              148
+            ],
+            "sourceAnchor": [
+              135,
+              486
+            ],
+            "exportOffset": [
+              10,
+              -5
+            ]
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              49,
+              46,
+              129,
+              161
+            ],
+            "sourceAnchor": [
+              129,
+              485
+            ],
+            "exportOffset": [
+              10,
+              -4
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              27,
+              129,
+              161
+            ],
+            "sourceAnchor": [
+              134,
+              485
+            ],
+            "exportOffset": [
+              9,
+              -4
+            ]
+          }
+        ]
+      },
+      "dizzy": {
+        "file": "combat-dizzy.png",
+        "guide": "combat-dizzy-guia.png",
+        "frameCount": 6,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              52,
+              21,
+              125,
+              161
+            ],
+            "sourceAnchor": [
+              147,
+              492
+            ],
+            "exportOffset": [
+              11,
+              14
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              30,
+              124,
+              161
+            ],
+            "sourceAnchor": [
+              147,
+              492
+            ],
+            "exportOffset": [
+              11,
+              14
+            ]
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              23,
+              124,
+              161
+            ],
+            "sourceAnchor": [
+              147,
+              492
+            ],
+            "exportOffset": [
+              11,
+              14
+            ]
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              21,
+              125,
+              161
+            ],
+            "sourceAnchor": [
+              146,
+              492
+            ],
+            "exportOffset": [
+              11,
+              14
+            ]
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              43,
+              131,
+              161
+            ],
+            "sourceAnchor": [
+              123,
+              492
+            ],
+            "exportOffset": [
+              18,
+              14
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              32,
+              131,
+              161
+            ],
+            "sourceAnchor": [
+              123,
+              492
+            ],
+            "exportOffset": [
+              18,
+              14
+            ]
+          }
+        ]
+      },
+      "dash": {
+        "file": "combat-dash.png",
+        "guide": "combat-dash-guia.png",
+        "frameCount": 6,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              45,
+              27,
+              131,
+              161
+            ],
+            "sourceAnchor": [
+              114,
+              473
+            ],
+            "exportOffset": [
+              12,
+              5
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              52,
+              31,
+              178,
+              161
+            ],
+            "sourceAnchor": [
+              69,
+              473
+            ],
+            "exportOffset": [
+              33,
+              5
+            ]
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              49,
+              21,
+              138,
+              161
+            ],
+            "sourceAnchor": [
+              124,
+              473
+            ],
+            "exportOffset": [
+              12,
+              5
+            ]
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              34,
+              27,
+              134,
+              161
+            ],
+            "sourceAnchor": [
+              169,
+              474
+            ],
+            "exportOffset": [
+              -2,
+              5
+            ]
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              60,
+              16,
+              124,
+              149
+            ],
+            "sourceAnchor": [
+              114,
+              475
+            ],
+            "exportOffset": [
+              19,
+              4
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              50,
+              27,
+              128,
+              161
+            ],
+            "sourceAnchor": [
+              126,
+              475
+            ],
+            "exportOffset": [
+              14,
+              5
+            ]
+          }
+        ]
+      },
+      "walk": {
+        "file": "combat-walk.png",
+        "guide": "combat-walk-guia.png",
+        "frameCount": 6,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              20,
+              131,
+              161
+            ],
+            "sourceAnchor": [
+              150,
+              482
+            ],
+            "exportOffset": [
+              7,
+              9
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              50,
+              21,
+              111,
+              161
+            ],
+            "sourceAnchor": [
+              167,
+              482
+            ],
+            "exportOffset": [
+              1,
+              9
+            ]
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              47,
+              21,
+              111,
+              161
+            ],
+            "sourceAnchor": [
+              151,
+              483
+            ],
+            "exportOffset": [
+              4,
+              9
+            ]
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              45,
+              22,
+              141,
+              161
+            ],
+            "sourceAnchor": [
+              143,
+              480
+            ],
+            "exportOffset": [
+              9,
+              10
+            ]
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              52,
+              22,
+              143,
+              161
+            ],
+            "sourceAnchor": [
+              114,
+              480
+            ],
+            "exportOffset": [
+              19,
+              10
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              41,
+              21,
+              98,
+              161
+            ],
+            "sourceAnchor": [
+              202,
+              480
+            ],
+            "exportOffset": [
+              -9,
+              10
+            ]
+          }
+        ]
+      },
+      "ko-win": {
+        "file": "combat-ko-win.png",
+        "guide": "combat-ko-win-guia.png",
+        "frameCount": 6,
+        "frames": [
+          {
+            "index": 0,
+            "rect": [
+              0,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": true,
+            "bbox": [
+              39,
+              30,
+              155,
+              159
+            ],
+            "sourceAnchor": [
+              150,
+              472
+            ],
+            "exportOffset": [
+              5,
+              -2
+            ]
+          },
+          {
+            "index": 1,
+            "rect": [
+              192,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              12,
+              72,
+              150,
+              161
+            ],
+            "sourceAnchor": [
+              150,
+              465
+            ],
+            "exportOffset": [
+              5,
+              1
+            ]
+          },
+          {
+            "index": 2,
+            "rect": [
+              384,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              6,
+              127,
+              164,
+              161
+            ],
+            "sourceAnchor": [
+              150,
+              464
+            ],
+            "exportOffset": [
+              5,
+              1
+            ]
+          },
+          {
+            "index": 3,
+            "rect": [
+              576,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              52,
+              20,
+              128,
+              161
+            ],
+            "sourceAnchor": [
+              147,
+              471
+            ],
+            "exportOffset": [
+              5,
+              -1
+            ]
+          },
+          {
+            "index": 4,
+            "rect": [
+              768,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              19,
+              127,
+              161
+            ],
+            "sourceAnchor": [
+              154,
+              471
+            ],
+            "exportOffset": [
+              2,
+              -1
+            ]
+          },
+          {
+            "index": 5,
+            "rect": [
+              960,
+              0,
+              192,
+              176
+            ],
+            "empty": false,
+            "airborne": false,
+            "bbox": [
+              51,
+              3,
+              128,
+              161
+            ],
+            "sourceAnchor": [
+              161,
+              471
+            ],
+            "exportOffset": [
+              0,
+              -1
+            ]
+          }
+        ]
+      }
+    },
+    "palette": [
+      "#f5c4a3",
+      "#f2af86",
+      "#efa47a",
+      "#cd9c75",
+      "#c8845c",
+      "#8e7d5c",
+      "#857454",
+      "#7f7154",
+      "#a1643e",
+      "#895a37",
+      "#7b6d50",
+      "#7b6c4b",
+      "#796244",
+      "#706449",
+      "#655744",
+      "#5e5049",
+      "#42516a",
+      "#754627",
+      "#60463b",
+      "#5a4b4d",
+      "#584a4b",
+      "#584648",
+      "#56494b",
+      "#56474a",
+      "#554844",
+      "#554447",
+      "#524547",
+      "#504736",
+      "#504245",
+      "#4e413d",
+      "#484035",
+      "#463c37",
+      "#30415f",
+      "#52321e",
+      "#40342e",
+      "#3b342f",
+      "#3a2c27",
+      "#342e2e",
+      "#322c26",
+      "#302522",
+      "#282b38",
+      "#2b2727",
+      "#2a2625",
+      "#292425",
+      "#282420",
+      "#26201f",
+      "#211e1c",
+      "#1f1a17",
+      "#1f130e",
+      "#142340",
+      "#151313",
+      "#110e0d",
+      "#0f0907",
+      "#0a0807",
+      "#070706",
+      "#080403",
+      "#050405",
+      "#040303",
+      "#040201",
+      "#030303",
+      "#020201",
+      "#030101",
+      "#010103",
+      "#000000"
+    ]
+  },
+  "effects": {
+    "fx-parry": {
+      "file": "fx-parry.png",
+      "cellSize": [
+        128,
+        128
+      ],
+      "columns": 6,
+      "rows": 1,
+      "anchor": [
+        64,
+        64
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "row": 0,
+          "rect": [
+            0,
+            0,
+            128,
+            128
+          ],
+          "bbox": [
+            53,
+            52,
+            75,
+            76
+          ]
+        },
+        {
+          "index": 1,
+          "row": 0,
+          "rect": [
+            128,
+            0,
+            128,
+            128
+          ],
+          "bbox": [
+            46,
+            47,
+            82,
+            81
+          ]
+        },
+        {
+          "index": 2,
+          "row": 0,
+          "rect": [
+            256,
+            0,
+            128,
+            128
+          ],
+          "bbox": [
+            28,
+            29,
+            100,
+            97
+          ]
+        },
+        {
+          "index": 3,
+          "row": 0,
+          "rect": [
+            384,
+            0,
+            128,
+            128
+          ],
+          "bbox": [
+            11,
+            16,
+            116,
+            111
+          ]
+        },
+        {
+          "index": 4,
+          "row": 0,
+          "rect": [
+            512,
+            0,
+            128,
+            128
+          ],
+          "bbox": [
+            22,
+            25,
+            105,
+            103
+          ]
+        },
+        {
+          "index": 5,
+          "row": 0,
+          "rect": [
+            640,
+            0,
+            128,
+            128
+          ],
+          "bbox": [
+            40,
+            43,
+            86,
+            84
+          ]
+        }
+      ]
+    },
+    "fx-guardbreak": {
+      "file": "fx-guardbreak.png",
+      "cellSize": [
+        160,
+        160
+      ],
+      "columns": 6,
+      "rows": 1,
+      "anchor": [
+        80,
+        80
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "row": 0,
+          "rect": [
+            0,
+            0,
+            160,
+            160
+          ],
+          "bbox": [
+            28,
+            29,
+            131,
+            131
+          ]
+        },
+        {
+          "index": 1,
+          "row": 0,
+          "rect": [
+            160,
+            0,
+            160,
+            160
+          ],
+          "bbox": [
+            29,
+            29,
+            132,
+            131
+          ]
+        },
+        {
+          "index": 2,
+          "row": 0,
+          "rect": [
+            320,
+            0,
+            160,
+            160
+          ],
+          "bbox": [
+            29,
+            29,
+            132,
+            131
+          ]
+        },
+        {
+          "index": 3,
+          "row": 0,
+          "rect": [
+            480,
+            0,
+            160,
+            160
+          ],
+          "bbox": [
+            26,
+            27,
+            134,
+            133
+          ]
+        },
+        {
+          "index": 4,
+          "row": 0,
+          "rect": [
+            640,
+            0,
+            160,
+            160
+          ],
+          "bbox": [
+            24,
+            25,
+            132,
+            131
+          ]
+        },
+        {
+          "index": 5,
+          "row": 0,
+          "rect": [
+            800,
+            0,
+            160,
+            160
+          ],
+          "bbox": [
+            29,
+            36,
+            121,
+            122
+          ]
+        }
+      ]
+    },
+    "fx-chapas": {
+      "file": "fx-chapas.png",
+      "cellSize": [
+        96,
+        48
+      ],
+      "columns": 8,
+      "rows": 1,
+      "anchor": [
+        48,
+        24
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "row": 0,
+          "rect": [
+            0,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            9,
+            12,
+            86,
+            42
+          ]
+        },
+        {
+          "index": 1,
+          "row": 0,
+          "rect": [
+            96,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            12,
+            14,
+            83,
+            47
+          ]
+        },
+        {
+          "index": 2,
+          "row": 0,
+          "rect": [
+            192,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            21,
+            11,
+            89,
+            46
+          ]
+        },
+        {
+          "index": 3,
+          "row": 0,
+          "rect": [
+            288,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            11,
+            10,
+            84,
+            43
+          ]
+        },
+        {
+          "index": 4,
+          "row": 0,
+          "rect": [
+            384,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            9,
+            22,
+            88,
+            46
+          ]
+        },
+        {
+          "index": 5,
+          "row": 0,
+          "rect": [
+            480,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            9,
+            15,
+            86,
+            47
+          ]
+        },
+        {
+          "index": 6,
+          "row": 0,
+          "rect": [
+            576,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            9,
+            10,
+            75,
+            47
+          ]
+        },
+        {
+          "index": 7,
+          "row": 0,
+          "rect": [
+            672,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            13,
+            14,
+            88,
+            45
+          ]
+        }
+      ]
+    },
+    "fx-hit": {
+      "file": "fx-hit.png",
+      "cellSize": [
+        96,
+        96
+      ],
+      "columns": 6,
+      "rows": 2,
+      "anchor": [
+        48,
+        48
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "row": 0,
+          "rect": [
+            0,
+            0,
+            96,
+            96
+          ],
+          "bbox": [
+            46,
+            39,
+            54,
+            47
+          ]
+        },
+        {
+          "index": 1,
+          "row": 0,
+          "rect": [
+            96,
+            0,
+            96,
+            96
+          ],
+          "bbox": [
+            39,
+            33,
+            61,
+            53
+          ]
+        },
+        {
+          "index": 2,
+          "row": 0,
+          "rect": [
+            192,
+            0,
+            96,
+            96
+          ],
+          "bbox": [
+            32,
+            28,
+            67,
+            62
+          ]
+        },
+        {
+          "index": 3,
+          "row": 0,
+          "rect": [
+            288,
+            0,
+            96,
+            96
+          ],
+          "bbox": [
+            30,
+            28,
+            67,
+            60
+          ]
+        },
+        {
+          "index": 4,
+          "row": 0,
+          "rect": [
+            384,
+            0,
+            96,
+            96
+          ],
+          "bbox": [
+            33,
+            28,
+            64,
+            59
+          ]
+        },
+        {
+          "index": 5,
+          "row": 0,
+          "rect": [
+            480,
+            0,
+            96,
+            96
+          ],
+          "bbox": [
+            47,
+            43,
+            49,
+            45
+          ]
+        },
+        {
+          "index": 0,
+          "row": 1,
+          "rect": [
+            0,
+            96,
+            96,
+            96
+          ],
+          "bbox": [
+            45,
+            40,
+            55,
+            50
+          ]
+        },
+        {
+          "index": 1,
+          "row": 1,
+          "rect": [
+            96,
+            96,
+            96,
+            96
+          ],
+          "bbox": [
+            23,
+            21,
+            74,
+            68
+          ]
+        },
+        {
+          "index": 2,
+          "row": 1,
+          "rect": [
+            192,
+            96,
+            96,
+            96
+          ],
+          "bbox": [
+            8,
+            3,
+            90,
+            82
+          ]
+        },
+        {
+          "index": 3,
+          "row": 1,
+          "rect": [
+            288,
+            96,
+            96,
+            96
+          ],
+          "bbox": [
+            11,
+            13,
+            80,
+            76
+          ]
+        },
+        {
+          "index": 4,
+          "row": 1,
+          "rect": [
+            384,
+            96,
+            96,
+            96
+          ],
+          "bbox": [
+            22,
+            23,
+            77,
+            65
+          ]
+        },
+        {
+          "index": 5,
+          "row": 1,
+          "rect": [
+            480,
+            96,
+            96,
+            96
+          ],
+          "bbox": [
+            40,
+            39,
+            54,
+            49
+          ]
+        }
+      ]
+    },
+    "fx-dust": {
+      "file": "fx-dust.png",
+      "cellSize": [
+        96,
+        48
+      ],
+      "columns": 6,
+      "rows": 1,
+      "anchor": [
+        48,
+        44
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "row": 0,
+          "rect": [
+            0,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            38,
+            36,
+            62,
+            44
+          ]
+        },
+        {
+          "index": 1,
+          "row": 0,
+          "rect": [
+            96,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            22,
+            29,
+            75,
+            44
+          ]
+        },
+        {
+          "index": 2,
+          "row": 0,
+          "rect": [
+            192,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            10,
+            16,
+            88,
+            44
+          ]
+        },
+        {
+          "index": 3,
+          "row": 0,
+          "rect": [
+            288,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            11,
+            19,
+            87,
+            44
+          ]
+        },
+        {
+          "index": 4,
+          "row": 0,
+          "rect": [
+            384,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            18,
+            26,
+            78,
+            44
+          ]
+        },
+        {
+          "index": 5,
+          "row": 0,
+          "rect": [
+            480,
+            0,
+            96,
+            48
+          ],
+          "bbox": [
+            21,
+            34,
+            70,
+            44
+          ]
+        }
+      ]
+    },
+    "fx-sweat": {
+      "file": "fx-sweat.png",
+      "cellSize": [
+        32,
+        32
+      ],
+      "columns": 4,
+      "rows": 1,
+      "anchor": [
+        16,
+        16
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "row": 0,
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ],
+          "bbox": [
+            13,
+            7,
+            20,
+            15
+          ]
+        },
+        {
+          "index": 1,
+          "row": 0,
+          "rect": [
+            32,
+            0,
+            32,
+            32
+          ],
+          "bbox": [
+            12,
+            11,
+            20,
+            22
+          ]
+        },
+        {
+          "index": 2,
+          "row": 0,
+          "rect": [
+            64,
+            0,
+            32,
+            32
+          ],
+          "bbox": [
+            12,
+            12,
+            21,
+            24
+          ]
+        },
+        {
+          "index": 3,
+          "row": 0,
+          "rect": [
+            96,
+            0,
+            32,
+            32
+          ],
+          "bbox": [
+            12,
+            17,
+            20,
+            27
+          ]
+        }
+      ]
+    },
+    "ui-agarre": {
+      "file": "ui-agarre.png",
+      "cellSize": [
+        64,
+        64
+      ],
+      "columns": 1,
+      "rows": 1,
+      "anchor": [
+        32,
+        32
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "row": 0,
+          "rect": [
+            0,
+            0,
+            64,
+            64
+          ],
+          "bbox": [
+            6,
+            7,
+            58,
+            58
+          ]
+        }
+      ]
+    },
+    "ui-fuelle": {
+      "file": "ui-fuelle.png",
+      "cellSize": [
+        32,
+        32
+      ],
+      "columns": 1,
+      "rows": 1,
+      "anchor": [
+        16,
+        16
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "row": 0,
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ],
+          "bbox": [
+            3,
+            5,
+            29,
+            27
+          ]
+        }
+      ]
+    }
+  },
+  "aliases": {
+    "guard": {
+      "animation": "guard",
+      "frames": [
+        2,
+        3
+      ],
+      "loop": true
+    },
+    "guardEnter": {
+      "animation": "guard",
+      "frames": [
+        0,
+        1
+      ],
+      "loop": false
+    },
+    "guardHit": {
+      "animation": "guard",
+      "frames": [
+        4
+      ],
+      "loop": false
+    },
+    "parry": {
+      "animation": "guard",
+      "frames": [
+        5
+      ],
+      "loop": false
+    },
+    "hit": {
+      "animation": "hit",
+      "frames": [
+        0,
+        1
+      ],
+      "loop": false
+    },
+    "hitHeavy": {
+      "animation": "hit",
+      "frames": [
+        2,
+        3
+      ],
+      "loop": false
+    },
+    "hitAir": {
+      "animation": "hit",
+      "frames": [
+        4,
+        5
+      ],
+      "loop": false
+    },
+    "grab": {
+      "animation": "grab",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false
+    },
+    "grabHold": {
+      "animation": "grab",
+      "frames": [
+        3
+      ],
+      "loop": true
+    },
+    "grabbed": {
+      "animation": "grabbed",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "loop": false
+    },
+    "gancho": {
+      "animation": "gancho",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false
+    },
+    "airPunch": {
+      "animation": "air",
+      "frames": [
+        0,
+        1
+      ],
+      "loop": false
+    },
+    "dive": {
+      "animation": "air",
+      "frames": [
+        2,
+        3
+      ],
+      "loop": false
+    },
+    "land": {
+      "animation": "air",
+      "frames": [
+        4,
+        5
+      ],
+      "loop": false
+    },
+    "down": {
+      "animation": "knockdown",
+      "frames": [
+        0,
+        1,
+        2
+      ],
+      "loop": false
+    },
+    "getup": {
+      "animation": "knockdown",
+      "frames": [
+        3,
+        4,
+        5
+      ],
+      "loop": false
+    },
+    "jump": {
+      "animation": "jump",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false
+    },
+    "dizzy": {
+      "animation": "dizzy",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "loop": true
+    },
+    "tired": {
+      "animation": "dizzy",
+      "frames": [
+        4,
+        5
+      ],
+      "loop": true
+    },
+    "dash": {
+      "animation": "dash",
+      "frames": [
+        0,
+        1,
+        2
+      ],
+      "loop": false
+    },
+    "backdash": {
+      "animation": "dash",
+      "frames": [
+        3,
+        4,
+        5
+      ],
+      "loop": false
+    },
+    "walk": {
+      "animation": "walk",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": true
+    },
+    "ko": {
+      "animation": "ko-win",
+      "frames": [
+        0,
+        1,
+        2
+      ],
+      "loop": false
+    },
+    "win": {
+      "animation": "ko-win",
+      "frames": [
+        3,
+        4,
+        5
+      ],
+      "loop": false
+    }
+  },
+  "timingNotes": "El motor controla los tiempos. Para dash/backdash, sugerencia 60–65 ms por fotograma (180–195 ms por movimiento). El GIF es una previsualización, no fija los tiempos de juego."
+}

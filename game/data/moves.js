@@ -52,20 +52,39 @@
     ] }
   };
 
-  /* Poses de estado (sin golpe). `art` es el nombre de la animación propia cuando exista;
-   * mientras, `from` toma un fotograma del atlas actual. */
+  /* Poses de estado (sin golpe). `art` es la animación propia (assets/fighter.json, arte de
+   * Combate 2.0 desde v0.12.4); si no existe, `from` toma un fotograma del atlas original y
+   * el combate añade giros provisionales. Las animaciones de arte con `loop` se repiten; el
+   * resto se quedan en su último fotograma. */
   const POSES = {
-    jump: { art: 'jump', from: ['kick', 1] },
+    jump: { art: 'jumpApex', from: ['kick', 1] },
+    jumpRise: { art: 'jumpRise', from: ['kick', 1] },
+    jumpApex: { art: 'jumpApex', from: ['kick', 1] },
+    jumpFall: { art: 'jumpFall', from: ['kick', 1] },
+    jumpLand: { art: 'jumpLand', from: ['idle', 0] },
+    doubleJump: { art: 'doubleJump', from: ['kick', 1] },   // tras el segundo impulso del salto doble
     hit: { art: 'hit', from: ['idle', 0] },
+    hitHeavy: { art: 'hitHeavy', from: ['idle', 0] },
+    hitAir: { art: 'hitAir', from: ['idle', 0] },
+    fall: { art: 'fall', from: ['idle', 0] },
+    thrown: { art: 'thrown', from: ['idle', 0] },
     guard: { art: 'guard', from: ['idle', 2] },
+    guardEnter: { art: 'guardEnter', from: ['idle', 2] },
+    guardHit: { art: 'guardHit', from: ['idle', 2] },
+    parry: { art: 'parry', from: ['idle', 2] },
     dizzy: { art: 'dizzy', from: ['idle', 0] },
     down: { art: 'down', from: ['idle', 0] },
     getup: { art: 'getup', from: ['idle', 0] },
     dash: { art: 'dash', from: ['idle', 3] },
+    backdash: { art: 'backdash', from: ['idle', 3] },
     land: { art: 'land', from: ['kick', 5] },
     tired: { art: 'tired', from: ['idle', 0] },
+    walk: { art: 'walk', from: ['idle', 0] },
     grabHold: { art: 'grabHold', from: ['throwBottle', 1] },
-    grabbed: { art: 'grabbed', from: ['idle', 0] }
+    grabbed: { art: 'grabbed', from: ['idle', 0] },
+    grabbedLift: { art: 'grabbedLift', from: ['idle', 0] },
+    ko: { art: 'ko', from: ['idle', 0] },
+    win: { art: 'win', from: ['throwBottle', 2] }
   };
 
   function frameOf(data, anim, i) {
@@ -101,13 +120,17 @@
     return data;
   }
 
-  /** Fotograma para una pose de estado: el del arte propio si existe (en bucle por tiempo), o el provisional. */
-  function poseFrame(data, name, tMs) {
+  /** Fotograma de una pose de estado a los `tMs` de empezar: el del arte propio si existe
+   * (en bucle si la animación lo es; si no, se queda en el último), o el provisional.
+   * `reverse` recorre el bucle al revés (andar hacia atrás). */
+  function poseFrame(data, name, tMs, reverse) {
     const p = POSES[name];
     if (!p) return frameOf(data, 'idle', 0);
     const art = data.animations[p.art];
     if (art && art.frames && art.frames.length) {
-      let t = Math.max(0, tMs || 0) % art.frames.reduce((n, f) => n + f.duration, 0);
+      const total = art.frames.reduce((n, f) => n + f.duration, 0);
+      let t = Math.max(0, tMs || 0);
+      if (art.loop) { t %= total; if (reverse) t = total - 1 - t; }
       for (const f of art.frames) { if (t < f.duration) return f; t -= f.duration; }
       return art.frames[art.frames.length - 1];
     }

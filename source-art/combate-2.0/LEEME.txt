@@ -1,0 +1,91 @@
+LA TROLINA FIGHTERS — ASSETS DE COMBATE 2.0
+Paquete gráfico independiente para su posterior integración con Codex.
+
+CONTENIDO
+12 tiras del luchador, 6 efectos animados y 2 iconos: 20 PNG de producción.
+70 poses dibujadas del luchador, 42 fotogramas de efectos y 2 iconos.
+Además: 12 guías, 3 láminas de revisión, 2 GIF de previsualización,
+metadatos, el encargo original, los prompts y el resultado de comprobación.
+
+FORMATO DEL LUCHADOR
+Cada combat-*.png mide 1152 x 176 px: seis celdas de 192 x 176 px.
+Orden temporal de izquierda a derecha. Índices desde cero.
+Mirando a la derecha, manos vacías, PNG RGBA con alfa binario real.
+Paleta compartida de 64 colores; reducción con vecino más próximo, sin dithering.
+Referencia: El Barbas del atlas anterior assets/fighter.png.
+Ancla de referencia (56,160). En las poses con pie apoyado, el contacto
+de la suela está en ese punto y no hay píxeles por debajo de y=160.
+En el aire se conserva la referencia del cuerpo y se eleva la pose;
+en caída, suelo y giro el ancla sigue siendo la referencia del actor,
+no un pie que deba estar físicamente en ese punto.
+Las distintas flexiones, saltos y brazos levantados cambian la caja visible.
+No recortar ni recentrar automáticamente las celdas al importarlas.
+
+ANIMACIONES
+combat-guard.png: 0–1 entrar; 2–3 mantener; 4 recibir bloqueando; 5 parry.
+combat-hit.png: 0–1 golpe flojo; 2–3 golpe fuerte; 4–5 reacción aérea.
+combat-grab.png: 0 preparar; 1 avanzar; 2 agarre activo; 3 sujetar;
+                 4 girar; 5 soltar. El rival se dibuja por separado.
+combat-grabbed.png: 0 atrapado; 1 levantado; 2 lanzado; 3 caída.
+                   LAS CELDAS 4 Y 5 ESTÁN VACÍAS, con alfa 0 completo.
+combat-gancho.png: 0 agacharse; 1 impulso; 2 golpe activo; 3 cima;
+                   4 descenso; 5 recuperar.
+combat-air.png: 0 preparar puño aéreo; 1 puño activo; 2 recogerse;
+                3 picado activo; 4 aterrizar; 5 levantarse.
+combat-knockdown.png: 0 caer; 1 impacto; 2 tumbado; 3 girar;
+                      4 de rodillas; 5 de pie.
+combat-jump.png: 0 preparar; 1 subir; 2 cima; 3 bajar; 4 aterrizar; 5 guardia.
+combat-dizzy.png: 0–3 mareo en bucle; 4–5 jadeo en bucle.
+combat-dash.png: 0–2 avance; 3–5 retroceso. Son dos secuencias separadas.
+combat-walk.png: 0–5 marcha en guardia, bucle.
+combat-ko-win.png: 0–2 KO; 3–5 victoria. Son dos secuencias separadas.
+
+EFECTOS E INTERFAZ
+fx-parry.png: 768 x 128, seis celdas de 128 x 128. Aro blanco azulado.
+fx-guardbreak.png: 960 x 160, seis celdas de 160 x 160.
+                  Escudo azul translúcido, rotura y fogonazo rojo.
+fx-chapas.png: 768 x 48, ocho celdas de 96 x 48.
+               Tres chapas sin marca: dos doradas y una roja, en órbita.
+fx-hit.png: 576 x 192. Seis columnas, dos filas, celdas de 96 x 96.
+            FILA 0: impacto flojo amarillo. FILA 1: fuerte naranja.
+fx-dust.png: 576 x 48, seis celdas de 96 x 48. Polvo y salpicadura.
+fx-sweat.png: 128 x 32, cuatro celdas de 32 x 32. Sudor descendente.
+ui-agarre.png: 64 x 64. Mano abierta para el botón de agarre.
+ui-fuelle.png: 32 x 32. Pulmones para la barra de fuelle.
+Todos los PNG de producción tienen fondo transparente real.
+El escudo conserva translucidez; los demás tienen bordes de alfa binario.
+Los efectos se reproducen en su centro, salvo el polvo, cuyo contacto
+con el suelo está en (48,44). Las chapas se colocan encima de la cabeza.
+No hay textos, marcas comerciales ni armas dibujados.
+
+PARA REVISAR
+combat-<nombre>-guia.png: lámina de referencia, no usar como sprite.
+Verde: ancla y línea de suelo. Rosa: mano/pie orientativo del cuadro activo.
+Las guías tienen fondo opaco intencionadamente. Los puntos rosas ayudan
+al ajuste visual; no sustituyen a las hitboxes que decida el motor.
+VISTA_TIRAS.png: todas las poses a tamaño nativo.
+VISTA_EFECTOS.png: efectos e iconos.
+COMPARACION_ESCALA.png: atlas anterior y poses nuevas a la misma escala de píxel.
+PREVIEW_COMBATE.gif: repaso de las poses; NO simula la física del juego.
+PREVIEW_EFECTOS.gif: efectos en bucle, incluidos ambos tipos de impacto.
+Los fondos de las vistas y GIF son solo de previsualización.
+
+PARA CODEX
+combat-assets.json contiene rectángulos de cada celda, ancla, paleta,
+fotogramas activos orientativos y un mapa sugerido de nombres de animación.
+El JSON es documentación de importación: no es un parche al juego.
+En particular: grabHold usa grab[3]; airPunch usa air[0,1]; dive usa
+air[2,3]; land usa air[4,5]; down usa knockdown[0,1,2]; getup usa
+knockdown[3,4,5]; dizzy usa dizzy[0,1,2,3]; tired usa dizzy[4,5].
+Conservar las seis celdas, incluidas las dos vacías de grabbed.
+Para dash y backdash se sugieren 60–65 ms por cuadro: 180–195 ms por movimiento.
+El resto de tiempos, física, daños, colisiones, bucles y recoloreados
+los define la integración. Las guías y los GIF no fijan esos parámetros.
+
+ESTADO DE LA ENTREGA
+Se ha seguido ASSETS_COMBATE(1).md, incluido como ENCARGO_ORIGINAL.md.
+Se entregan únicamente imágenes nuevas y documentación de importación.
+No se ha ampliado el atlas, registrado movimientos, regenerado recolores
+ni modificado el proyecto del juego. La integración queda pendiente.
+PROMPTS_GENERACION.json conserva los prompts de la generación integrada.
+COMPROBACION.json y MANIFEST_SHA256.txt registran la validación y los archivos.

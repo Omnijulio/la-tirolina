@@ -11,3 +11,6 @@ references/
 # Paquetes de trabajo descomprimidos dentro de la carpeta (ya integrados)
 la-trolina-codex-policia/
 la-trolina-assets-clima-fuente/
+
+# Paquete de assets de combate (integrado con tools/integrate_combat_assets.py; copia en source-art/combate-2.0)
+la-trolina-assets-combate/

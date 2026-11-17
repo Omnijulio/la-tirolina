@@ -101,6 +101,7 @@
       this.fountain = root.Fountain ? new root.Fountain({ on: fs.on, lit: fs.lit, night: this.stageInfo.night !== false, art: this.assets.fountain }) : null;
       this.grab = null; this.fountainNoted = false;
       this.throwing = null;   // agarre normal en curso (botón AGARRE)
+      this.fxAnims = [];      // efectos animados del arte de combate (solo decorado)
       // Modo salvaje (experimental): caos desde el segundo 30 y mensajes pasivo-agresivos.
       this.wild = !!opts.wild;
       this.snark = null; this.snarkCd = {}; this.onsetSaid = false; this.blackout = 0; this.visionAt = 0;
@@ -180,11 +181,28 @@
     popup(c, text, color) {
       this.popups.push({ x: c.cx, y: C.GROUND + c.y - 330, text, color: color || '#fff', t: 0, life: 900 });
     }
+    /** Efecto animado del paquete de Combate 2.0 (si está cargado). Devuelve false si no. */
+    fxPlay(key, x, y, opts) {
+      const D = root.TROLINA_COMBAT_FX, img = this.assets.combatFx && this.assets.combatFx[key];
+      if (!D || !img) return false;
+      const def = D.fx[key], o = opts || {};
+      this.fxAnims.push({ img, def, x, y, t: 0, row: o.row || 0, scale: o.scale || C.S, flip: o.flip || 1, life: o.life || def.cols * def.ms });
+      return true;
+    }
+
     dust(x, y, size) {
-      for (let i = 0; i < 6; i++) this.dusts.push({ x: x + (Math.random() - 0.5) * 60, y, vx: (Math.random() - 0.5) * 120, r: 6 + Math.random() * 8 * (size || 1), t: 0, life: 420 });
+      // Con el arte de combate: polvo y salpicadura del suelo mojado (el contacto del dibujo va al suelo).
+      if ((size || 1) >= 0.6 && this.fxPlay('dust', x, y, { scale: C.S * Math.min(1.5, Math.max(0.8, size || 1)) })) return;
+      const rnd = root.__trolinaRealRandom || Math.random;   // solo decorado: no gasta el azar común del multijugador
+      for (let i = 0; i < 6; i++) this.dusts.push({ x: x + (rnd() - 0.5) * 60, y, vx: (rnd() - 0.5) * 120, r: 6 + rnd() * 8 * (size || 1), t: 0, life: 420 });
     }
     spark(x, y, kind) {
-      this.sparks.push({ x, y, kind, t: 0, life: kind === 'block' ? 180 : kind === 'dart' ? 420 : kind === 'parry' || kind === 'break' ? 380 : 240, rot: Math.random() * Math.PI });
+      // Con el arte de combate: guardia justa, guardia rota e impactos (flojo / fuerte) son animaciones.
+      if (kind === 'parry' && this.fxPlay('parry', x, y)) return;
+      if (kind === 'break' && this.fxPlay('guardbreak', x, y)) return;
+      if ((kind === 'hit' || kind === 'hitHeavy' || kind === 'bottle') && this.fxPlay('hit', x, y, { row: kind === 'hit' ? 0 : 1 })) return;
+      if (kind === 'hitHeavy') kind = 'hit';
+      this.sparks.push({ x, y, kind, t: 0, life: kind === 'block' ? 180 : kind === 'dart' ? 420 : kind === 'parry' || kind === 'break' ? 380 : 240, rot: (root.__trolinaRealRandom || Math.random)() * Math.PI });
     }
     smokePuff(c) {
       const p = c.cigTip();
@@ -556,7 +574,8 @@
     }
 
     updateEffects(dt) {
-      for (const list of [this.sparks, this.popups, this.dusts, this.smokes]) for (const e of list) e.t += dt;
+      for (const list of [this.sparks, this.popups, this.dusts, this.smokes, this.fxAnims]) for (const e of list) e.t += dt;
+      this.fxAnims = this.fxAnims.filter((e) => e.t < e.life);
       this.smokes = this.smokes.filter((e) => e.t < e.life);
       this.sparks = this.sparks.filter((e) => e.t < e.life);
       this.popups = this.popups.filter((e) => e.t < e.life);
@@ -643,6 +662,7 @@
       def.facing = -att.facing;
       def.cx = Math.max(C.MIN_X, Math.min(C.MAX_X, att.cx + att.facing * 70));
       def.y = -24 - Math.min(1, g.t / 200) * 16; def.grabRot = -0.12; def.sync();
+      def.throwPose = g.t < 200 ? 'grabbed' : 'grabbedLift';
       // Zafarse: pulsar AGARRE a tiempo.
       const dctl = def === this.p1 ? c1 : c2;
       if (g.t <= G.techMs && dctl && (dctl.actions || []).includes('grab')) {
@@ -652,15 +672,15 @@
       if (g.t < G.holdMs) return;
       // ¡Lo tira al suelo!
       this.throwing = null;
-      att.locked = false; att.poseOverride = null; att.f.play('throwGrab', true);
-      def.state = 'fight'; def.f.enabled = true; def.grabRot = 0;
+      att.locked = false; att.poseOverride = null; att.f.play(att.f.data.animations.throw ? 'throw' : 'throwGrab', true);
+      def.state = 'fight'; def.f.enabled = true; def.grabRot = 0; def.throwPose = null; def.thrownAt = def.t;
       def.air = true; def.vy = G.throwVy; def.vx = att.facing * G.throwVx; def.downPending = true; def.hitstun = 1500;
       const wildBonus = this.wild ? 1 + R.WILD.damageBonus * Math.min(1, this.chaos()) : 1;
       const dmg = R.damageFor('grab', att.powerNow, att === this.p2 ? this.diff.cpuDamage : 1) * wildBonus;
       def.hp = Math.max(0, def.hp - dmg); def.flash = 140; def.flashColor = '#ffffff';
       this.addNoise(R.NOISE.hit * 2);
       this.sfx('kick'); this.shake = 10; this.hitstop = 90;
-      this.spark(def.cx, C.GROUND + def.y - 180, 'hit');
+      this.spark(def.cx, C.GROUND + def.y - 180, 'hitHeavy');
       this.addScore(att, R.hitPoints('grab', 1, this.intoxOf(att)), def.cx, C.GROUND - 300);
       if (att.hasSpecial && !att.meterFull) {
         att.meter = Math.min(R.METER_MAX, att.meter + R.meterGain(2));
@@ -675,7 +695,7 @@
       const G = R.GRAB;
       for (const [c, dir] of [[att, -att.facing], [def, att.facing]]) {
         c.locked = false; c.poseOverride = null;
-        if (c.state === 'grabbed') { c.state = 'fight'; c.f.enabled = true; c.y = 0; c.air = false; c.grabRot = 0; }
+        if (c.state === 'grabbed') { c.state = 'fight'; c.f.enabled = true; c.y = 0; c.air = false; c.grabRot = 0; c.throwPose = null; }
         c.f.play('idle', true); c.hitstun = 0; c.blockstun = G.techStunMs; c.pending = [];
         c.vx = dir * G.techPush;
         c.sync();
@@ -693,7 +713,7 @@
       g.att.locked = false; g.att.poseOverride = null;
       if (g.def.state === 'grabbed') {
         g.def.state = this.phase === 'fight' ? 'fight' : 'ready';
-        g.def.y = 0; g.def.air = false; g.def.f.enabled = true; g.def.grabRot = 0;
+        g.def.y = 0; g.def.air = false; g.def.f.enabled = true; g.def.grabRot = 0; g.def.throwPose = null;
       }
     }
 
@@ -766,7 +786,7 @@
         return;
       }
       if (kind === 'punch' || kind === 'kick') att.hitConfirm = att.f.actionId;
-      this.spark(x, y, kind === 'bottle' ? 'bottle' : kind === 'dart' ? 'dart' : 'hit');
+      this.spark(x, y, kind === 'bottle' ? 'bottle' : kind === 'dart' ? 'dart' : kind === 'punch' || kind === 'airPunch' ? 'hit' : 'hitHeavy');
       this.sfx(kind === 'kick' || kind === 'dive' || kind === 'gancho' ? 'kick' : kind === 'dart' ? 'dartHit' : 'punch');
       if (type) { this.popup(def, type === 'counter' ? '¡CONTRA!' : '¡CASTIGO!', type === 'counter' ? '#ffb347' : '#ff6a5a'); this.sfx('counter'); }
       bounce(1);
@@ -879,7 +899,7 @@
           }
           const order = this.p1.attacking ? [this.p2, this.p1] : [this.p1, this.p2];
           for (const f of order) {
-            const p = f.draw(c);
+            const p = f.draw(c, this.assets.combatFx ? { fx: true } : undefined);
             if (p.item) {
               const w = f.f.worldPoint(p.item);
               this.bottles.drawItem(c, w.x, w.y + p.dy, C.S, p.item.rotation || 0, f.facing);
@@ -1035,6 +1055,27 @@
     }
 
     drawWorldFx(c) {
+      const D = root.TROLINA_COMBAT_FX, FX = this.assets.combatFx;
+      const cell = (img, def, i, row, x, y, sc, flip, alpha) => {
+        c.save(); c.imageSmoothingEnabled = false;
+        if (alpha !== undefined) c.globalAlpha = alpha;
+        c.translate(Math.round(x), Math.round(y)); c.scale(sc * (flip || 1), sc);
+        c.drawImage(img, i * def.w, row * def.h, def.w, def.h, -def.ax, -def.ay, def.w, def.h);
+        c.restore();
+      };
+      if (D && FX) {
+        for (const e of this.fxAnims) {
+          const i = Math.min(e.def.cols - 1, Math.floor(e.t / e.def.ms) % (e.def.loop ? e.def.cols : 1e9));
+          cell(e.img, e.def, i, e.row, e.x, e.y, e.scale, e.flip);
+        }
+        for (const f of this.fighters) {
+          if (f.state !== 'fight') continue;
+          const head = f.f.worldPoint({ x: 84, y: 14 });
+          // Guardia rota: chapas dando vueltas sobre la cabeza. Sin fuelle: sudor.
+          if (f.dizzyT > 0 && FX.chapas) { const d = D.fx.chapas; cell(FX.chapas, d, Math.floor(f.t / d.ms) % d.cols, 0, head.x, head.y - 16, C.S); }
+          else if (f.exhausted && FX.sweat) { const d = D.fx.sweat; cell(FX.sweat, d, Math.floor(f.t / d.ms) % d.cols, 0, head.x + f.facing * 26, head.y + 30, C.S); }
+        }
+      }
       for (const sm of this.smokes) {
         const k = sm.t / sm.life;
         c.fillStyle = 'rgba(225,225,232,' + (0.6 * (1 - k)) + ')';
@@ -1141,7 +1182,13 @@
           ctx.textAlign = side === 1 ? 'left' : 'right';
           const fl = c.dizzyT > 0 ? 'GUARDIA ROTA' : c.exhausted ? 'SIN FUELLE' : 'FUELLE';
           ctx.fillStyle = c.dizzyT > 0 || c.exhausted ? '#ffd0c8' : '#dff7ef';
-          const lx = side === 1 ? fx + fw + 8 : fx - 8;
+          let lx = side === 1 ? fx + fw + 8 : fx - 8;
+          const icon = this.assets.combatUi && this.assets.combatUi.fuelle;
+          if (icon) {
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(icon, side === 1 ? lx : lx - 16, fy - 4, 16, 16);
+            lx += side * 20;
+          }
           ctx.strokeText(fl, lx, fy + 9); ctx.fillText(fl, lx, fy + 9);
         }
         const yo = 14;   // lo de debajo baja para dejar sitio al fuelle

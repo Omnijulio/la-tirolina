@@ -79,6 +79,7 @@ body.touch.fighting.portrait #touch::before {
 .tbtn.punch { border-color: #ffcf6e; } .tbtn.kick { border-color: #ff7b6e; }
 .tbtn.bottle { border-color: #8bf2ce; } .tbtn.block { border-color: #8fd6ff; } .tbtn.smoke { border-color: #c9d3df; }
 .tbtn.grab { border-color: #c79bff; }
+.tbtn.grab img { width: 32px; height: 32px; margin-top: -4px; }
 /* Botón DASH: en vertical, en su propia fila arriba a la derecha; en horizontal, a la izquierda de los demás. */
 .tbtn.dash { border-color: #5fd3ff; grid-column: 1 / -1; justify-self: end; }
 .tbtn.dash.armed { background: #1d5b7a; box-shadow: 0 0 0 3px var(--mint), 0 0 16px #5fd3ffaa; }

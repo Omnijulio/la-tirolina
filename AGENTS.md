@@ -25,7 +25,8 @@ Lee `CONTEXTO_CODEX.md`, `PLAN.md`, `README.md` y `STAGE.md` antes de modificar 
 ## Contratos visuales y de juego
 
 - Conserva la estética pixel art y la identidad/ropa del personaje salvo que la petición cambie esos requisitos.
-- Sprites de 192x176, ancla del pie (56,160), atlas 6x4. No recentres cada pose por su caja visible.
+- Sprites de 192x176, ancla del pie (56,160), atlas 6x16 desde v0.12.4: filas 0–3 originales (idle, punch, kick, throwBottle) y 4–15 el arte de Combate 2.0 (guard, hit, grab, grabbed, gancho, air, knockdown, jump, dizzy, dash, walk, ko-win). No recentres cada pose por su caja visible.
+- El arte de Combate 2.0 está en `source-art/combate-2.0` y se integra con `python3 tools/integrate_combat_assets.py` (amplía `assets/fighter.png` y `assets/fighter.json`, copia efectos e iconos y escribe `assets/fx/combat-fx-data.js`) seguido de `python3 tools/build_characters.py` y `python3 tools/build_demo.py`. Las poses en el aire se bajan dentro de su celda: la altura la pone la física.
 - Conserva la transparencia de los PNG y el escalado sin suavizado.
 - El botellín Estrella Galicia es un arma común; su lógica no debe depender de un nombre de personaje ni de una fila fija de atlas.
 - Orden del escenario: pared, mesas/sillas, suelo frontal, personajes y proyectiles. Los personajes siempre quedan delante de las mesas.

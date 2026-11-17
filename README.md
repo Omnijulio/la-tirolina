@@ -1,4 +1,4 @@
-# La Trolina Fighters — v0.12.3
+# La Trolina Fighters — v0.12.4
 
 Juego de lucha 2D arcade (estilo finales de los 90) en la terraza de La Trolina. **1 jugador contra la CPU**, en navegador de escritorio y móvil.
 

@@ -1,0 +1,220 @@
+{
+  "result": "PASS",
+  "productionPngCount": 20,
+  "characterVisibleFrames": 70,
+  "characterEmptyFrames": 2,
+  "animatedEffectsFrames": 42,
+  "uiIcons": 2,
+  "noCellBorderPixels": true,
+  "rearSupportContact": [
+    56,
+    160
+  ],
+  "groundPosesBelowBaseline": false,
+  "bottleCapsPerFrame": 3,
+  "gameProjectUnchanged": true,
+  "gameProjectFilesChecked": 134,
+  "visualReview": "Poses, identidad, escala comparada con el atlas, puntos activos, transparencia y vistas revisados.",
+  "files": [
+    {
+      "file": "combat-guard.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "combat-hit.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "combat-grab.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "combat-grabbed.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 4,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "combat-gancho.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "combat-air.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "combat-knockdown.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "combat-jump.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "combat-dizzy.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "combat-dash.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "combat-walk.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "combat-ko-win.png",
+      "size": [
+        1152,
+        176
+      ],
+      "visibleFrames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "fx-parry.png",
+      "size": [
+        768,
+        128
+      ],
+      "frames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "fx-guardbreak.png",
+      "size": [
+        960,
+        160
+      ],
+      "frames": 6,
+      "alpha": "translucent RGBA",
+      "result": "PASS"
+    },
+    {
+      "file": "fx-chapas.png",
+      "size": [
+        768,
+        48
+      ],
+      "frames": 8,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "fx-hit.png",
+      "size": [
+        576,
+        192
+      ],
+      "frames": 12,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "fx-dust.png",
+      "size": [
+        576,
+        48
+      ],
+      "frames": 6,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "fx-sweat.png",
+      "size": [
+        128,
+        32
+      ],
+      "frames": 4,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "ui-agarre.png",
+      "size": [
+        64,
+        64
+      ],
+      "frames": 1,
+      "alpha": "0/255",
+      "result": "PASS"
+    },
+    {
+      "file": "ui-fuelle.png",
+      "size": [
+        32,
+        32
+      ],
+      "frames": 1,
+      "alpha": "0/255",
+      "result": "PASS"
+    }
+  ]
+}

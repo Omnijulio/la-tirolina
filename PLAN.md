@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.12.3** (16/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.12.4** (17/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -110,11 +110,21 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 
 - **Botón DASH**: lo pulsas y el siguiente movimiento del joystick decide. Hacia un lado da paso rápido; hacia arriba, **salto doble** (segundo impulso arriba, más alto y más lejos). Hacia abajo no hace nada. Teclado: E o Mayúsculas.
 
+## Hecho en v0.12.4 — Arte de Combate 2.0
+
+- **Arte integrado:**
+  - **Animaciones:** 12 tiras nuevas de El Barbas, recoloreadas para los 6 luchadores. Cubren guardia y guardia justa, recibir golpe, agarre y lanzamiento, gancho, puño aéreo y picado, caída y levantarse, salto, mareo y sin fuelle, paso rápido, andar, KO y victoria.
+  - **Efectos:** destello de guardia justa, guardia rota, chapas del mareo, impactos, polvo y sudor.
+  - **Iconos:** AGARRE y fuelle.
+- **Atlas** de 6×16 celdas. Herramienta `tools/integrate_combat_assets.py` para repetir la integración con nuevas entregas.
+- **Pendiente de arte:** salto doble (`combat-doublejump.png`, `fx-doublejump.png`) e icono de DASH (`ui-dash.png`).
+
 ## Próximas fases propuestas
 
 ### Fase 1b — Ajustar el combate jugando
 - [ ] Jugar v0.12 en móviles reales y ajustar números en `rules.js` (`MOVES`, `FUELLE`, `PARRY`…): duración de los asaltos, cuánto se usa el agarre, si la guardia justa es demasiado fácil o difícil.
-- [ ] Integrar el arte de `ASSETS_COMBATE.md` cuando llegue (filas nuevas del atlas + `build_characters.py`).
+- [x] Integrar el arte de `ASSETS_COMBATE.md` (v0.12.4).
+- [ ] Encargar e integrar el salto doble y el icono de DASH.
 
 ### Fase 1 — Publicar y probar con amigos
 - [ ] Publicar en GitHub Pages (ver `PUBLICAR.md`) y probar en móviles reales.

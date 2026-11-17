@@ -22,7 +22,7 @@ test('la simulación no usa trigonometría de Math (cambia entre iPhone y Androi
   const sim = src.slice(src.indexOf('updateGrab(dt)'), src.indexOf('/* ---------- dibujo ---------- */'));
   assert.ok(!/Math\.(sin|cos|atan2|hypot|pow|exp|log)\(/.test(sim), 'match.js: trigonometría de Math en la parte que simula');
   const c = fs.readFileSync(path.join(__dirname, '../game/combat/combatant.js'), 'utf8');
-  const csim = c.slice(c.indexOf('update(dt, ctl, opp, match)'), c.indexOf('/** Fotograma y transformaciones de la pose actual. */'));
+  const csim = c.slice(c.indexOf('update(dt, ctl, opp, match)'), c.indexOf('    pose() {'));
   assert.ok(!/Math\.(sin|cos|atan2|hypot|pow|exp|log)\(/.test(csim), 'combatant.js: trigonometría de Math en la parte que simula');
 });
 
