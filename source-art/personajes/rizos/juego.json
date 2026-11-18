@@ -1,0 +1,7 @@
+{
+  "_nota": "Ajustes a mano para el juego (tools/integrate_character.py los copia a assets/characters/art-data.js). Coordenadas de celda 192x176.",
+  "mouth": {
+    "x": 95,
+    "y": 41
+  }
+}

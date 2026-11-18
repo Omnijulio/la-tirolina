@@ -138,7 +138,8 @@ test('el pedido de la CPU respeta el máximo de botellines', () => {
 });
 
 test('el modo historia desbloquea a cada rival en orden', () => {
-  assert.equal(STORY.length, CHARACTERS.length - 1);
+  // Todos salen en la historia salvo los que están desde el principio (El Barbas, Rizos).
+  assert.equal(STORY.length, CHARACTERS.filter((c) => !c.unlock.start).length);
   STORY.forEach((id, i) => {
     const c = CHARACTERS.find((x) => x.id === id);
     assert.equal(c.unlock.story, i);

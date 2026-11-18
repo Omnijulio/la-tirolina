@@ -1,0 +1,4970 @@
+{
+  "id": "rizos",
+  "name": "Rizos",
+  "nameIsProvisional": true,
+  "image": "fighter.png",
+  "frameWidth": 192,
+  "frameHeight": 176,
+  "columns": 6,
+  "rows": 16,
+  "anchor": {
+    "x": 56,
+    "y": 160
+  },
+  "facing": "right",
+  "integrationStatus": "NOT_INTEGRATED",
+  "physicalScaleReference": "El Barbas / assets/fighter.png; standing crown-to-sole about141px",
+  "units": "Native cell pixels; rect origin top-left; timings milliseconds.",
+  "strips": {
+    "idle": {
+      "file": "tiras/idle.png",
+      "guide": "guias/idle.png",
+      "row": 0,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            19,
+            129,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            15,
+            16
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            18,
+            129,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            15,
+            16
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            17,
+            129,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            15,
+            16
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            19,
+            129,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            15,
+            16
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            20,
+            129,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            15,
+            16
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            20,
+            129,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            15,
+            16
+          ]
+        }
+      ]
+    },
+    "punch": {
+      "file": "tiras/punch.png",
+      "guide": "guias/punch.png",
+      "row": 1,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            20,
+            130,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            16,
+            17
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            47,
+            20,
+            129,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            15,
+            17
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            22,
+            129,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            15,
+            17
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            22,
+            157,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            16,
+            17
+          ],
+          "activePoint": {
+            "kind": "puno",
+            "x": 149,
+            "y": 57
+          }
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            22,
+            129,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            15,
+            17
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            21,
+            130,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            16,
+            17
+          ]
+        }
+      ]
+    },
+    "kick": {
+      "file": "tiras/kick.png",
+      "guide": "guias/kick.png",
+      "row": 2,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            20,
+            128,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            20,
+            16
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            44,
+            21,
+            116,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            11,
+            16
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            31,
+            20,
+            108,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            6,
+            16
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            27,
+            20,
+            154,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            6,
+            15
+          ],
+          "activePoint": {
+            "kind": "pie",
+            "x": 146,
+            "y": 67
+          }
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            32,
+            20,
+            109,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            4,
+            15
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            20,
+            129,
+            161
+          ],
+          "sourceScale": 0.3,
+          "exportOffset": [
+            34,
+            15
+          ]
+        }
+      ]
+    },
+    "throwBottle": {
+      "file": "tiras/throwBottle.png",
+      "guide": "guias/throwBottle.png",
+      "row": 3,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            20,
+            130,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            17,
+            16
+          ],
+          "itemSocket": {
+            "x": 83,
+            "y": 63,
+            "rotation": -0.15
+          }
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            31,
+            20,
+            130,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            16,
+            16
+          ],
+          "itemSocket": {
+            "x": 41,
+            "y": 54,
+            "rotation": -0.8
+          }
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            35,
+            19,
+            134,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            14,
+            16
+          ],
+          "itemSocket": {
+            "x": 51,
+            "y": 32,
+            "rotation": -1.1
+          }
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            49,
+            20,
+            160,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            22,
+            16
+          ],
+          "itemSocket": {
+            "x": 149,
+            "y": 48,
+            "rotation": 0.2
+          }
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            22,
+            150,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            23,
+            16
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            49,
+            20,
+            130,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            16,
+            16
+          ]
+        }
+      ]
+    },
+    "guard": {
+      "file": "tiras/guard.png",
+      "guide": "guias/guard.png",
+      "row": 4,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            20,
+            129,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            16,
+            17
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            20,
+            128,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            15,
+            17
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            20,
+            127,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            14,
+            17
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            21,
+            128,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            15,
+            17
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            23,
+            129,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            16,
+            17
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            47,
+            21,
+            139,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            15,
+            17
+          ],
+          "activePoint": {
+            "kind": "parry",
+            "x": 131,
+            "y": 54
+          }
+        }
+      ]
+    },
+    "hit": {
+      "file": "tiras/hit.png",
+      "guide": "guias/hit.png",
+      "row": 5,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            20,
+            125,
+            161
+          ],
+          "sourceScale": 0.297,
+          "exportOffset": [
+            14,
+            16
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            47,
+            22,
+            121,
+            161
+          ],
+          "sourceScale": 0.297,
+          "exportOffset": [
+            15,
+            16
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            46,
+            32,
+            129,
+            161
+          ],
+          "sourceScale": 0.297,
+          "exportOffset": [
+            17,
+            16
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            46,
+            39,
+            126,
+            161
+          ],
+          "sourceScale": 0.297,
+          "exportOffset": [
+            11,
+            16
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            30,
+            19,
+            128,
+            140
+          ],
+          "sourceScale": 0.297,
+          "exportOffset": [
+            15,
+            15
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            16,
+            24,
+            160,
+            133
+          ],
+          "sourceScale": 0.297,
+          "exportOffset": [
+            15,
+            15
+          ]
+        }
+      ]
+    },
+    "grab": {
+      "file": "tiras/grab.png",
+      "guide": "guias/grab.png",
+      "row": 6,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            20,
+            144,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            19,
+            18
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            25,
+            166,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            32,
+            18
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            27,
+            167,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            33,
+            18
+          ],
+          "activePoint": {
+            "kind": "agarre",
+            "x": 159,
+            "y": 63
+          }
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            25,
+            143,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            23,
+            18
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            23,
+            167,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            32,
+            18
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            25,
+            171,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            31,
+            18
+          ]
+        }
+      ]
+    },
+    "grabbed": {
+      "file": "tiras/grabbed.png",
+      "guide": "guias/grabbed.png",
+      "row": 7,
+      "frameCount": 4,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            38,
+            19,
+            104,
+            161
+          ],
+          "sourceScale": 0.294,
+          "exportOffset": [
+            -5,
+            14
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            36,
+            15,
+            104,
+            145
+          ],
+          "sourceScale": 0.294,
+          "exportOffset": [
+            -2,
+            14
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            18,
+            34,
+            158,
+            141
+          ],
+          "sourceScale": 0.294,
+          "exportOffset": [
+            12,
+            14
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            14,
+            80,
+            162,
+            153
+          ],
+          "sourceScale": 0.294,
+          "exportOffset": [
+            12,
+            28
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": true,
+          "airborne": false,
+          "lying": false,
+          "bbox": null,
+          "sourceScale": 0.294,
+          "exportOffset": [
+            0,
+            0
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": true,
+          "airborne": false,
+          "lying": false,
+          "bbox": null,
+          "sourceScale": 0.294,
+          "exportOffset": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "gancho": {
+      "file": "tiras/gancho.png",
+      "guide": "guias/gancho.png",
+      "row": 8,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            43,
+            51,
+            127,
+            161
+          ],
+          "sourceScale": 0.4,
+          "exportOffset": [
+            -12,
+            -15
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            32,
+            129,
+            161
+          ],
+          "sourceScale": 0.4,
+          "exportOffset": [
+            -10,
+            -15
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            56,
+            8,
+            135,
+            158
+          ],
+          "sourceScale": 0.4,
+          "exportOffset": [
+            -6,
+            -17
+          ],
+          "activePoint": {
+            "kind": "puno",
+            "x": 129,
+            "y": 16
+          }
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            60,
+            5,
+            130,
+            155
+          ],
+          "sourceScale": 0.4,
+          "exportOffset": [
+            -6,
+            -17
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            56,
+            24,
+            134,
+            160
+          ],
+          "sourceScale": 0.4,
+          "exportOffset": [
+            -6,
+            -17
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            49,
+            29,
+            128,
+            161
+          ],
+          "sourceScale": 0.4,
+          "exportOffset": [
+            -10,
+            -17
+          ]
+        }
+      ]
+    },
+    "air": {
+      "file": "tiras/air.png",
+      "guide": "guias/air.png",
+      "row": 9,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            51,
+            10,
+            128,
+            139
+          ],
+          "sourceScale": 0.303,
+          "exportOffset": [
+            18,
+            8
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            43,
+            12,
+            157,
+            133
+          ],
+          "sourceScale": 0.303,
+          "exportOffset": [
+            18,
+            8
+          ],
+          "activePoint": {
+            "kind": "puno",
+            "x": 151,
+            "y": 43
+          }
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            53,
+            14,
+            125,
+            115
+          ],
+          "sourceScale": 0.303,
+          "exportOffset": [
+            18,
+            8
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            37,
+            15,
+            168,
+            135
+          ],
+          "sourceScale": 0.303,
+          "exportOffset": [
+            18,
+            8
+          ],
+          "activePoint": {
+            "kind": "pie",
+            "x": 162,
+            "y": 129
+          }
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            29,
+            59,
+            119,
+            161
+          ],
+          "sourceScale": 0.303,
+          "exportOffset": [
+            -2,
+            21
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            20,
+            129,
+            161
+          ],
+          "sourceScale": 0.303,
+          "exportOffset": [
+            15,
+            19
+          ]
+        }
+      ]
+    },
+    "knockdown": {
+      "file": "tiras/knockdown.png",
+      "guide": "guias/knockdown.png",
+      "row": 10,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            29,
+            39,
+            164,
+            158
+          ],
+          "sourceScale": 0.388,
+          "exportOffset": [
+            -2,
+            -4
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": true,
+          "bbox": [
+            16,
+            101,
+            162,
+            161
+          ],
+          "sourceScale": 0.388,
+          "exportOffset": [
+            -2,
+            3
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": true,
+          "bbox": [
+            8,
+            126,
+            168,
+            161
+          ],
+          "sourceScale": 0.388,
+          "exportOffset": [
+            -2,
+            6
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": true,
+          "bbox": [
+            36,
+            88,
+            171,
+            161
+          ],
+          "sourceScale": 0.388,
+          "exportOffset": [
+            -2,
+            6
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            67,
+            152,
+            161
+          ],
+          "sourceScale": 0.388,
+          "exportOffset": [
+            8,
+            4
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            49,
+            19,
+            136,
+            161
+          ],
+          "sourceScale": 0.388,
+          "exportOffset": [
+            -3,
+            2
+          ]
+        }
+      ]
+    },
+    "jump": {
+      "file": "tiras/jump.png",
+      "guide": "guias/jump.png",
+      "row": 11,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            43,
+            47,
+            115,
+            161
+          ],
+          "sourceScale": 0.302,
+          "exportOffset": [
+            6,
+            14
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            41,
+            18,
+            113,
+            150
+          ],
+          "sourceScale": 0.302,
+          "exportOffset": [
+            7,
+            13
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            40,
+            16,
+            113,
+            118
+          ],
+          "sourceScale": 0.302,
+          "exportOffset": [
+            7,
+            13
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            45,
+            18,
+            120,
+            147
+          ],
+          "sourceScale": 0.302,
+          "exportOffset": [
+            7,
+            13
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            40,
+            49,
+            115,
+            161
+          ],
+          "sourceScale": 0.302,
+          "exportOffset": [
+            6,
+            14
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            20,
+            129,
+            161
+          ],
+          "sourceScale": 0.302,
+          "exportOffset": [
+            14,
+            14
+          ]
+        }
+      ]
+    },
+    "dizzy": {
+      "file": "tiras/dizzy.png",
+      "guide": "guias/dizzy.png",
+      "row": 12,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            19,
+            124,
+            161
+          ],
+          "sourceScale": 0.294,
+          "exportOffset": [
+            15,
+            15
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            54,
+            21,
+            126,
+            161
+          ],
+          "sourceScale": 0.294,
+          "exportOffset": [
+            17,
+            16
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            48,
+            17,
+            122,
+            161
+          ],
+          "sourceScale": 0.294,
+          "exportOffset": [
+            14,
+            15
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            17,
+            123,
+            161
+          ],
+          "sourceScale": 0.294,
+          "exportOffset": [
+            14,
+            14
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            36,
+            132,
+            161
+          ],
+          "sourceScale": 0.294,
+          "exportOffset": [
+            23,
+            14
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            38,
+            131,
+            161
+          ],
+          "sourceScale": 0.294,
+          "exportOffset": [
+            23,
+            14
+          ]
+        }
+      ]
+    },
+    "dash": {
+      "file": "tiras/dash.png",
+      "guide": "guias/dash.png",
+      "row": 13,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            20,
+            139,
+            161
+          ],
+          "sourceScale": 0.358,
+          "exportOffset": [
+            8,
+            5
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            35,
+            178,
+            161
+          ],
+          "sourceScale": 0.358,
+          "exportOffset": [
+            30,
+            6
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            48,
+            20,
+            143,
+            161
+          ],
+          "sourceScale": 0.358,
+          "exportOffset": [
+            2,
+            5
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            35,
+            24,
+            135,
+            161
+          ],
+          "sourceScale": 0.358,
+          "exportOffset": [
+            -9,
+            3
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            56,
+            16,
+            133,
+            145
+          ],
+          "sourceScale": 0.358,
+          "exportOffset": [
+            11,
+            2
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            41,
+            26,
+            138,
+            161
+          ],
+          "sourceScale": 0.358,
+          "exportOffset": [
+            -6,
+            3
+          ]
+        }
+      ]
+    },
+    "walk": {
+      "file": "tiras/walk.png",
+      "guide": "guias/walk.png",
+      "row": 14,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            54,
+            21,
+            133,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            19,
+            18
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            46,
+            21,
+            129,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            19,
+            18
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            47,
+            19,
+            125,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            19,
+            18
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            19,
+            147,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            19,
+            18
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            49,
+            20,
+            137,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            19,
+            18
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            55,
+            19,
+            130,
+            161
+          ],
+          "sourceScale": 0.299,
+          "exportOffset": [
+            19,
+            18
+          ]
+        }
+      ]
+    },
+    "ko-win": {
+      "file": "tiras/ko-win.png",
+      "guide": "guias/ko-win.png",
+      "row": 15,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            24,
+            23,
+            151,
+            143
+          ],
+          "sourceScale": 0.3045,
+          "exportOffset": [
+            10,
+            10
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": true,
+          "bbox": [
+            14,
+            97,
+            161,
+            161
+          ],
+          "sourceScale": 0.3045,
+          "exportOffset": [
+            10,
+            29
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": true,
+          "bbox": [
+            12,
+            125,
+            163,
+            161
+          ],
+          "sourceScale": 0.3045,
+          "exportOffset": [
+            10,
+            29
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            20,
+            127,
+            161
+          ],
+          "sourceScale": 0.3045,
+          "exportOffset": [
+            10,
+            11
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            49,
+            13,
+            125,
+            161
+          ],
+          "sourceScale": 0.3045,
+          "exportOffset": [
+            9,
+            11
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            44,
+            12,
+            124,
+            161
+          ],
+          "sourceScale": 0.3045,
+          "exportOffset": [
+            8,
+            10
+          ]
+        }
+      ]
+    }
+  },
+  "animations": {
+    "idle": {
+      "strip": "idle",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": true,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 50,
+            "y": 19,
+            "w": 79,
+            "h": 142
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 50,
+            "y": 18,
+            "w": 79,
+            "h": 143
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 50,
+            "y": 17,
+            "w": 79,
+            "h": 144
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 51,
+            "y": 19,
+            "w": 78,
+            "h": 142
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 768,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 50,
+            "y": 20,
+            "w": 79,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 150,
+          "hurtbox": {
+            "x": 51,
+            "y": 20,
+            "w": 78,
+            "h": 141
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "punch": {
+      "strip": "punch",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 60,
+          "hurtbox": {
+            "x": 51,
+            "y": 20,
+            "w": 79,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 47,
+            "y": 20,
+            "w": 82,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 45,
+          "hurtbox": {
+            "x": 50,
+            "y": 22,
+            "w": 79,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 51,
+            "y": 22,
+            "w": 106,
+            "h": 139
+          },
+          "hitboxes": [
+            {
+              "x": 140,
+              "y": 48,
+              "w": 18,
+              "h": 18
+            }
+          ],
+          "activePoint": {
+            "kind": "puno",
+            "x": 149,
+            "y": 57
+          }
+        },
+        {
+          "x": 768,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 50,
+            "y": 22,
+            "w": 79,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 51,
+            "y": 21,
+            "w": 79,
+            "h": 140
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "kick": {
+      "strip": "kick",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 70,
+          "hurtbox": {
+            "x": 51,
+            "y": 20,
+            "w": 77,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 44,
+            "y": 21,
+            "w": 72,
+            "h": 140
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 65,
+          "hurtbox": {
+            "x": 31,
+            "y": 20,
+            "w": 77,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 140,
+          "hurtbox": {
+            "x": 27,
+            "y": 20,
+            "w": 127,
+            "h": 141
+          },
+          "hitboxes": [
+            {
+              "x": 135,
+              "y": 56,
+              "w": 22,
+              "h": 22
+            }
+          ],
+          "activePoint": {
+            "kind": "pie",
+            "x": 146,
+            "y": 67
+          }
+        },
+        {
+          "x": 768,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 32,
+            "y": 20,
+            "w": 77,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "duration": 110,
+          "hurtbox": {
+            "x": 51,
+            "y": 20,
+            "w": 78,
+            "h": 141
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "throwBottle": {
+      "strip": "throwBottle",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 50,
+            "y": 20,
+            "w": 80,
+            "h": 141
+          },
+          "hitboxes": [],
+          "itemSocket": {
+            "x": 83,
+            "y": 63,
+            "rotation": -0.15
+          }
+        },
+        {
+          "x": 192,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 110,
+          "hurtbox": {
+            "x": 31,
+            "y": 20,
+            "w": 99,
+            "h": 141
+          },
+          "hitboxes": [],
+          "itemSocket": {
+            "x": 41,
+            "y": 54,
+            "rotation": -0.8
+          }
+        },
+        {
+          "x": 384,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 35,
+            "y": 19,
+            "w": 99,
+            "h": 142
+          },
+          "hitboxes": [],
+          "itemSocket": {
+            "x": 51,
+            "y": 32,
+            "rotation": -1.1
+          }
+        },
+        {
+          "x": 576,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 49,
+            "y": 20,
+            "w": 111,
+            "h": 141
+          },
+          "hitboxes": [],
+          "itemSocket": {
+            "x": 149,
+            "y": 48,
+            "rotation": 0.2
+          },
+          "events": [
+            {
+              "type": "spawn-projectile",
+              "weapon": "bottle",
+              "socket": {
+                "x": 149,
+                "y": 48,
+                "rotation": 0.2
+              }
+            }
+          ]
+        },
+        {
+          "x": 768,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 120,
+          "hurtbox": {
+            "x": 50,
+            "y": 22,
+            "w": 100,
+            "h": 139
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "duration": 130,
+          "hurtbox": {
+            "x": 49,
+            "y": 20,
+            "w": 81,
+            "h": 141
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "guardEnter": {
+      "strip": "guard",
+      "sourceFrames": [
+        0,
+        1
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "duration": 70,
+          "hurtbox": {
+            "x": 52,
+            "y": 20,
+            "w": 77,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "duration": 70,
+          "hurtbox": {
+            "x": 51,
+            "y": 20,
+            "w": 77,
+            "h": 141
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "guard": {
+      "strip": "guard",
+      "sourceFrames": [
+        2,
+        3
+      ],
+      "loop": true,
+      "next": "guard",
+      "frames": [
+        {
+          "x": 384,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "duration": 130,
+          "hurtbox": {
+            "x": 50,
+            "y": 20,
+            "w": 77,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "duration": 130,
+          "hurtbox": {
+            "x": 51,
+            "y": 21,
+            "w": 77,
+            "h": 140
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "guardHit": {
+      "strip": "guard",
+      "sourceFrames": [
+        4
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 768,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "duration": 110,
+          "hurtbox": {
+            "x": 50,
+            "y": 23,
+            "w": 79,
+            "h": 138
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "parry": {
+      "strip": "guard",
+      "sourceFrames": [
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 960,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 47,
+            "y": 21,
+            "w": 92,
+            "h": 140
+          },
+          "hitboxes": [],
+          "activePoint": {
+            "kind": "parry",
+            "x": 131,
+            "y": 54
+          }
+        }
+      ]
+    },
+    "hit": {
+      "strip": "hit",
+      "sourceFrames": [
+        0,
+        1
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "duration": 90,
+          "hurtbox": {
+            "x": 50,
+            "y": 20,
+            "w": 75,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "duration": 90,
+          "hurtbox": {
+            "x": 47,
+            "y": 22,
+            "w": 74,
+            "h": 139
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "hitHeavy": {
+      "strip": "hit",
+      "sourceFrames": [
+        2,
+        3
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 384,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "duration": 90,
+          "hurtbox": {
+            "x": 46,
+            "y": 32,
+            "w": 83,
+            "h": 129
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "duration": 90,
+          "hurtbox": {
+            "x": 46,
+            "y": 39,
+            "w": 80,
+            "h": 122
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "hitAir": {
+      "strip": "hit",
+      "sourceFrames": [
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 768,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "duration": 90,
+          "hurtbox": {
+            "x": 30,
+            "y": 19,
+            "w": 98,
+            "h": 121
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "duration": 90,
+          "hurtbox": {
+            "x": 16,
+            "y": 24,
+            "w": 144,
+            "h": 109
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "grab": {
+      "strip": "grab",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "duration": 70,
+          "hurtbox": {
+            "x": 52,
+            "y": 20,
+            "w": 92,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "duration": 70,
+          "hurtbox": {
+            "x": 51,
+            "y": 25,
+            "w": 115,
+            "h": 136
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 52,
+            "y": 27,
+            "w": 115,
+            "h": 134
+          },
+          "hitboxes": [],
+          "activePoint": {
+            "kind": "agarre",
+            "x": 159,
+            "y": 63
+          },
+          "events": [
+            {
+              "type": "grab-active",
+              "point": {
+                "kind": "agarre",
+                "x": 159,
+                "y": 63
+              }
+            }
+          ]
+        },
+        {
+          "x": 576,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "duration": 120,
+          "hurtbox": {
+            "x": 51,
+            "y": 25,
+            "w": 92,
+            "h": 136
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 768,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "duration": 90,
+          "hurtbox": {
+            "x": 51,
+            "y": 23,
+            "w": 116,
+            "h": 138
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 50,
+            "y": 25,
+            "w": 121,
+            "h": 136
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "grabHold": {
+      "strip": "grab",
+      "sourceFrames": [
+        3
+      ],
+      "loop": true,
+      "next": "grabHold",
+      "frames": [
+        {
+          "x": 576,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "duration": 120,
+          "hurtbox": {
+            "x": 51,
+            "y": 25,
+            "w": 92,
+            "h": 136
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "grabbed": {
+      "strip": "grabbed",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "loop": false,
+      "next": "down",
+      "frames": [
+        {
+          "x": 0,
+          "y": 1232,
+          "w": 192,
+          "h": 176,
+          "duration": 90,
+          "hurtbox": {
+            "x": 38,
+            "y": 19,
+            "w": 66,
+            "h": 142
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 1232,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 36,
+            "y": 15,
+            "w": 68,
+            "h": 130
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 1232,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 18,
+            "y": 34,
+            "w": 140,
+            "h": 107
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 1232,
+          "w": 192,
+          "h": 176,
+          "duration": 130,
+          "hurtbox": {
+            "x": 14,
+            "y": 80,
+            "w": 148,
+            "h": 73
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "gancho": {
+      "strip": "gancho",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "duration": 70,
+          "hurtbox": {
+            "x": 43,
+            "y": 51,
+            "w": 84,
+            "h": 110
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "duration": 70,
+          "hurtbox": {
+            "x": 50,
+            "y": 32,
+            "w": 79,
+            "h": 129
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "duration": 90,
+          "hurtbox": {
+            "x": 56,
+            "y": 8,
+            "w": 79,
+            "h": 150
+          },
+          "hitboxes": [
+            {
+              "x": 120,
+              "y": 7,
+              "w": 18,
+              "h": 18
+            }
+          ],
+          "activePoint": {
+            "kind": "puno",
+            "x": 129,
+            "y": 16
+          }
+        },
+        {
+          "x": 576,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "duration": 90,
+          "hurtbox": {
+            "x": 60,
+            "y": 5,
+            "w": 70,
+            "h": 150
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 768,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 56,
+            "y": 24,
+            "w": 78,
+            "h": 136
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "duration": 110,
+          "hurtbox": {
+            "x": 49,
+            "y": 29,
+            "w": 79,
+            "h": 132
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "airPunch": {
+      "strip": "air",
+      "sourceFrames": [
+        0,
+        1
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "duration": 90,
+          "hurtbox": {
+            "x": 51,
+            "y": 10,
+            "w": 77,
+            "h": 129
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "duration": 110,
+          "hurtbox": {
+            "x": 43,
+            "y": 12,
+            "w": 114,
+            "h": 121
+          },
+          "hitboxes": [
+            {
+              "x": 142,
+              "y": 34,
+              "w": 18,
+              "h": 18
+            }
+          ],
+          "activePoint": {
+            "kind": "puno",
+            "x": 151,
+            "y": 43
+          }
+        }
+      ]
+    },
+    "dive": {
+      "strip": "air",
+      "sourceFrames": [
+        2,
+        3
+      ],
+      "loop": false,
+      "next": null,
+      "frames": [
+        {
+          "x": 384,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 53,
+            "y": 14,
+            "w": 72,
+            "h": 101
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "duration": 120,
+          "hurtbox": {
+            "x": 37,
+            "y": 15,
+            "w": 131,
+            "h": 120
+          },
+          "hitboxes": [
+            {
+              "x": 151,
+              "y": 118,
+              "w": 22,
+              "h": 22
+            }
+          ],
+          "activePoint": {
+            "kind": "pie",
+            "x": 162,
+            "y": 129
+          }
+        }
+      ],
+      "holdLastFrame": true
+    },
+    "land": {
+      "strip": "air",
+      "sourceFrames": [
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 768,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 29,
+            "y": 59,
+            "w": 90,
+            "h": 102
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 50,
+            "y": 20,
+            "w": 79,
+            "h": 141
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "down": {
+      "strip": "knockdown",
+      "sourceFrames": [
+        0,
+        1,
+        2
+      ],
+      "loop": false,
+      "next": null,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 29,
+            "y": 39,
+            "w": 135,
+            "h": 119
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 16,
+            "y": 101,
+            "w": 146,
+            "h": 60
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "duration": 250,
+          "hurtbox": {
+            "x": 8,
+            "y": 126,
+            "w": 160,
+            "h": 35
+          },
+          "hitboxes": []
+        }
+      ],
+      "holdLastFrame": true
+    },
+    "getup": {
+      "strip": "knockdown",
+      "sourceFrames": [
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 576,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "duration": 120,
+          "hurtbox": {
+            "x": 36,
+            "y": 88,
+            "w": 135,
+            "h": 73
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 768,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "duration": 140,
+          "hurtbox": {
+            "x": 51,
+            "y": 67,
+            "w": 101,
+            "h": 94
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "duration": 140,
+          "hurtbox": {
+            "x": 49,
+            "y": 19,
+            "w": 87,
+            "h": 142
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "jump": {
+      "strip": "jump",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "duration": 70,
+          "hurtbox": {
+            "x": 43,
+            "y": 47,
+            "w": 72,
+            "h": 114
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 41,
+            "y": 18,
+            "w": 72,
+            "h": 132
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "duration": 130,
+          "hurtbox": {
+            "x": 40,
+            "y": 16,
+            "w": 73,
+            "h": 102
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 45,
+            "y": 18,
+            "w": 75,
+            "h": 129
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 768,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "duration": 80,
+          "hurtbox": {
+            "x": 40,
+            "y": 49,
+            "w": 75,
+            "h": 112
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 52,
+            "y": 20,
+            "w": 77,
+            "h": 141
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "crouch": {
+      "strip": "jump",
+      "sourceFrames": [
+        0
+      ],
+      "loop": true,
+      "next": null,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "duration": 70,
+          "hurtbox": {
+            "x": 43,
+            "y": 47,
+            "w": 72,
+            "h": 114
+          },
+          "hitboxes": []
+        }
+      ],
+      "holdLastFrame": true
+    },
+    "dizzy": {
+      "strip": "dizzy",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "loop": true,
+      "next": "dizzy",
+      "frames": [
+        {
+          "x": 0,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "duration": 180,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 72,
+            "h": 142
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "duration": 180,
+          "hurtbox": {
+            "x": 54,
+            "y": 21,
+            "w": 72,
+            "h": 140
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "duration": 180,
+          "hurtbox": {
+            "x": 48,
+            "y": 17,
+            "w": 74,
+            "h": 144
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "duration": 180,
+          "hurtbox": {
+            "x": 52,
+            "y": 17,
+            "w": 71,
+            "h": 144
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "tired": {
+      "strip": "dizzy",
+      "sourceFrames": [
+        4,
+        5
+      ],
+      "loop": true,
+      "next": "tired",
+      "frames": [
+        {
+          "x": 768,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "duration": 180,
+          "hurtbox": {
+            "x": 52,
+            "y": 36,
+            "w": 80,
+            "h": 125
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "duration": 180,
+          "hurtbox": {
+            "x": 50,
+            "y": 38,
+            "w": 81,
+            "h": 123
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "dash": {
+      "strip": "dash",
+      "sourceFrames": [
+        0,
+        1,
+        2
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 0,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "duration": 60,
+          "hurtbox": {
+            "x": 50,
+            "y": 20,
+            "w": 89,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "duration": 65,
+          "hurtbox": {
+            "x": 53,
+            "y": 35,
+            "w": 125,
+            "h": 126
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "duration": 65,
+          "hurtbox": {
+            "x": 48,
+            "y": 20,
+            "w": 95,
+            "h": 141
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "backdash": {
+      "strip": "dash",
+      "sourceFrames": [
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "frames": [
+        {
+          "x": 576,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "duration": 60,
+          "hurtbox": {
+            "x": 35,
+            "y": 24,
+            "w": 100,
+            "h": 137
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 768,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "duration": 65,
+          "hurtbox": {
+            "x": 56,
+            "y": 16,
+            "w": 77,
+            "h": 129
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "duration": 65,
+          "hurtbox": {
+            "x": 41,
+            "y": 26,
+            "w": 97,
+            "h": 135
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "walk": {
+      "strip": "walk",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": true,
+      "next": "walk",
+      "frames": [
+        {
+          "x": 0,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 54,
+            "y": 21,
+            "w": 79,
+            "h": 140
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 46,
+            "y": 21,
+            "w": 83,
+            "h": 140
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 47,
+            "y": 19,
+            "w": 78,
+            "h": 142
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 50,
+            "y": 19,
+            "w": 97,
+            "h": 142
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 768,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 49,
+            "y": 20,
+            "w": 88,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 55,
+            "y": 19,
+            "w": 75,
+            "h": 142
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "walkBack": {
+      "strip": "walk",
+      "sourceFrames": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "loop": true,
+      "next": "walkBack",
+      "frames": [
+        {
+          "x": 960,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 55,
+            "y": 19,
+            "w": 75,
+            "h": 142
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 768,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 49,
+            "y": 20,
+            "w": 88,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 576,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 50,
+            "y": 19,
+            "w": 97,
+            "h": 142
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 47,
+            "y": 19,
+            "w": 78,
+            "h": 142
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 46,
+            "y": 21,
+            "w": 83,
+            "h": 140
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 0,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "duration": 100,
+          "hurtbox": {
+            "x": 54,
+            "y": 21,
+            "w": 79,
+            "h": 140
+          },
+          "hitboxes": []
+        }
+      ]
+    },
+    "ko": {
+      "strip": "ko-win",
+      "sourceFrames": [
+        0,
+        1,
+        2
+      ],
+      "loop": false,
+      "next": null,
+      "frames": [
+        {
+          "x": 0,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "duration": 120,
+          "hurtbox": {
+            "x": 24,
+            "y": 23,
+            "w": 127,
+            "h": 120
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 192,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "duration": 120,
+          "hurtbox": {
+            "x": 14,
+            "y": 97,
+            "w": 147,
+            "h": 64
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 384,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "duration": 500,
+          "hurtbox": {
+            "x": 12,
+            "y": 125,
+            "w": 151,
+            "h": 36
+          },
+          "hitboxes": []
+        }
+      ],
+      "holdLastFrame": true
+    },
+    "win": {
+      "strip": "ko-win",
+      "sourceFrames": [
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": null,
+      "frames": [
+        {
+          "x": 576,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "duration": 120,
+          "hurtbox": {
+            "x": 51,
+            "y": 20,
+            "w": 76,
+            "h": 141
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 768,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "duration": 140,
+          "hurtbox": {
+            "x": 49,
+            "y": 13,
+            "w": 76,
+            "h": 148
+          },
+          "hitboxes": []
+        },
+        {
+          "x": 960,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "duration": 500,
+          "hurtbox": {
+            "x": 44,
+            "y": 12,
+            "w": 80,
+            "h": 149
+          },
+          "hitboxes": []
+        }
+      ],
+      "holdLastFrame": true
+    }
+  },
+  "portraits": {
+    "select": "portraits/select-128.png",
+    "hud": "portraits/hud-64.png"
+  },
+  "collisionStatus": "Suggested visual hit/hurt boxes and timings. Final gameplay balance belongs to the engine integration.",
+  "palette": [
+    "#eed2b1",
+    "#eac7a1",
+    "#e7c29c",
+    "#f1bb91",
+    "#ddba95",
+    "#ebb288",
+    "#eca77c",
+    "#baa694",
+    "#999fae",
+    "#cb8e69",
+    "#9d9089",
+    "#8f95a5",
+    "#8d92a3",
+    "#8b909f",
+    "#878e9f",
+    "#838a9a",
+    "#7b8292",
+    "#a1684a",
+    "#8a5036",
+    "#6d7281",
+    "#775646",
+    "#80462d",
+    "#79432c",
+    "#70412d",
+    "#6d3c28",
+    "#606677",
+    "#595e6f",
+    "#555867",
+    "#4f5465",
+    "#4c4e5c",
+    "#554039",
+    "#414655",
+    "#3c3d49",
+    "#613525",
+    "#553124",
+    "#4b3026",
+    "#383237",
+    "#4b291e",
+    "#44271f",
+    "#3b2720",
+    "#3b221a",
+    "#371d15",
+    "#2c2a31",
+    "#272022",
+    "#2c1a15",
+    "#1f1a1d",
+    "#241410",
+    "#191314",
+    "#190c09",
+    "#100e10",
+    "#0f0a0a",
+    "#0d0808",
+    "#0d0706",
+    "#070607",
+    "#0a0504",
+    "#060404",
+    "#040405",
+    "#080202",
+    "#040202",
+    "#030203",
+    "#020101",
+    "#010102",
+    "#010201",
+    "#000000"
+  ],
+  "sharedResources": {
+    "effects": "shared/effects.json",
+    "bottle": "shared/bottle.json"
+  }
+}

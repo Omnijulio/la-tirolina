@@ -525,7 +525,7 @@
   function dhypot(x, y) { return Math.sqrt(x * x + y * y); }
 
   /** Versión del juego: se muestra en el multijugador y se compara con la del rival. */
-  const GAME_VERSION = '0.12.4';
+  const GAME_VERSION = '0.13.0';
 
   const Rules = {
     GAME_VERSION, dsin, dcos, datan2, dhypot,

@@ -47,7 +47,7 @@
       for (const c of [root.Combatant, root.Match, root.BottleSystem, root.BottleAttack, root.Fighter, root.Fountain]) parts.push(c ? c.toString() : '-');
       const M = root.TrolinaMoves;
       parts.push(M ? JSON.stringify(M.ANIMS) + M.install.toString() : '-');
-      parts.push(JSON.stringify(root.FIGHTER_DATA || null), JSON.stringify(root.BOTTLE_DATA || null), JSON.stringify(root.TROLINA_CHARACTERS || null));
+      parts.push(JSON.stringify(root.FIGHTER_DATA || null), JSON.stringify(root.BOTTLE_DATA || null), JSON.stringify(root.TROLINA_CHARACTERS || null), JSON.stringify(root.TROLINA_CHARACTER_ART || null));
       return fnv(parts.join('\n'));
     } catch (e) { return 'error'; }
   }

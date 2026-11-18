@@ -3,11 +3,17 @@
   const KEY = 'trolina.save.v1';
   const RANK_KEY = 'trolina.ranking.v1';   // aparte: «Borrar progreso» no borra el ranking
 
+  /** Personajes disponibles desde el principio (unlock.start en game/data/characters.js). */
+  function starters() {
+    const ids = (root.TROLINA_CHARACTERS || []).filter((c) => c.unlock && c.unlock.start).map((c) => c.id);
+    return ids.includes('barbas') ? ids : ['barbas'].concat(ids);
+  }
+
   function defaults() {
     return {
       version: 1,
       coins: (root.TrolinaRules && root.TrolinaRules.START_COINS) || 3000,
-      unlocked: ['barbas'],
+      unlocked: starters(),
       upgrades: {},
       story: { stage: 0, completed: false, cleared: [] },
       difficulty: 'normal',
@@ -58,6 +64,8 @@
         this.data = defaults();
       }
       if (!this.data.unlocked.includes('barbas')) this.data.unlocked.unshift('barbas');
+      // Personajes nuevos que salen desbloqueados (p. ej. Rizos) también en partidas de antes.
+      for (const id of starters()) if (!this.data.unlocked.includes(id)) this.data.unlocked.push(id);
       return this.data;
     },
     save() {

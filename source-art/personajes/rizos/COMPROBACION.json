@@ -1,0 +1,41 @@
+{
+  "result": "PASS",
+  "characterStrips": 16,
+  "visiblePoses": 94,
+  "emptyCells": 2,
+  "namedSequences": 30,
+  "atlasSize": [
+    1152,
+    2816
+  ],
+  "cellSize": [
+    192,
+    176
+  ],
+  "anchor": [
+    56,
+    160
+  ],
+  "paletteColors": 64,
+  "portraitSizes": [
+    [
+      128,
+      128
+    ],
+    [
+      64,
+      64
+    ]
+  ],
+  "productionAlpha": "binary, except reused translucent guard-break effect",
+  "noSpriteCellBorderPixels": true,
+  "atlasMatchesStrips": true,
+  "atlasRebuildIdentical": true,
+  "bottleReleaseFrame": 3,
+  "sharedEffectsAndBottleIncluded": true,
+  "referencesIncluded": 4,
+  "previewGifFrames": 94,
+  "gameProjectUnchanged": true,
+  "gameProjectFilesChecked": 134,
+  "visualReview": "All pose sheets, likeness, shared palette, scale beside the previous fighter, active contacts and preview in the bar reviewed."
+}

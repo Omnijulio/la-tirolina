@@ -5,7 +5,7 @@
 
   const Game = {
     params,
-    assets: { characters: {}, stage: {}, bottle: null, fountain: null, jardinera: null },
+    assets: { characters: {}, portraits: {}, stage: {}, bottle: null, fountain: null, jardinera: null },
     stageCache: {},
     match: null, paused: false, last: null,
     session: { mode: 'quick', p1: 'barbas', p2: null, difficulty: 'normal', order: {}, cpuOrder: {}, storyIndex: 0 },
@@ -70,6 +70,10 @@
       for (const layer of root.TERRACE_STAGE_DATA.layers) jobs.push([layer.image, (img) => { this.assets.stage[layer.id] = img; }]);
       jobs.push([root.BOTTLE_DATA.image, (img) => { this.assets.bottle = img; }]);
       for (const c of root.TROLINA_CHARACTERS) jobs.push([c.atlas, (img) => { this.assets.characters[c.id] = img; }]);
+      // Retratos propios (personajes con arte propio, assets/characters/art-data.js).
+      for (const [id, art] of Object.entries(root.TROLINA_CHARACTER_ART || {})) {
+        if (art.portrait) jobs.push([art.portrait, (img) => { this.assets.portraits[id] = img; }]);
+      }
       if (root.TROLINA_FOUNTAIN_DATA) {
         this.assets.fountain = {};
         for (const [k, src] of Object.entries(root.TROLINA_FOUNTAIN_DATA.images)) jobs.push([src, (img) => { this.assets.fountain[k] = img; }]);

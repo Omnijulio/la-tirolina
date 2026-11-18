@@ -1,7 +1,9 @@
 /* Plantel de personajes.
  * Todos comparten las animaciones de assets/fighter.json (celdas 192x176, ancla 56,160).
- * Las variantes son recoloreados PROVISIONALES generados con tools/build_characters.py;
- * para dar arte propio a un personaje basta con sustituir su PNG en assets/characters/.
+ * Las variantes son recoloreados PROVISIONALES generados con tools/build_characters.py.
+ * Arte propio (desde v0.13, Rizos): tools/integrate_character.py genera su atlas con la misma
+ * distribución de filas y assets/characters/art-data.js con su retrato y la mano del botellín.
+ * Tiempos y cajas de golpe son comunes: el equilibrio lo marcan las stats.
  *
  * stats:
  *   hp         vida base
@@ -12,7 +14,7 @@
  * special: ultimate propio del personaje (se carga encadenando golpes).
  *   id 'dardo' (El Barbas) o 'fuente' (El Peñista). El resto lo recibirá más adelante.
  * unlock:
- *   start: true  -> disponible desde el principio
+ *   start: true  -> disponible desde el principio (también en partidas guardadas de antes)
  *   story: n     -> se desbloquea al ganar el combate n del modo historia
  *   price: cents -> precio en la tienda para desbloquearlo antes
  */
@@ -29,6 +31,15 @@
         desc: 'Lanza un dardo ultrapreciso que busca al rival, no se puede bloquear y hace muchísimo daño. Se carga encadenando combos.'
       },
       cpu: { bottles: 0, style: 'balanced' }
+    },
+    {
+      // Arte propio (source-art/personajes/rizos). Nombre y stats provisionales; ultimate pendiente.
+      id: 'rizos', name: 'Rizos', color: '#c98a52',
+      atlas: 'assets/characters/rizos.png',
+      tagline: 'Melena al viento y abrigo de borrego. Ágil y con buena pegada.',
+      stats: { hp: 96, power: 1.05, speed: 1.08, tolerance: 0.05, aim: 0.95 },
+      unlock: { start: true, price: 0 },
+      cpu: { bottles: 1, style: 'rushdown' }
     },
     {
       id: 'runner', name: 'El Runner', color: '#3fd0d4',
@@ -77,6 +88,7 @@
   ];
 
   // Orden de rivales del modo historia. El índice coincide con unlock.story.
+  // Los personajes con unlock.start no están en la historia.
   const STORY = ['runner', 'penista', 'camarero', 'motero', 'dueno'];
 
   root.TROLINA_CHARACTERS = CHARACTERS;

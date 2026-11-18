@@ -2,8 +2,8 @@
 
 Las variantes son recoloreados provisionales (estilo "clon" arcade de los 90):
 comparten poses, ancla y cajas de colisión con El Barbas y solo cambian la ropa.
-Cuando cada personaje tenga arte propio basta con sustituir su PNG en
-assets/characters/ manteniendo celdas de 192x176 y el ancla (56,160).
+Los personajes con arte propio (source-art/personajes/<id>, p. ej. Rizos) los genera
+tools/integrate_character.py: aquí no se recolorean ni se sobrescriben, solo se listan.
 
 Uso:  python3 tools/build_characters.py
 Requiere Pillow y numpy (ver requirements-art.txt).
@@ -115,6 +115,11 @@ def main():
         Image.fromarray(arr, 'RGBA').save(path, optimize=True)
         manifest[cid] = f'assets/characters/{cid}.png'
         print('wrote', path.relative_to(ROOT))
+    # Arte propio (tools/integrate_character.py): se respeta su PNG.
+    for meta in sorted((ROOT / 'source-art' / 'personajes').glob('*/fighter.json')):
+        cid = meta.parent.name
+        if cid not in manifest and (OUT / f'{cid}.png').exists():
+            manifest[cid] = f'assets/characters/{cid}.png'
     (OUT / 'characters.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
 
 

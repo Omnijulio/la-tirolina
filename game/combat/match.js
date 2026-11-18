@@ -44,12 +44,20 @@
   }
 
   class Match {
-    constructor(opts) {
-      this.o = opts;
-      this.assets = opts.assets;
-      this.diff = R.DIFFICULTIES[opts.difficulty] || R.DIFFICULTIES.normal;
-      this.timeScale = opts.timeScale || 1;
-      const data = BottleAttack.install(root.FIGHTER_DATA);
+    /** Datos de animación de un personaje: los comunes (assets/fighter.json) con el botellín, las
+     * ultimates y Combate 2.0 (game/data/moves.js). Si tiene arte propio (assets/characters/art-data.js),
+     * su mano del botellín y su boca, y las animaciones que su atlas aún no tiene se quitan para que use las
+     * poses provisionales. Tiempos y cajas de golpe son los mismos para todos. */
+    static fighterData(character) {
+      const art = (root.TROLINA_CHARACTER_ART || {})[character && character.id] || null;
+      const data = BottleAttack.install(root.FIGHTER_DATA, art && art.sockets ? { sockets: art.sockets } : undefined);
+      if (art) {
+        if (art.mouth) data.mouth = art.mouth;   // donde va el pitillo
+        const H = data.frameHeight || 176, gone = new Set(art.missingRows || []);
+        for (const [name, a] of Object.entries(data.animations)) {
+          if (a.frames.some((f) => f.y + f.h > art.rows * H || gone.has(Math.floor(f.y / H)))) delete data.animations[name];
+        }
+      }
       // Ultimate de El Barbas: misma animación de lanzamiento, pero suelta un dardo.
       const dartAnim = JSON.parse(JSON.stringify(data.animations.throwBottle));
       for (const f of dartAnim.frames) for (const e of f.events || []) if (e.type === 'spawn-projectile') e.weapon = 'dart';
@@ -60,8 +68,19 @@
       data.animations.throwGrab = grabAnim;
       // Combate 2.0: tiempos de puño y patada, gancho, puño aéreo, picado y agarre (game/data/moves.js).
       root.TrolinaMoves.install(data);
+      return data;
+    }
+
+    constructor(opts) {
+      this.o = opts;
+      this.assets = opts.assets;
+      this.diff = R.DIFFICULTIES[opts.difficulty] || R.DIFFICULTIES.normal;
+      this.timeScale = opts.timeScale || 1;
+      // Animaciones de cada luchador (las comunes, con lo propio de su arte si lo tiene).
+      const datas = {};
+      const dataFor = (ch) => datas[ch.id] || (datas[ch.id] = Match.fighterData(ch));
       const mk = (side, sel, isCPU) => new Combatant({
-        character: sel.character, image: this.assets.characters[sel.character.id], data,
+        character: sel.character, image: this.assets.characters[sel.character.id], data: dataFor(sel.character),
         loadout: sel.loadout, isCPU, side
       });
       this.p1 = mk(0, opts.p1, !!opts.autoplay);

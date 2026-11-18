@@ -13,21 +13,34 @@
     return t.content.firstElementChild;
   }
 
-  /** Dibuja un retrato desde el atlas del personaje (sin getImageData: funciona en file://). */
+  /** Dibuja un retrato desde el atlas del personaje (sin getImageData: funciona en file://).
+   * o.portrait: retrato propio (personajes con arte propio) en lugar del recorte de la cara. */
   function drawPortrait(canvas, img, opts) {
     const o = opts || {};
+    if (o.portrait && o.crop !== 'full' && canvas.width !== o.portrait.width) {
+      canvas.width = o.portrait.width; canvas.height = o.portrait.height;   // a su tamaño: sin perder píxeles
+    }
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const f = o.frame || root.FIGHTER_DATA.animations.idle.frames[0];
-    const box = o.crop === 'full' ? [f.x, f.y, 192, 176] : [f.x + 32, f.y + 8, 96, 96];
-    ctx.drawImage(img, box[0], box[1], box[2], box[3], 0, 0, canvas.width, canvas.height);
+    if (o.portrait && o.crop !== 'full') ctx.drawImage(o.portrait, 0, 0, canvas.width, canvas.height);
+    else {
+      const f = o.frame || root.FIGHTER_DATA.animations.idle.frames[0];
+      const box = o.crop === 'full' ? [f.x, f.y, 192, 176] : [f.x + 32, f.y + 8, 96, 96];
+      ctx.drawImage(img, box[0], box[1], box[2], box[3], 0, 0, canvas.width, canvas.height);
+    }
     if (o.silhouette) {
       ctx.globalCompositeOperation = 'source-in';
       ctx.fillStyle = '#121a29';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.globalCompositeOperation = 'source-over';
     }
+  }
+
+  /** Cara de un personaje para fichas, tienda y listas: su retrato propio si lo tiene. */
+  function drawFace(canvas, game, id, opts) {
+    const own = game.assets.portraits && game.assets.portraits[id];
+    drawPortrait(canvas, game.assets.characters[id], Object.assign({}, opts, own ? { portrait: own } : {}));
   }
 
   const STAT_RANGES = {
@@ -254,7 +267,7 @@
       chars.forEach((c) => {
         const locked = !g.save.isUnlocked(c.id);
         const card = el(`<button class="card${locked ? ' locked' : ''}" data-id="${c.id}" style="--c:${c.color}"><canvas width="96" height="96"></canvas><span>${esc(c.name)}</span>${locked ? '<em>🔒</em>' : ''}<b class="jailtag"></b></button>`);
-        drawPortrait(card.querySelector('canvas'), g.assets.characters[c.id], { silhouette: locked && step === 'p1' });
+        drawFace(card.querySelector('canvas'), g, c.id, { silhouette: locked && step === 'p1' });
         if (step === 'p2' && c.id === s.p1) card.classList.add('mirror');
         card.addEventListener('click', () => {
           if (jailLeft(c.id)) { chosen = c.id; refresh(); this.flashError(node, c.name + ' está en el calabozo: sale en ' + clock(jailLeft(c.id))); return; }
@@ -563,7 +576,7 @@
         ${storyFinished ? '<div class="unlock gold"><div><small>Modo historia completado</small><b>Eres el rey de La Trolina</b></div></div>' : ''}
         <nav class="menu row"></nav>
       </div>`);
-      if (unlockedChar) drawPortrait(node.querySelector('.unlock canvas'), g.assets.characters[unlockedChar.id]);
+      if (unlockedChar) drawFace(node.querySelector('.unlock canvas'), g, unlockedChar.id);
       const nav = node.querySelector('nav');
       const add = (label, fn, primary) => {
         const b = el(`<button class="${primary ? 'primary' : ''}">${label}</button>`);
@@ -633,7 +646,7 @@
               ${!owned && c.unlock.story !== undefined ? '<p class="muted">Gratis al ganar el combate ' + (c.unlock.story + 1) + ' de la historia</p>' : ''}</div>
               <div class="buy">${owned ? '<span class="owned">✓ Disponible</span>' : `<button class="primary" data-buy="${c.id}" data-silent="1">${money(c.unlock.price)}</button>`}</div>
             </div>`);
-            drawPortrait(card.querySelector('canvas'), g.assets.characters[c.id]);
+            drawFace(card.querySelector('canvas'), g, c.id);
             list.append(card);
           }
         } else {
@@ -732,7 +745,7 @@
           <span>${jail ? 'Los avisos vuelven a cero.' : 'Aviso ' + outcome.strike + ' de 3. A la tercera seguida: noche en el calabozo (1 minuto sin poder usar a estos luchadores).'}</span></div>
         <nav class="menu row"></nav>
       </div>`);
-      node.querySelectorAll('.cells canvas').forEach((cv) => drawPortrait(cv, g.assets.characters[cv.dataset.id]));
+      node.querySelectorAll('.cells canvas').forEach((cv) => drawFace(cv, g, cv.dataset.id));
       const nav = node.querySelector('nav');
       const add = (label, fn, primary) => {
         const b = el(`<button class="${primary ? 'primary' : ''}">${label}</button>`);
@@ -808,7 +821,7 @@
             <span class="who"><b>${esc(e.name)}</b><small>${c ? esc(c.name) : ''} · ${modeName[e.mode] || ''}${diff ? ' · ' + diff : ''} · ${e.won ? 'ganó' : 'perdió'} ${esc(e.rounds || '')} · ${date}</small></span>
             <span class="pts">${R.formatPoints(e.score)}</span></li>`;
         }).join('') + '</ol>';
-        box.querySelectorAll('canvas[data-c]').forEach((cv) => { if (cv.dataset.c && g.assets.characters[cv.dataset.c]) drawPortrait(cv, g.assets.characters[cv.dataset.c]); });
+        box.querySelectorAll('canvas[data-c]').forEach((cv) => { if (cv.dataset.c && g.assets.characters[cv.dataset.c]) drawFace(cv, g, cv.dataset.c); });
       };
       node.querySelectorAll('[data-m]').forEach((b) => b.addEventListener('click', () => { filter = b.dataset.m; paint(); root.TrolinaSfx.play('select'); }));
       node.querySelectorAll('[data-s]').forEach((b) => b.addEventListener('click', () => { scope = b.dataset.s; paint(); root.TrolinaSfx.play('select'); }));

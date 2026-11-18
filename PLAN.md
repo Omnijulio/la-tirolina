@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.12.4** (17/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.13.0** (18/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -119,6 +119,18 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - **Atlas** de 6×16 celdas. Herramienta `tools/integrate_combat_assets.py` para repetir la integración con nuevas entregas.
 - **Pendiente de arte:** salto doble (`combat-doublejump.png`, `fx-doublejump.png`) e icono de DASH (`ui-dash.png`).
 
+## Hecho en v0.13 — Rizos, primer luchador con arte propio
+
+- **Rizos** (nombre provisional): melena rizada, abrigo de borrego, vaqueros y botas. Paquete `la-trolina-personaje-rizos` integrado con `tools/integrate_character.py`:
+  - 16 tiras con todas las animaciones de Combate 2.0.
+  - Copia en `source-art/personajes/rizos` y fotos de referencia en `references/rizos` (fuera de git).
+- **Atlas** `assets/characters/rizos.png` con la misma distribución de filas que El Barbas y las poses en el aire bajadas igual que las suyas.
+- **Datos propios** en `assets/characters/art-data.js`: mano del botellín, boca para el pitillo y retrato de selección. Los ajustes a mano van en `source-art/personajes/rizos/juego.json`.
+- **Mismos tiempos y cajas de golpe** que el resto: sus golpes caen dentro de las cajas comunes (lo comprueba la herramienta). El equilibrio lo marcan las stats (provisionales: vida 96, fuerza 1,05, velocidad 1,08, aguante 0,05, puntería 0,95).
+- **Disponible desde el principio**, también en partidas guardadas de antes; no sale en la historia. **Sin ultimate** todavía.
+- **Retrato propio** en la selección, la tienda, el ranking, la policía y los desbloqueos.
+- Si el atlas común gana filas (p. ej. el salto doble) y el suyo no, el combate le pone las poses provisionales en vez de dejarlo invisible.
+
 ## Próximas fases propuestas
 
 ### Fase 1b — Ajustar el combate jugando
@@ -131,7 +143,9 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - [ ] Ajustar equilibrio con lo que digan: daño, duración de asaltos, fuerza de la niebla, precios.
 
 ### Fase 2 — Identidad de personajes
-- [ ] Arte propio para cada luchador (fotos de cada amigo → sprites como El Barbas).
+- [ ] Arte propio para cada luchador (fotos de cada amigo → sprites como El Barbas). Hecho: **Rizos** (v0.13); el resto, con `tools/integrate_character.py`.
+- [ ] Ultimate de Rizos (pendiente de diseño) y su nombre definitivo.
+- [ ] Salto doble de Rizos cuando se entregue el de El Barbas (misma tira, `combat-doublejump.png`).
 - [ ] Animaciones que faltan: caminar, salto, recibir golpe, caída/KO, victoria, beber (las del combate, encargadas en `ASSETS_COMBATE.md`).
 - [ ] Ultimate propio para el resto de personajes (la estructura `special` ya existe; p. ej. bandeja del Camarero, sprint del Runner).
 - [ ] Pose propia de fumar y de lanzar el dardo.

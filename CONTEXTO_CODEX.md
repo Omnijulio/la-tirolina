@@ -39,7 +39,19 @@ Peticiones incorporadas, en orden:
 
 18. **v0.12.4 — Arte de Combate 2.0**: atlas 6×16 con 12 tiras nuevas (`source-art/combate-2.0`, `tools/integrate_combat_assets.py`), poses de estado por tiempo en `Combatant.pose()` / `TrolinaMoves.poseFrame`, efectos e iconos (`assets/fx/combat`, `assets/ui`, `assets/fx/combat-fx-data.js`). Ver `COMBATE.md` § Arte.
 
-El apodo **El Barbas** sigue siendo el nombre del personaje original. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
+19. **v0.13 — Rizos, primer luchador con arte propio**. El paquete `la-trolina-personaje-rizos` se integra con `tools/integrate_character.py`:
+    - Copia en `source-art/personajes/rizos` y fotos en `references/rizos`.
+    - Genera `assets/characters/rizos.png` con las mismas filas que `fighter.png` (poses en el aire bajadas) y `assets/characters/art-data.js` (`window.TROLINA_CHARACTER_ART`: filas, filas vacías, mano del botellín, boca y retrato).
+    - Los ajustes a mano van en `source-art/personajes/<id>/juego.json`.
+
+    En el juego:
+    - `Match.fighterData(character)` construye los datos de cada luchador por separado: botellín con sus `sockets`, `data.mouth` para el pitillo y fuera las animaciones cuyas filas no tenga su atlas, que pasan a poses provisionales.
+    - Tiempos y cajas de golpe son los comunes.
+    - `drawFace` en `screens.js` usa su retrato en fichas y listas.
+    - `unlock.start` se respeta también en partidas guardadas (`Save.starters`).
+    - `art-data.js` entra en la huella del multijugador.
+
+El apodo **El Barbas** sigue siendo el nombre del personaje original. **Rizos** (v0.13, nombre provisional, disponible desde el principio y sin ultimate) tiene arte propio. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
 ## Cómo está organizado el juego (v0.2)
 
@@ -62,7 +74,8 @@ Sin frameworks ni dependencias de ejecución: scripts clásicos que se cargan en
 | `game/ui/screens.js` | Pantallas: título, selección, La Barra, cinemática, VS, resultados, pausa, tienda, opciones, ayuda |
 | `game/main.js` | Arranque, carga de recursos, bucle y flujo entre pantallas (incluida la consecuencia policial) |
 | `src/police.js`, `assets/police/` | Controlador y sprites de la intervención policial (paquete v1.4) |
-| `assets/characters/*.png` | Atlas de los 6 luchadores (mismo formato que `fighter.png`) |
+| `assets/characters/*.png` | Atlas de los 7 luchadores (mismo formato y filas que `fighter.png`) y retrato de Rizos |
+| `assets/characters/art-data.js` | Generado por `tools/integrate_character.py`: lo propio de los luchadores con arte propio |
 | `assets/icons/` + `manifest.webmanifest` | Icono y manifest para instalar en la pantalla de inicio |
 
 Flujo: Título → (Historia | Pelea rápida) → Selección (luchador; en pelea rápida también rival) + dificultad → **La Barra** (pago) → cinemática si existe → VS → combate → resultados (recompensa, desbloqueos) → siguiente combate / revancha / menú.
@@ -137,7 +150,7 @@ Detalles y tabla de ruido en `POLICE.md`. Resumen: `Match` acumula `noise` (0–
 ### Economía, progreso y dificultad
 
 - Dinero en céntimos. Se empieza con 30 €. Victoria: 120 € × multiplicador de dificultad (1 / 1,5 / 2,2 / 3,2) + 30 € por asalto ganado + perfectos, tiempo sobrante, combos, ultimates acertados, “valor etílico” por botellines, jefe y primera vez. Derrota: 12 € + 6 € por asalto ganado.
-- Historia: Runner → Peñista → Camarero → Motero → Dueño (jefe). Ganar a cada uno lo desbloquea. Tienda: personajes (120–800 €) y 4 mejoras permanentes de 3 niveles.
+- Historia: Runner → Peñista → Camarero → Motero → Dueño (jefe). Ganar a cada uno lo desbloquea. El Barbas y Rizos están desde el principio. Tienda: personajes (120–800 €) y 4 mejoras permanentes de 3 niveles.
 - Dificultad elegible en la selección y en Opciones; afecta a reacción, agresividad, guardia, antiaéreos, errores, daño y pedido de la CPU y a la recompensa.
 
 ## Kit base (v1.3, sigue vigente)
@@ -177,7 +190,8 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 | `src/fighter.js`, `src/bottle.js`, `src/stage.js` | Motor base compartido (el juego lo usa sin modificarlo) |
 | `assets/*.json`, `assets/stage/stage.json`, `assets/police/police.json` | Datos canónicos; `python3 tools/build_demo.py` regenera los espejos `*-data.js`, `fighter-preview.html` y `police-preview.html` |
 | `templates/index.template.html` | Fuente del Fighter Lab (`fighter-preview.html`). **`index.html` ya no se genera**: es el juego |
-| `tools/build_characters.py` | Regenera los atlas de variantes desde `assets/fighter.png` (Pillow + NumPy) |
+| `tools/build_characters.py` | Regenera los atlas de variantes desde `assets/fighter.png` (Pillow + NumPy); no toca los de arte propio |
+| `tools/integrate_character.py` | Integra un paquete de personaje con arte propio (`python3 tools/integrate_character.py <carpeta>`; sin carpeta, reintegra `source-art/personajes/*`) |
 | `tools/package_web.py` | ZIP solo con lo necesario para jugar (itch.io, Netlify) |
 | `references/`, `source-art/` | Fotos del usuario y originales gráficos. `references/` está en `.gitignore` para no publicarse |
 
@@ -218,7 +232,7 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 
 ## Límites actuales
 
-- Las variantes de personaje son recoloreados con la misma cara; no hay arte propio por personaje.
+- Las variantes de personaje son recoloreados con la misma cara; solo Rizos tiene arte propio (sin ultimate ni salto doble propio).
 - No hay animaciones dedicadas de caminar, salto, recibir golpe, caída ni victoria (se simulan con poses existentes).
 - Solo El Barbas (dardo) y El Peñista (pilón) tienen ultimate; no hay agacharse ni especiales con comandos.
 - Lluvia y nieve son visuales: no cambian la jugabilidad.

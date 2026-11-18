@@ -14,3 +14,6 @@ la-trolina-assets-clima-fuente/
 
 # Paquete de assets de combate (integrado con tools/integrate_combat_assets.py; copia en source-art/combate-2.0)
 la-trolina-assets-combate/
+
+# Paquete del personaje Rizos (integrado con tools/integrate_character.py; copia en source-art/personajes/rizos)
+la-trolina-personaje-rizos/

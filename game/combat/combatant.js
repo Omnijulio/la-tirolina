@@ -16,7 +16,7 @@
     JUMP_V: -940,
     WALK_F: 230, WALK_B: 185,
     FRICTION: 2200,
-    MOUTH: { x: 98, y: 43 }   // boca en el fotograma de guardia (coordenadas locales de celda)
+    MOUTH: { x: 98, y: 43 }   // boca en el fotograma de guardia (celda); con arte propio, data.mouth
   };
   const R = () => root.TrolinaRules;
   const M = () => root.TrolinaMoves;
@@ -819,7 +819,7 @@
       if (!o.ghost) {
         if (p.cig) {
           // Lo que fuma, en la boca (coordenadas locales de la celda).
-          const mx = C.MOUTH.x - a.x, my = C.MOUTH.y - a.y;
+          const mo = this.f.data.mouth || C.MOUTH, mx = mo.x - a.x, my = mo.y - a.y;
           const look = (this.smoking && this.smoking.item.look) || 'cig';
           const ember = Math.sin(this.t / 90) > 0 ? '#ff5a1e' : '#ffb347';
           if (look === 'cigar' || look === 'habano') {
@@ -891,7 +891,7 @@
     }
 
     /** Punto de la brasa del cigarrillo en coordenadas del mundo. */
-    cigTip() { return this.f.worldPoint({ x: C.MOUTH.x + 11, y: C.MOUTH.y }); }
+    cigTip() { const mo = this.f.data.mouth || C.MOUTH; return this.f.worldPoint({ x: mo.x + 11, y: mo.y }); }
   }
 
   root.TrolinaCombat = C;
