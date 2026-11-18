@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.14.0** (18/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.14.1** (18/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -150,6 +150,16 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
   - Segunda hoja de 256×224 con ancla (72,208), con el objeto dibujado dentro.
   - Humo, patinete suelto y punto de enlace con el luchador.
   - Copia en `source-art/personajes/rizos/extras`.
+
+## Hecho en v0.14.1 — Rótulos discretos
+
+- Los rótulos de la pelea ya no tapan el escenario. Antes salían en grande en el centro; ahora van en una franja fina justo bajo el marcador:
+  - asalto, «¡PELEA!», K.O., «GANA…», victoria, derrota y la policía;
+  - el nombre de la ultimate;
+  - las frases del modo salvaje.
+- Son más pequeños, con letras espaciadas y filetes finos a los lados, sin cajas oscuras. Las frases llevan solo un velo suave para leerse sobre la nieve o de día.
+- Se desvanecen solos a los 1,7 s. Así queda un momento para ver dónde se pelea, al presentar el asalto y en la entrada en patinete, y dónde se ha peleado, al final.
+- Si coinciden varios, se apilan hacia abajo; con el aviso de la policía bajo el reloj, empiezan más abajo. Posición y tiempos en `TOP_Y`, `BANNER_HOLD` y `BANNER_FADE` (`game/combat/match.js`).
 
 ## Próximas fases propuestas
 

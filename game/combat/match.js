@@ -3,6 +3,20 @@
   const C = root.TrolinaCombat;
   const R = root.TrolinaRules;
   const FONT = '"Arial Black", "Arial Bold", Impact, system-ui, sans-serif';
+  // Rótulos de arriba (asalto, K.O., victoria, ultimate, frases): una franja fina pegada al
+  // marcador, para que el escenario y los luchadores se vean enteros. TOP_Y = primera línea;
+  // TOP_Y_POLICE si está el aviso de la policía bajo el reloj.
+  const TOP_Y = 188, TOP_Y_POLICE = 214;
+  const BANNER_HOLD = 1700, BANNER_FADE = 450;
+  /** '#rgb' o '#rrggbb' → 'rgba(r,g,b,a)' (para degradados que se desvanecen sin oscurecer). */
+  function rgba(hex, a) {
+    let h = String(hex || '#fff').replace('#', '');
+    if (h.length === 3) h = h.split('').map((x) => x + x).join('');
+    const n = parseInt(h.slice(0, 6), 16) || 0;
+    return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')';
+  }
+  /** Espaciado entre letras si el navegador lo admite (si no, se queda sin él). */
+  function spacing(ctx, px) { if ('letterSpacing' in ctx) ctx.letterSpacing = px + 'px'; }
   // Versión corta de cada fallo del modo salvaje, cuando ya hay un mensaje grande en pantalla.
   const SNARK_SHORT = {
     whiff: '¡CASI!', stumble: '¡HIC!', fall: '¡PUMBA!', invert: '¡AL REVÉS!', swap: '¿ESO?',
@@ -205,7 +219,8 @@
       if (this.o.input) this.o.input.clear();
     }
 
-    setBanner(text, color, sub) { this.banner = { text, color: color || '#fff', sub: sub || '', t: 0 }; }
+    /** Rótulo de arriba. Se ve BANNER_HOLD ms y se desvanece solo, para dejar ver la escena. */
+    setBanner(text, color, sub) { this.banner = { text, color: color || '#fff', sub: sub || '', t: 0, hold: BANNER_HOLD }; }
 
     /** Suma puntos a un luchador y los enseña flotando donde ha pasado. */
     addScore(c, pts, x, y, big) {
@@ -737,7 +752,9 @@
         this.updateEntrances(dt);
         if (this.phaseT > this.fightCallMs && !this.fightCalled) { this.fightCalled = true; this.setBanner('¡PELEA!', '#ff4d5e'); this.sfx('fight'); }
         if (this.phaseT > this.introMs) {
-          this.phase = 'fight'; this.banner = null;
+          this.phase = 'fight';
+          // «¡PELEA!» no se corta de golpe: se desvanece mientras empieza la pelea.
+          if (this.banner) this.banner.hold = Math.min(this.banner.hold, this.banner.t);
           for (const f of this.fighters) {
             f.state = 'fight';
             // STAB: si lleva su bebida o su tabaco, se avisa al empezar la pelea.
@@ -1165,8 +1182,7 @@
       }
       this.drawHud(ctx, I);
       ctx.restore();
-      this.drawBanner(ctx);
-      this.drawSnark(ctx);
+      this.drawTopTexts(ctx);
       if (this.net) this.drawNetStatus(ctx);
     }
 
@@ -1215,29 +1231,85 @@
       }
     }
 
-    /** Mensaje pasivo-agresivo actual, grande y claro. */
-    drawSnark(ctx) {
+    /**
+     * Rótulos de arriba, apilados bajo el marcador en este orden: nombre de la ultimate,
+     * rótulo del asalto (ASALTO, ¡PELEA!, K.O., GANA…, ¡VICTORIA!, ¡ALTO!) y frase del modo
+     * salvaje. Pequeños, sin cajas y con fundido: la escena se tiene que ver.
+     */
+    drawTopTexts(ctx) {
+      let y = this.police && this.police.active && this.phase !== 'police' ? TOP_Y_POLICE : TOP_Y;
+      const st = this.superText;
+      if (st && st.t < 1300) {
+        this.drawHeadline(ctx, { text: st.text, color: '#f8ce73', accent: st.c.char.color, t: st.t, hold: 1000, fade: 300, y, from: st.c === this.p1 ? -1 : 1 });
+        y += 40;
+      }
+      const b = this.banner;
+      if (b && b.t < b.hold + BANNER_FADE) {
+        this.drawHeadline(ctx, { text: b.text, color: b.color, accent: b.color, sub: b.sub, t: b.t, hold: b.hold, fade: BANNER_FADE, y, from: 0 });
+        y += b.sub ? 62 : 40;
+      }
+      this.drawSnark(ctx, y);
+    }
+
+    /** Una línea de rótulo: letras espaciadas, filetes finos a los lados y entrada/salida suaves. */
+    drawHeadline(ctx, o) {
+      const fin = Math.min(1, o.t / 240);
+      const fout = o.t > o.hold ? Math.max(0, 1 - (o.t - o.hold) / o.fade) : 1;
+      const a = fin * fout;
+      if (a <= 0) return;
+      const ease = 1 - Math.pow(1 - fin, 3);
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.translate(480 + o.from * (1 - ease) * 70, o.y - (1 - ease) * 10);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      let size = 34;
+      ctx.font = 'bold ' + size + 'px ' + FONT; spacing(ctx, 3);
+      let w = ctx.measureText(o.text).width;
+      if (w > 600) { size = Math.floor(size * 600 / w); ctx.font = 'bold ' + size + 'px ' + FONT; w = ctx.measureText(o.text).width; }
+      // Filetes a los lados, que crecen al entrar.
+      const len = 120 * ease;
+      for (const s of [-1, 1]) {
+        const x0 = s * (w / 2 + 16), x1 = x0 + s * len;
+        const g = ctx.createLinearGradient(x0, 0, x1, 0);
+        g.addColorStop(0, rgba(o.accent, 0.85)); g.addColorStop(1, rgba(o.accent, 0));
+        ctx.fillStyle = g; ctx.fillRect(Math.min(x0, x1), -1, len, 2);
+      }
+      ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 2;
+      ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0a0610';
+      ctx.strokeText(o.text, 0, 0);
+      ctx.shadowColor = 'transparent';
+      ctx.fillStyle = o.color; ctx.fillText(o.text, 0, 0);
+      if (o.sub) {
+        ctx.font = 'bold 16px ' + FONT; spacing(ctx, 2);
+        ctx.lineWidth = 4; ctx.strokeText(o.sub, 0, 30);
+        ctx.fillStyle = '#ffffff'; ctx.fillText(o.sub, 0, 30);
+      }
+      ctx.restore();
+    }
+
+    /** Frase pasivo-agresiva del modo salvaje: una línea en cursiva sobre un velo suave, sin caja. */
+    drawSnark(ctx, y) {
       const sn = this.snark;
       if (!sn) return;
       const age = this.t - sn.t0, life = 1900;
       if (age > life) { this.snark = null; return; }
-      const k = Math.min(1, age / 140), out = age > life - 350 ? (life - age) / 350 : 1;
+      const fin = Math.min(1, age / 160), out = age > life - 350 ? (life - age) / 350 : 1;
       ctx.save();
-      ctx.globalAlpha = Math.max(0, out);
-      ctx.translate(480, 262);
-      ctx.rotate(Math.sin(sn.t0) * 0.04);
-      const s = 0.85 + 0.15 * k;
-      ctx.scale(s, s);
-      ctx.font = 'italic bold 38px ' + FONT;
+      ctx.globalAlpha = Math.max(0, fin * out);
+      ctx.translate(480, y - (1 - fin) * 6);
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      let size = 22;
+      ctx.font = 'italic bold ' + size + 'px ' + FONT;
       let w = ctx.measureText(sn.text).width;
-      if (w > 860) { ctx.font = 'italic bold ' + Math.floor(38 * 860 / w) + 'px ' + FONT; w = ctx.measureText(sn.text).width; }
-      ctx.fillStyle = 'rgba(10,6,16,0.72)';
-      ctx.fillRect(-w / 2 - 22, -32, w + 44, 64);
-      ctx.fillStyle = '#f8ce73'; ctx.fillRect(-w / 2 - 22, -32, 6, 64);
-      ctx.lineWidth = 6; ctx.strokeStyle = '#0a0610';
-      ctx.strokeText(sn.text, 0, 2);
-      ctx.fillStyle = '#ffffff'; ctx.fillText(sn.text, 0, 2);
+      if (w > 640) { size = Math.floor(size * 640 / w); ctx.font = 'italic bold ' + size + 'px ' + FONT; w = ctx.measureText(sn.text).width; }
+      const half = w / 2 + 80;
+      const g = ctx.createLinearGradient(-half, 0, half, 0);
+      g.addColorStop(0, 'rgba(8,5,14,0)'); g.addColorStop(0.22, 'rgba(8,5,14,0.4)');
+      g.addColorStop(0.78, 'rgba(8,5,14,0.4)'); g.addColorStop(1, 'rgba(8,5,14,0)');
+      ctx.fillStyle = g; ctx.fillRect(-half, -16, half * 2, 32);
+      ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0a0610';
+      ctx.strokeText(sn.text, 0, 1);
+      ctx.fillStyle = '#ffffff'; ctx.fillText(sn.text, 0, 1);
       ctx.restore();
     }
 
@@ -1567,42 +1639,6 @@
         ctx.font = 'bold 13px ' + FONT; ctx.fillStyle = '#f8ce73'; ctx.textAlign = 'center';
         ctx.globalAlpha = 0.6 + 0.4 * Math.sin(this.t / 200);
         ctx.fillText('VAS FINO…', 480, 152);
-      }
-      ctx.restore();
-    }
-
-    drawSuperText(ctx) {
-      const st = this.superText;
-      if (!st || st.t > 1300) return;
-      const k = Math.min(1, st.t / 160), out = st.t > 1000 ? 1 - (st.t - 1000) / 300 : 1;
-      ctx.save();
-      ctx.globalAlpha = out;
-      const y = 190;
-      ctx.fillStyle = 'rgba(5,7,12,0.75)'; ctx.fillRect(0, y - 34, 960, 62);
-      ctx.fillStyle = st.c.char.color; ctx.fillRect(0, y - 34, 960, 3); ctx.fillRect(0, y + 25, 960, 3);
-      ctx.font = 'bold 44px ' + FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      const x = 480 + (1 - k) * (st.c === this.p1 ? -400 : 400);
-      ctx.lineWidth = 8; ctx.strokeStyle = '#0a0610'; ctx.strokeText(st.text, x, y);
-      ctx.fillStyle = '#f8ce73'; ctx.fillText(st.text, x, y);
-      ctx.restore();
-    }
-
-    drawBanner(ctx) {
-      this.drawSuperText(ctx);
-      const b = this.banner;
-      if (!b) return;
-      const k = Math.min(1, b.t / 180);
-      ctx.save();
-      ctx.translate(480, 250);
-      const s = 0.6 + 0.4 * (1 - Math.pow(1 - k, 3));
-      ctx.scale(s, s);
-      ctx.globalAlpha = k;
-      ctx.font = 'bold 76px ' + FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.lineWidth = 12; ctx.strokeStyle = '#0a0610'; ctx.strokeText(b.text, 0, 0);
-      ctx.fillStyle = b.color; ctx.fillText(b.text, 0, 0);
-      if (b.sub) {
-        ctx.font = 'bold 30px ' + FONT; ctx.lineWidth = 7;
-        ctx.strokeText(b.sub, 0, 62); ctx.fillStyle = '#fff'; ctx.fillText(b.sub, 0, 62);
       }
       ctx.restore();
     }

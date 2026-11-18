@@ -144,7 +144,7 @@ Ver `FUENTE.md`. `Fountain` (`game/combat/fountain.js`) usa `TROLINA_FOUNTAIN_DA
 - Entrada propia en el título (`beginWild`, `session.wild`); `?wild=1` en las URL de prueba. Revancha conserva el modo; Pelea rápida e Historia lo desactivan.
 - Reglas en `TrolinaRules.WILD`, `chaosAt(s)` (0 hasta 30 s, 1 a los 45 s, hasta 1,25 si se alarga) y `wildLevel(intox, caos)` (máx. 1,5). `computeLoadout(..., {wild:true})`: puntillo ×1,6 y fuerza de los objetos ×1,4. `Match.levelOf(c)` sustituye a `intoxOf` para la torpeza y la percepción.
 - Efectos con caos (para los dos luchadores, en `Combatant.update`): controles invertidos 1,5–3 s, puñetazo/patada cambiados, pasos solos, caídas solo (1,1 s en el suelo, cuentan como desmayo), botellas hacia atrás, micro-siestas (pantalla en negro), tintes que cambian, mareo ×1,8 y marcador que se mueve. Equilibrio: +30 % de daño con el caos a tope y prima del 50 % al ganar.
-- Mensajes en `game/data/snark.js` (editables): `Match.say(c, tipo)` muestra uno grande en el centro; si ya hay otro, una versión corta encima del luchador. De la CPU solo comenta alguno. En La Barra, cada pedido tiene su comentario.
+- Mensajes en `game/data/snark.js` (editables): `Match.say(c, tipo)` lo muestra en la franja de rótulos bajo el marcador (desde v0.14.1, `Match.drawTopTexts`, junto al asalto, K.O., victoria y ultimate; pequeños y con fundido para no tapar el escenario); si ya hay otro, una versión corta encima del luchador. De la CPU solo comenta alguno. En La Barra, cada pedido tiene su comentario.
 
 ### La fuente y «Al pilón» (v0.5)
 
