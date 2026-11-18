@@ -15,6 +15,10 @@
  *         'smoke' ocupa el hueco de fumar (1 de base; 2 con la Pitillera) y define `smoke`.
  *     m.sugar        bolsa de azúcar: subidón 30 s, bajón y desmayo a los 45 s
  *
+ * STAB: la bebida y el tabaco propios de cada luchador (`stab` en characters.js) le
+ *   multiplican la fuerza (TrolinaRules.STAB). Rizos: destornillador y Ducados negros;
+ *   El Barbas: Red Label con cola y Camel.
+ *
  * UPGRADES: mejoras permanentes de la tienda, por niveles.
  */
 (function (root) {
@@ -55,6 +59,20 @@
       effect: (m) => { m.powerPct += 20; m.intox += 3; m.fogMult *= 1.25; }
     },
     {
+      id: 'destornillador', kind: 'drink', name: 'Destornillador', short: 'Destornillador', icon: 'img:assets/icons/drinks/destornillador.png',
+      price: 550, max: 2,
+      good: '+12 % de fuerza y el zumo de naranja despeja: −10 % de niebla',
+      bad: 'Equivale a 2 botellines de puntillo y no da envase',
+      effect: (m) => { m.powerPct += 12; m.intox += 2; m.fogMult *= 0.9; }
+    },
+    {
+      id: 'redlabel', kind: 'drink', name: 'Red Label con cola', short: 'Red Label', icon: 'img:assets/icons/drinks/red-label-cola.png',
+      price: 600, max: 2,
+      good: '+15 % de fuerza y +3 % de velocidad',
+      bad: 'Equivale a 2,5 botellines de puntillo y no da envase',
+      effect: (m) => { m.powerPct += 15; m.speedPct += 3; m.intox += 2.5; }
+    },
+    {
       id: 'energetica', kind: 'drink', name: 'Red Bull', short: 'Red Bull', icon: '⚡',
       price: 250, max: 2,
       good: '+12 % de velocidad',
@@ -86,11 +104,19 @@
       effect: () => {}
     },
     {
-      id: 'ducados', kind: 'smoke', name: 'Paquete de Ducados', short: 'Ducados', icon: '🚬',
+      id: 'ducados', kind: 'smoke', name: 'Paquete de Ducados negros', short: 'Ducados', icon: 'img:assets/icons/smokes/ducados.png',
       price: 500, max: 1,
       smoke: { units: 10, ms: 1500, relief: 0.12, heal: 9, coughFrom: 2, look: 'cig' },
       good: '10 de tabaco negro: −12 % de puntillo y +9 de vida cada uno',
       bad: 'Quieto 1,5 s; la tos llega enseguida (desde el 3.º)',
+      effect: () => {}
+    },
+    {
+      id: 'camel', kind: 'smoke', name: 'Paquete de Camel', short: 'Camel', icon: 'img:assets/icons/smokes/camel.png',
+      price: 580, max: 1,
+      smoke: { units: 10, ms: 1500, relief: 0.14, heal: 7, coughFrom: 4, look: 'cig' },
+      good: '10 cigarrillos: −14 % de puntillo y +7 de vida cada uno',
+      bad: 'Quieto 1,5 s por cigarrillo; a partir del 5.º, tos',
       effect: () => {}
     },
     {

@@ -14,7 +14,8 @@
   }
 
   /** Dibuja un retrato desde el atlas del personaje (sin getImageData: funciona en file://).
-   * o.portrait: retrato propio (personajes con arte propio) en lugar del recorte de la cara. */
+   * o.portrait: retrato propio (personajes con arte propio) en lugar del recorte de la cara.
+   * o.size: tamaño del luchador (Rizos es más bajito); en cuerpo entero se encoge con los pies en su sitio. */
   function drawPortrait(canvas, img, opts) {
     const o = opts || {};
     if (o.portrait && o.crop !== 'full' && canvas.width !== o.portrait.width) {
@@ -27,7 +28,8 @@
     else {
       const f = o.frame || root.FIGHTER_DATA.animations.idle.frames[0];
       const box = o.crop === 'full' ? [f.x, f.y, 192, 176] : [f.x + 32, f.y + 8, 96, 96];
-      ctx.drawImage(img, box[0], box[1], box[2], box[3], 0, 0, canvas.width, canvas.height);
+      const k = o.crop === 'full' && o.size ? o.size : 1, cw = canvas.width, ch = canvas.height;
+      ctx.drawImage(img, box[0], box[1], box[2], box[3], (56 / 192) * cw * (1 - k), (160 / 176) * ch * (1 - k), cw * k, ch * k);
     }
     if (o.silhouette) {
       ctx.globalCompositeOperation = 'source-in';
@@ -41,6 +43,18 @@
   function drawFace(canvas, game, id, opts) {
     const own = game.assets.portraits && game.assets.portraits[id];
     drawPortrait(canvas, game.assets.characters[id], Object.assign({}, opts, own ? { portrait: own } : {}));
+  }
+
+  /** Texto del STAB de un pedido: '' si no lleva su bebida ni su tabaco. */
+  function stabText(c, order) {
+    const st = R.stabOf(c, order);
+    return st.mult > 1 ? '★ STAB ×' + String(Math.round(st.mult * 100) / 100).replace('.', ',') : '';
+  }
+  /** Su bebida y su tabaco (para la selección y La Barra). */
+  function stabNames(c) {
+    if (!c.stab) return '';
+    const map = {}; for (const it of root.TROLINA_BAR_ITEMS || []) map[it.id] = it;
+    return [c.stab.drink, c.stab.smoke].filter((id) => map[id]).map((id) => map[id].name.replace(/^Paquete de /, '')).join(' y ');
   }
 
   const STAT_RANGES = {
@@ -248,7 +262,7 @@
           <div class="roster"></div>
           <div class="detail">
             <canvas class="big" width="192" height="176"></canvas>
-            <div class="info"><h3></h3><p class="tag"></p><div class="statwrap"></div><p class="special-info"></p><p class="lock muted"></p></div>
+            <div class="info"><h3></h3><p class="tag"></p><div class="statwrap"></div><p class="special-info"></p><p class="stab-info"></p><p class="lock muted"></p></div>
           </div>
         </div>
         <footer class="actions">
@@ -297,7 +311,7 @@
         const frames = root.FIGHTER_DATA.animations.idle.frames;
         const fr = frames[Math.floor(animT / 150) % frames.length];
         const c = chars.find((x) => x.id === chosen);
-        drawPortrait(big, g.assets.characters[c.id], { crop: 'full', frame: fr, silhouette: step === 'p1' && !g.save.isUnlocked(c.id) });
+        drawPortrait(big, g.assets.characters[c.id], { crop: 'full', frame: fr, size: c.size, silhouette: step === 'p1' && !g.save.isUnlocked(c.id) });
       });
       const diffBtns = node.querySelectorAll('[data-diff]');
       const setDiff = (id) => { s.difficulty = id; d.difficulty = id; g.save.save(); diffBtns.forEach((b) => b.classList.toggle('on', b.dataset.diff === id)); };
@@ -313,6 +327,7 @@
         node.querySelector('.special-info').innerHTML = c.special
           ? '<b>Ultimate · ' + esc(c.special.name) + ':</b> ' + esc(c.special.desc)
           : '<span class="muted">Ultimate: próximamente</span>';
+        node.querySelector('.stab-info').innerHTML = c.stab ? '<b>★ STAB:</b> ' + esc(stabNames(c)) + ' (×' + String(R.STAB.drink).replace('.', ',') + ' de fuerza cada uno si los lleva)' : '';
         const locked = !g.save.isUnlocked(c.id);
         const lockTxt = locked ? (c.unlock.story !== undefined ? 'Se desbloquea al ganar el combate ' + (c.unlock.story + 1) + ' de la historia · o en la tienda por ' + money(c.unlock.price) : '') : '';
         node.querySelector('.lock').textContent = step === 'p1' ? lockTxt : (locked ? 'Como rival puedes elegirlo aunque esté bloqueado.' : '');
@@ -361,6 +376,7 @@
         ${this.header('La Barra', 'back')}
         ${online ? '<p class="intro wild-intro"><b>BARRA LIBRE.</b> En el multijugador no se paga: pide lo que quieras dentro de tus huecos y pulsa «¡Listo!».</p>' : ''}
         ${s.wild ? '<p class="intro wild-intro"><b>MODO SALVAJE.</b> Aquí todo pega más: lo bueno y lo malo. Los primeros 30 segundos son normales. Después, buena suerte. O no.</p>' : ''}
+        ${char.stab ? `<p class="intro stab-intro"><b>★ STAB de ${esc(char.name)}:</b> ${esc(stabNames(char))}. Si los llevas, tu fuerza se multiplica (×${String(R.STAB.drink).replace('.', ',')} cada uno).</p>` : ''}
         <p class="intro">Antes de pelear contra <b style="color:${rival.color}">${esc(rival.name)}</b>, pide algo. Cada <b>botellín (2,90 €)</b> te da fuerza y un envase para lanzar, pero sube el <b>puntillo</b>: niebla, mareo, golpes al aire y controles lentos. Cuanto más dure la pelea, peor. <b>Fumar</b> lo baja; la <b>bolsa de azúcar</b> lo borra… un rato.</p>
         <div class="slots-bar"></div>
         <div class="barra-body">
@@ -380,9 +396,10 @@
       for (const it of items) {
         if (it.kind !== lastKind) { lastKind = it.kind; list.append(el(`<h4 class="group">${groups[it.kind] || ''}<span data-group="${it.kind}"></span></h4>`)); }
         const isBottle = it.id === 'botellin';
-        const row = el(`<div class="item${isBottle ? ' main' : ''}" data-id="${it.id}">
+        const isStab = !!(char.stab && (char.stab.drink === it.id || char.stab.smoke === it.id));
+        const row = el(`<div class="item${isBottle ? ' main' : ''}${isStab ? ' stab' : ''}" data-id="${it.id}">
           <div class="ico">${it.icon === 'bottle' ? '<img src="assets/bottle.png" alt="">' : it.icon.startsWith('img:') ? `<img class="drink" src="${it.icon.slice(4)}" alt="">` : it.icon}</div>
-          <div class="txt"><b>${esc(it.name)}</b> <span class="price">${money(it.price)}</span>
+          <div class="txt"><b>${esc(it.name)}</b> <span class="price">${money(it.price)}</span>${isStab ? ` <span class="stab-tag">★ STAB ×${String(it.kind === 'smoke' ? R.STAB.smoke : R.STAB.drink).replace('.', ',')}</span>` : ''}
             <p class="good">▲ ${esc(it.good)}</p><p class="bad">▼ ${esc(it.bad)}</p>
           </div>
           <div class="stepper"><button data-d="-1" data-silent="1" aria-label="Quitar">−</button><output>0</output><button data-d="1" data-silent="1" aria-label="Añadir">+</button></div>
@@ -412,7 +429,7 @@
         }
         if (!online && R.orderCost(next, items) > d.coins) { this.flashError(node, 'No te llega el dinero'); return; }
         if (qty > (order[it.id] || 0)) {
-          root.TrolinaSfx.play(['botellin', 'peterete', 'jager', 'licorcafe', 'tequila'].includes(it.id) ? 'gulp' : 'buy');
+          root.TrolinaSfx.play(['botellin', 'peterete', 'jager', 'licorcafe', 'tequila', 'destornillador', 'redlabel'].includes(it.id) ? 'gulp' : 'buy');
           if (s.wild && root.trolinaBarSnark) this.snarkToast(node, root.trolinaBarSnark(it.id));
         } else root.TrolinaSfx.play('back');
         order = next; render();
@@ -451,13 +468,14 @@
           <h3 style="color:${char.color}">${esc(char.name)}</h3>
           <div class="kv"><span>Vida</span><b>${lo.maxHp}${lo.maxHp !== base.maxHp ? ' <em>(+' + (lo.maxHp - base.maxHp) + ')</em>' : ''}</b></div>
           <div class="kv"><span>Fuerza</span><b>${pct(lo.power / base.power - 1)}</b></div>
+          ${lo.stab && lo.stab.mult > 1 ? `<div class="kv stab"><span>★ STAB</span><b>×${String(Math.round(lo.stab.mult * 100) / 100).replace('.', ',')} de fuerza (${[lo.stab.drink ? 'su bebida' : '', lo.stab.smoke ? 'su tabaco' : ''].filter(Boolean).join(' y ')})</b></div>` : ''}
           <div class="kv"><span>Velocidad</span><b>${pct(lo.speed / base.speed - 1)}</b></div>
           <div class="kv"><span>Botellines para lanzar</span><b>${lo.ammo} por asalto${jard ? ' <em>(+2 de la jardinera)</em>' : ''}</b></div>
           ${lo.smokes.map((sm) => `<div class="kv"><span>${esc(sm.short)} (F)</span><b>×${sm.units} · ${sm.relief >= 0.1 ? '−' + Math.round(sm.relief * 100) + ' % puntillo, ' : ''}+${sm.heal} vida · ${(sm.ms / 1000).toLocaleString('es-ES')} s</b></div>`).join('')}
           ${lo.sugar ? '<div class="kv"><span>Azúcar</span><b class="warn">+40 % vel. 30 s · desmayo a los 45 s</b></div>' : ''}
           <div class="kv"><span>Puntillo</span><b class="${i1 > 0.5 ? 'warn' : ''}">${Math.round(i0 * 100)} % → ${Math.round(i1 * 100)} % <em>(1 min)</em> → ${Math.round(i2 * 100)} %</b></div>
           <div class="meter"><i style="width:${Math.round(i1 * 100)}%"></i></div>
-          <p class="muted">${lo.fogMult < 1 ? 'Gafas de sol: ves la mitad de niebla. ' : ''}${i1 > 0.6 ? 'Vas a ver doble.' : i1 > 0.3 ? 'Empezarás a notar la niebla.' : i1 > 0 ? 'Un puntillo controlado.' : 'Fresco como una lechuga.'}</p>`;
+          <p class="muted">${order.gafas ? 'Gafas de sol: ves la mitad de niebla. ' : ''}${i1 > 0.6 ? 'Vas a ver doble.' : i1 > 0.3 ? 'Empezarás a notar la niebla.' : i1 > 0 ? 'Un puntillo controlado.' : 'Fresco como una lechuga.'}</p>`;
         node.querySelector('.total').innerHTML = online ? '<b>Barra libre</b><span class="muted"> · multijugador</span>' : 'Total: <b>' + money(cost) + '</b><span class="muted"> · te quedarán ' + money(d.coins - cost) + '</span>';
         node.querySelector('[data-ok]').textContent = online ? '¡Listo!' : cost ? '¡A pelear! (pagar ' + money(cost) + ')' : '¡A pelear!';
       };
@@ -509,7 +527,7 @@
         const who = sc.speaker ? g.charById(sc.speaker) : null;
         por.style.display = who ? '' : 'none';
         por.className = 'cine-portrait ' + (sc.side || 'right');
-        if (who) drawPortrait(por.querySelector('canvas'), g.assets.characters[who.id], { crop: 'full' });
+        if (who) drawPortrait(por.querySelector('canvas'), g.assets.characters[who.id], { crop: 'full', size: who.size });
         node.querySelector('.who').textContent = who ? who.name : '';
         node.querySelector('.who').style.color = who ? who.color : '';
         full = sc.text || ''; shown = 0;
@@ -543,15 +561,15 @@
       const c1 = g.charById(s.p1), c2 = g.charById(s.p2);
       const items = root.TROLINA_BAR_ITEMS;
       const node = el(`<div class="scr vs">
-        <div class="side l" style="--c:${c1.color}"><canvas width="192" height="176"></canvas><h3>${esc(c1.name)}</h3><p>${online && side === 1 ? 'Rival' : 'Tú'} · ${esc(R.describeOrder(s.order, items))}</p></div>
+        <div class="side l" style="--c:${c1.color}"><canvas width="192" height="176"></canvas><h3>${esc(c1.name)}</h3><p>${online && side === 1 ? 'Rival' : 'Tú'} · ${esc(R.describeOrder(s.order, items))}${stabText(c1, s.order) ? ' <b class="stab-tag">' + stabText(c1, s.order) + '</b>' : ''}</p></div>
         <div class="vs-mid"><b>VS</b>${s.wild ? '<span class="wild-badge">MODO SALVAJE</span>' : ''}${online ? '<span class="wild-badge exp">MULTIJUGADOR · EXPERIMENTAL</span>' : ''}<span>${online ? 'Al mejor de 3' : esc(R.DIFFICULTIES[s.difficulty].name)}${s.mode === 'story' ? ' · Historia ' + (s.storyIndex + 1) + '/' + root.TROLINA_STORY.length : ''}</span>
           ${(() => { const st = g.stageById(s.stage || 'noche'); return `<span class="stage-state">${st.icon || ''} ${esc(st.name)}</span>` + (g.jardinera() ? '<span class="stage-state jard">🪴 Jardinera llena: +2 botellines para lanzar cada uno</span>' : '') + (s.fountain ? `<span class="fountain-state">⛲ Fuente ${s.fountain.on ? 'encendida' : 'apagada'}${st.night !== false ? ' · ' + (s.fountain.lit ? 'con luz' : 'sin luz') : ''}${s.fountain.on && !online ? ' — tapa el ruido de los botellines' : ''}</span>` : ''); })()}</div>
-        <div class="side r" style="--c:${c2.color}"><canvas width="192" height="176"></canvas><h3>${esc(c2.name)}</h3><p>${online ? (side === 1 ? 'Tú' : 'Rival') : 'CPU'} · ${esc(R.describeOrder(s.cpuOrder, items))}</p></div>
+        <div class="side r" style="--c:${c2.color}"><canvas width="192" height="176"></canvas><h3>${esc(c2.name)}</h3><p>${online ? (side === 1 ? 'Tú' : 'Rival') : 'CPU'} · ${esc(R.describeOrder(s.cpuOrder, items))}${stabText(c2, s.cpuOrder) ? ' <b class="stab-tag">' + stabText(c2, s.cpuOrder) + '</b>' : ''}</p></div>
         <span class="hint">Toca para empezar</span>
       </div>`);
       const [a, b] = node.querySelectorAll('canvas');
-      drawPortrait(a, g.assets.characters[c1.id], { crop: 'full' });
-      drawPortrait(b, g.assets.characters[c2.id], { crop: 'full' });
+      drawPortrait(a, g.assets.characters[c1.id], { crop: 'full', size: c1.size });
+      drawPortrait(b, g.assets.characters[c2.id], { crop: 'full', size: c2.size });
       let t = 0, done = false;
       const go = () => { if (!done) { done = true; p.onDone(); } };
       this.tickers.push((dt) => { t += dt; if (t > 3200) go(); });

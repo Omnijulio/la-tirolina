@@ -95,6 +95,8 @@ En Fácil casi no hace nada de esto; en Pesadilla castiga casi todo y hace guard
 | Daño, coste de fuelle, gasto al bloquear, desgaste, retroceso | `MOVES` en `game/core/rules.js` |
 | Fuelle, guardia rota, guardia justa, contra/castigo, derribo, paso rápido, agarre, picado, gancho | `FUELLE`, `GUARD_BREAK`, `PARRY`, `COUNTER`, `KNOCKDOWN`, `DASH`, `GRAB`, `DIVE`, `GANCHO` en `rules.js` |
 | Tiempos y cajas de cada golpe, poses provisionales | `game/data/moves.js` |
+| Ultimate de Rizos (pausa para el piti) y la china | `PITI` y `MOVES.china` en `rules.js`; lógica en `Match.startSmokeBreak` / `updateTruce` |
+| STAB (bebida y tabaco propios: ×fuerza) | `STAB` y `CPU_STAB` en `rules.js`; `stab` de cada luchador en `game/data/characters.js` |
 | IA | `game/combat/ai.js` y `DIFFICULTIES` |
 | Comprobaciones del diseño | `tests/combat.test.cjs` (si cambias un número y rompe la idea, falla) |
 

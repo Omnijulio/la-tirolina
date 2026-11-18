@@ -51,7 +51,14 @@ Peticiones incorporadas, en orden:
     - `unlock.start` se respeta también en partidas guardadas (`Save.starters`).
     - `art-data.js` entra en la huella del multijugador.
 
-El apodo **El Barbas** sigue siendo el nombre del personaje original. **Rizos** (v0.13, nombre provisional, disponible desde el principio y sin ultimate) tiene arte propio. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
+20. **v0.14 — Ultimate de Rizos, entrada en patinete y STAB**.
+    - **Segunda hoja de animaciones** (`assets/characters/rizos-extras.png`, celdas 256×224, ancla 72,208, con taburete o patinete dentro). Se dibuja con el punto de enlace `ref` de cada animación en el ancla del luchador: `Combatant.extraPose` → `pose().extra`. Datos en `art-data.js` → `extras` (cuadros `[x,y,ms]`, boca, humo, patinete aparcado y secuencias de la ultimate y la entrada).
+    - **Pausa para el piti**: `Match.startSmokeBreak` / `updateTruce` / `cancelTruce`. Durante `this.truce` no corre el reloj ni el puntillo, no hay golpes ni botellines, y el rival solo puede fumar (`Match.controls`). Cura `PITI.heal` y lanza la china (`spawnChina` / `updateChinas`, `MOVES.china`).
+    - **Entrada**: `startEntrance` / `updateEntrances` en el primer asalto; alarga `introMs`. El patinete queda en `this.parked`.
+    - **Tamaño por luchador** (`character.size`): `Combatant.S` escala el dibujo y las cajas; `MatchBottles` iguala los botellines de quien tiene otro tamaño.
+    - **STAB**: `TrolinaRules.STAB`, `stabOf`, `CPU_STAB`; `computeLoadout` multiplica `power` y devuelve `stab`.
+
+El apodo **El Barbas** sigue siendo el nombre del personaje original. **Rizos** (v0.13, nombre provisional, disponible desde el principio, ultimate «Pausa para el piti» desde v0.14) tiene arte propio. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
 ## Cómo está organizado el juego (v0.2)
 
@@ -232,9 +239,10 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 
 ## Límites actuales
 
-- Las variantes de personaje son recoloreados con la misma cara; solo Rizos tiene arte propio (sin ultimate ni salto doble propio).
+- Las variantes de personaje son recoloreados con la misma cara; solo Rizos tiene arte propio (sin salto doble propio).
 - No hay animaciones dedicadas de caminar, salto, recibir golpe, caída ni victoria (se simulan con poses existentes).
-- Solo El Barbas (dardo) y El Peñista (pilón) tienen ultimate; no hay agacharse ni especiales con comandos.
+- Solo El Barbas (dardo), El Peñista (pilón) y Rizos (pausa para el piti) tienen ultimate; no hay agacharse ni especiales con comandos.
+- Solo El Barbas y Rizos tienen bebida y tabaco propios (STAB).
 - Lluvia y nieve son visuales: no cambian la jugabilidad.
 - Cinemáticas: solo texto y retratos provisionales.
 - Sin música; los efectos de sonido son sintéticos.

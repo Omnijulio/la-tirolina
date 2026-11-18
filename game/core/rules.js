@@ -41,7 +41,9 @@
     // Ultimate de El Barbas: no se puede bloquear.
     dart: { damage: 30, hitstun: 800, knockback: 950, blockstun: 0, unblockable: true, knockdown: true, launch: -420 },
     // Ultimate de El Peñista: agarre y chapuzón en la fuente (no se puede bloquear).
-    fountain: { damage: 38, hitstun: 300, knockback: 0, blockstun: 0, unblockable: true }
+    fountain: { damage: 38, hitstun: 300, knockback: 0, blockstun: 0, unblockable: true },
+    // Ultimate de Rizos: la china del cigarro. Poco daño, pero lo manda para atrás y lo tumba.
+    china: { damage: 6, hitstun: 700, knockback: 1250, blockstun: 0, unblockable: true, knockdown: true, launch: -360 }
   };
 
   /* Fuelle: una sola barra para pegar y para cubrirse.
@@ -121,6 +123,26 @@
   const WET = { ms: 12000, speedMult: 0.7, animMult: 0.85 };
   // Fuente: con los chorros encendidos tapa el ruido de los botellines.
   const FOUNTAIN = { masksBottleNoise: true, splashNoise: 10 };
+  /**
+   * Ultimate de Rizos, «Pausa para el piti»: la pelea se para `pauseMs` (no corre el reloj y nadie
+   * hace daño; el rival solo puede fumar). Rizos se sienta en un taburete (`sitMs`), fuma (`smokeMs`:
+   * recupera `heal` de su vida máxima y `relief` de puntillo) y se levanta (`riseMs`). A los
+   * `flickMs` de levantarse le lanza la china al rival (MOVES.china) a `chinaSpeed` px/s.
+   */
+  const PITI = { pauseMs: 2000, sitMs: 450, smokeMs: 1100, riseMs: 450, flickMs: 120, heal: 0.45, relief: 0.15, chinaSpeed: 1300 };
+  /**
+   * STAB (como en Pokémon): cada luchador tiene su bebida y su tabaco (`stab` en
+   * game/data/characters.js). Si los lleva, su fuerza se multiplica (cada uno por separado).
+   */
+  const STAB = { drink: 1.5, smoke: 1.5 };
+  /** ¿Lleva su bebida o su tabaco? Devuelve { drink, smoke, mult }. */
+  function stabOf(character, order) {
+    const st = (character && character.stab) || {}, o = order || {};
+    const drink = !!(st.drink && o[st.drink] > 0), smoke = !!(st.smoke && o[st.smoke] > 0);
+    return { drink, smoke, mult: (drink ? STAB.drink : 1) * (smoke ? STAB.smoke : 1) };
+  }
+  /** La CPU pide a veces su bebida y su tabaco (más cuanto más difícil). */
+  const CPU_STAB = { facil: 0.15, normal: 0.3, dificil: 0.5, pesadilla: 0.7 };
 
   /* ---------- Modo salvaje (experimental) ----------
    * Los primeros 30 s se juegan normal. Desde el segundo 30 sube el «caos» para los
@@ -164,7 +186,7 @@
    * la victoria. Al final se multiplica por la dificultad y por el modo salvaje.
    */
   const SCORE = {
-    hit: { punch: 100, kick: 150, gancho: 250, airPunch: 120, dive: 200, grab: 250, bottle: 200, dart: 1500, fountain: 2000 },
+    hit: { punch: 100, kick: 150, gancho: 250, airPunch: 120, dive: 200, grab: 250, bottle: 200, dart: 1500, fountain: 2000, china: 1200 },
     comboStep: 0.5,       // cada golpe más del combo vale un 50 % más
     styleMax: 1,          // hasta +100 % con el puntillo al máximo
     block: 20,
@@ -250,6 +272,8 @@
   // Tabaco: cada cigarrillo tarda en fumarse y baja el puntillo.
   const SMOKE = { durationMs: 1500, relief: 0.15, heal: 6, coughFrom: 3, coughPerSec: 0.05 };
   const SMOKE_DEFAULTS = { units: 10, ms: 1500, relief: 0.15, heal: 6, coughFrom: 3, look: 'cig' };
+  /** Lo que se fuma (un solo hueco para la CPU). */
+  const SMOKE_IDS = ['tabaco', 'ducados', 'camel', 'liar', 'puro', 'habano', 'chiflo'];
   /** Huecos de La Barra: bebidas (cada unidad cuenta) y cosas para fumar (cada paquete cuenta). */
   const SLOTS = { drinks: 7, smokes: 1 };
   /** La CPU también tiene hígado: huecos de bebida según la dificultad. */
@@ -372,12 +396,14 @@
     }
     if (opts && opts.jardinera) m.ammo += JARDINERA_AMMO;
     if (opts && opts.wild) { m.intox *= WILD.intoxMult; m.powerPct *= WILD.powerMult; }
+    const stab = stabOf(character, clean);
     const tolerance = Math.max(-0.3, Math.min(0.8, base.tolerance));
     // 10 botellines equivalen a puntillo 1,0 (máximo) para alguien sin aguante extra.
     const intoxLevel = Math.max(0, Math.min(1, m.intox * 0.1 * m.intoxMult * (1 - tolerance)));
     return {
       maxHp: Math.round((base.hp + m.hp) * HP_SCALE),
-      power: base.power * (1 + m.powerPct / 100),
+      power: base.power * (1 + m.powerPct / 100) * stab.mult,
+      stab,
       speed: Math.max(0.6, base.speed * (1 + m.speedPct / 100)),
       aim: base.aim,
       tolerance,
@@ -479,6 +505,16 @@
       const k = r();
       order[difficulty === 'pesadilla' && k < 0.4 ? 'habano' : (difficulty === 'dificil' || difficulty === 'pesadilla') && k < 0.7 ? 'puro' : k < 0.5 ? 'tabaco' : k < 0.75 ? 'ducados' : 'liar'] = 1;
     }
+    // STAB: a veces lleva su bebida y su tabaco (el tabaco sustituye al que hubiera pedido).
+    const st = (character && character.stab) || {}, pStab = CPU_STAB[difficulty] || CPU_STAB.normal;
+    if (st.drink && r() < pStab) {
+      if (left <= 0 && order.botellin > 0) { order.botellin--; left++; }
+      add(st.drink);
+    }
+    if (st.smoke && r() < pStab) {
+      for (const k of Object.keys(order)) if (SMOKE_IDS.includes(k)) delete order[k];
+      order[st.smoke] = 1;
+    }
     return order;
   }
 
@@ -525,12 +561,13 @@
   function dhypot(x, y) { return Math.sqrt(x * x + y * y); }
 
   /** Versión del juego: se muestra en el multijugador y se compara con la del rival. */
-  const GAME_VERSION = '0.13.0';
+  const GAME_VERSION = '0.14.0';
 
   const Rules = {
     GAME_VERSION, dsin, dcos, datan2, dhypot,
     BOTTLE_PRICE, MAX_BOTTLES, START_COINS, DIFFICULTIES, DIFFICULTY_ORDER, MOVES,
     ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX, NOISE, POLICE, WET, FOUNTAIN,
+    PITI, STAB, stabOf, CPU_STAB,
     FUELLE, GUARD_BREAK, PARRY, COUNTER, KNOCKDOWN, DASH, GRAB, DIVE, GANCHO,
     fuelleRegen, isParry, hitType, hitTypeMult, frameData, blockAdvantage, PUSH, pushSpeed, splitPush,
     WILD, chaosAt, wildLevel,

@@ -38,14 +38,19 @@
   }
 
   class Combatant {
-    constructor({ character, image, data, loadout, isCPU, side }) {
+    constructor({ character, image, data, loadout, isCPU, side, extras }) {
       this.char = character;
       this.image = image;
+      // Tamaño (Rizos es más bajito): escala el dibujo y las cajas de golpe.
+      this.size = character.size || 1;
+      this.S = C.S * this.size;
+      // Segunda hoja de animaciones con objeto (taburete, patinete): { img, def } de art-data.js.
+      this.extras = extras && extras.img && extras.def ? extras : null;
       this.loadout = loadout;
       this.isCPU = !!isCPU;
       this.side = side;
       this.maxHp = loadout.maxHp;
-      this.f = new Fighter(image, data, { x: 0, y: C.GROUND, scale: C.S, facing: 1 });
+      this.f = new Fighter(image, data, { x: 0, y: C.GROUND, scale: this.S, facing: 1 });
       this.f.combatant = this;
       this.seed = Math.random() * 1000;
       // Lo que dura todo el combate (no se reinicia entre asaltos).
@@ -79,6 +84,7 @@
       this.combo = 0; this.noAmmoCooldown = 0;
       this.smoking = null; this.faintT = 0; this.faintTotal = 0; this.buffs = [];
       this.wetT = 0; this.locked = false; this.poseOverride = null; this.grabRot = 0;
+      this.extraPose = null; this.entrance = null;   // cuadro de la segunda hoja (ultimate de Rizos, entrada)
       // Combate 2.0: fuelle, guardia justa, guardia rota, derribo, paso rápido, picado.
       this.fuelle = R().FUELLE.max; this.regenAt = 0; this.exhausted = false; this.guardWas = false;
       this.blockInput = false; this.blockPressT = -1e9; this.blockReleaseT = -1e9; this.parryIdle = 1e9; this.parryUsed = false;
@@ -500,6 +506,12 @@
         return false;
       }
       const id = this.char.special.id;
+      if (id === 'piti') {
+        // Pausa para el piti: la dirige el combate (Match.startSmokeBreak).
+        if (this.smoking || !match.startSmokeBreak || !match.startSmokeBreak(this)) return false;
+        this.meter = 0; this.chain = 0; this.ultimates++;
+        return true;
+      }
       if (id === 'fuente') {
         if (!match.fountain) return false;
         this.f.play('idle', true);
@@ -663,6 +675,11 @@
      * Con el arte de Combate 2.0 cada estado tiene su animación (desde que empezó); sin él, se
      * usan fotogramas del atlas original con giros provisionales. */
     pose() {
+      if (this.extraPose && this.extras) {
+        // Segunda hoja: el cuadro se dibuja con su punto de enlace (`ref`) en el ancla del luchador.
+        const ep = this.extraPose, D = this.extras.def, A = D.anims[ep.anim], fr = A && A.frames[ep.frame];
+        if (fr) return { extra: { x: fr[0], y: fr[1], w: D.cell[0], h: D.cell[1], ref: A.ref, dx: ep.dx || 0 }, frame: null, rot: 0, dy: 0, shield: 0, item: null, pivot: null, cig: false, dart: null };
+      }
       const data = this.f.data, anims = data.animations, Mv = M();
       const at = (name, since, reverse) => Mv.poseFrame(data, name, this.t - (since === undefined ? 0 : since), reverse);
       const st = (name) => Mv.poseFrame(data, name, this.t);
@@ -767,16 +784,28 @@
     }
 
     drawShadow(ctx) {
-      const h = Math.min(1, -this.y / 300);
+      const h = Math.min(1, -this.y / 300), k = this.size * (1 - h * 0.5);
+      const dx = this.extraPose && this.extraPose.dx ? this.extraPose.dx : 0;
       ctx.fillStyle = 'rgba(12,8,16,0.55)';
       ctx.beginPath();
-      ctx.ellipse(this.cx, C.GROUND + 3, 66 * (1 - h * 0.5), 9 * (1 - h * 0.5), 0, 0, Math.PI * 2);
+      ctx.ellipse(this.cx + dx, C.GROUND + 3, 66 * k, 9 * k, 0, 0, Math.PI * 2);
       ctx.fill();
     }
 
     draw(ctx, opts) {
       const o = opts || {};
       const p = this.pose();
+      if (p.extra) {
+        const e = p.extra;
+        ctx.save();
+        if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
+        ctx.imageSmoothingEnabled = false;
+        ctx.translate(Math.round(this.f.x + e.dx + (o.dx || 0)), Math.round(this.f.y + (o.dy || 0)));
+        ctx.scale(this.S * this.facing, this.S);
+        ctx.drawImage(this.extras.img, e.x, e.y, e.w, e.h, -e.ref[0], -e.ref[1], e.w, e.h);
+        ctx.restore();
+        return p;
+      }
       const a = this.f.data.anchor, fr = p.frame;
       let src = this.image, sx = fr.x, sy = fr.y;
       if (this.flash > 0 && !o.ghost) {
@@ -795,7 +824,7 @@
       if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
       ctx.imageSmoothingEnabled = false;
       ctx.translate(Math.round(this.f.x + (o.dx || 0)), Math.round(this.f.y + p.dy + (o.dy || 0)));
-      ctx.scale(C.S * this.facing, C.S);
+      ctx.scale(this.S * this.facing, this.S);
       if (p.pivot) {
         ctx.translate(p.pivot.x, p.pivot.y + p.pivot.drop);
         ctx.rotate(p.rot);
@@ -863,7 +892,7 @@
         ctx.restore();
       }
       if (!o.ghost && !o.fx && this.state === 'fight') {
-        const head = { x: this.cx + this.facing * 8, y: C.GROUND + this.y + p.dy - 290 };
+        const head = { x: this.cx + this.facing * 8, y: C.GROUND + this.y + p.dy - 290 * this.size };
         if (this.dizzyT > 0) {
           // Guardia rota: chapas dando vueltas sobre la cabeza.
           ctx.save();

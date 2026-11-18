@@ -12,7 +12,11 @@
  *   tolerance  aguante al alcohol (0 = normal, positivo reduce el "puntillo")
  *   aim        puntería: reduce fallos e imprecisión del lanzamiento (1 = normal)
  * special: ultimate propio del personaje (se carga encadenando golpes).
- *   id 'dardo' (El Barbas) o 'fuente' (El Peñista). El resto lo recibirá más adelante.
+ *   id 'dardo' (El Barbas), 'fuente' (El Peñista) o 'piti' (Rizos). El resto lo recibirá más adelante.
+ * stab: su bebida y su tabaco (ids de game/data/items.js). Si los lleva, su fuerza se
+ *   multiplica (TrolinaRules.STAB, como el STAB de Pokémon).
+ * size: tamaño en pantalla (1 = normal). Escala el dibujo y sus cajas de golpe; los
+ *   botellines que lanza vuelan igual que los de todos.
  * unlock:
  *   start: true  -> disponible desde el principio (también en partidas guardadas de antes)
  *   story: n     -> se desbloquea al ganar el combate n del modo historia
@@ -30,16 +34,23 @@
         id: 'dardo', name: 'Dardo certero', short: 'DARDO',
         desc: 'Lanza un dardo ultrapreciso que busca al rival, no se puede bloquear y hace muchísimo daño. Se carga encadenando combos.'
       },
+      stab: { drink: 'redlabel', smoke: 'camel' },
       cpu: { bottles: 0, style: 'balanced' }
     },
     {
-      // Arte propio (source-art/personajes/rizos). Nombre y stats provisionales; ultimate pendiente.
+      // Arte propio (source-art/personajes/rizos). Nombre provisional. Un tanque bajito:
+      // mucha vida y aguante, más lento, y una ultimate que cura. Números para ajustar jugando.
       id: 'rizos', name: 'Rizos', color: '#c98a52',
-      atlas: 'assets/characters/rizos.png',
-      tagline: 'Melena al viento y abrigo de borrego. Ágil y con buena pegada.',
-      stats: { hp: 96, power: 1.05, speed: 1.08, tolerance: 0.05, aim: 0.95 },
+      atlas: 'assets/characters/rizos.png', size: 0.85,
+      tagline: 'Bajito, melenudo y duro como una pared. Llega en patinete y aguanta lo que le eches.',
+      stats: { hp: 150, power: 0.95, speed: 0.86, tolerance: 0.4, aim: 0.9 },
       unlock: { start: true, price: 0 },
-      cpu: { bottles: 1, style: 'rushdown' }
+      special: {
+        id: 'piti', name: 'Pausa para el piti', short: 'PITI',
+        desc: 'Para la pelea 2 segundos: se sienta en un taburete, se fuma un cigarro y recupera casi media vida. Al levantarse le lanza la china al rival y lo manda para atrás. Mientras, el rival solo puede fumar. Se carga encadenando golpes.'
+      },
+      stab: { drink: 'destornillador', smoke: 'ducados' },
+      cpu: { bottles: 1, style: 'brawler' }
     },
     {
       id: 'runner', name: 'El Runner', color: '#3fd0d4',

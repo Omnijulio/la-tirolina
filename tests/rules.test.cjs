@@ -275,3 +275,42 @@ test('ranking: orden, puesto, tope de 20 y nombres limpios', () => {
   assert.equal(R.cleanName('<script>'), 'script');
   assert.equal(R.formatPoints(1234567), '1.234.567');
 });
+
+test('STAB: su bebida y su tabaco le multiplican la fuerza (cada uno por separado)', () => {
+  const rizos = CHARACTERS.find((c) => c.id === 'rizos');
+  const base = R.computeLoadout(rizos, {}, {}, BAR_ITEMS, UPGRADES);
+  const drink = R.computeLoadout(rizos, { [rizos.stab.drink]: 1 }, {}, BAR_ITEMS, UPGRADES);
+  const both = R.computeLoadout(rizos, { [rizos.stab.drink]: 1, [rizos.stab.smoke]: 1 }, {}, BAR_ITEMS, UPGRADES);
+  const item = BAR_ITEMS.find((i) => i.id === rizos.stab.drink);
+  const m = { hp: 0, powerPct: 0, speedPct: 0, intox: 0, intoxMult: 1, riseMult: 1, fogMult: 1, ammo: 0 };
+  item.effect(m);
+  assert.ok(Math.abs(drink.power - base.power * (1 + m.powerPct / 100) * R.STAB.drink) < 1e-9);
+  assert.ok(both.stab.drink && both.stab.smoke && both.stab.mult === R.STAB.drink * R.STAB.smoke);
+  // La bebida de otro no cuenta.
+  const other = R.computeLoadout(rizos, { [barbas.stab.drink]: 1 }, {}, BAR_ITEMS, UPGRADES);
+  assert.equal(other.stab.mult, 1);
+  for (const c of CHARACTERS.filter((x) => x.stab)) {
+    for (const id of [c.stab.drink, c.stab.smoke]) assert.ok(BAR_ITEMS.find((i) => i.id === id), c.id + ': ' + id + ' no está en La Barra');
+  }
+});
+
+test('la CPU a veces pide su bebida y su tabaco, sin pasarse de huecos', () => {
+  const rizos = CHARACTERS.find((c) => c.id === 'rizos');
+  let seed = 7, seen = 0;
+  const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < 200; i++) {
+    const o = R.cpuOrder('pesadilla', rizos, rng);
+    const use = R.orderUsage(o, BAR_ITEMS);
+    assert.ok(use.drinks <= R.cpuSlots('pesadilla').drinks && use.smokes <= 1, JSON.stringify(o));
+    if (R.stabOf(rizos, o).mult > 1) seen++;
+  }
+  assert.ok(seen > 50, 'en pesadilla lo pide a menudo (' + seen + ')');
+});
+
+test('la pausa para el piti dura lo que dice el diseño y cura mucho', () => {
+  const P = R.PITI;
+  assert.equal(P.pauseMs, 2000);
+  assert.ok(P.sitMs + P.smokeMs < P.pauseMs && P.flickMs < P.pauseMs - P.sitMs - P.smokeMs);
+  assert.ok(P.heal >= 0.4, 'recupera gran parte de la vida');
+  assert.ok(R.MOVES.china.unblockable && R.MOVES.china.knockdown && R.MOVES.china.knockback >= 1000);
+});

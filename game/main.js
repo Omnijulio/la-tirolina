@@ -5,7 +5,7 @@
 
   const Game = {
     params,
-    assets: { characters: {}, portraits: {}, stage: {}, bottle: null, fountain: null, jardinera: null },
+    assets: { characters: {}, portraits: {}, extras: {}, stage: {}, bottle: null, fountain: null, jardinera: null },
     stageCache: {},
     match: null, paused: false, last: null,
     session: { mode: 'quick', p1: 'barbas', p2: null, difficulty: 'normal', order: {}, cpuOrder: {}, storyIndex: 0 },
@@ -73,6 +73,14 @@
       // Retratos propios (personajes con arte propio, assets/characters/art-data.js).
       for (const [id, art] of Object.entries(root.TROLINA_CHARACTER_ART || {})) {
         if (art.portrait) jobs.push([art.portrait, (img) => { this.assets.portraits[id] = img; }]);
+        // Segunda hoja (ultimate, entrada en patinete), humo y patinete suelto.
+        const ex = art.extras;
+        if (ex) {
+          const box = this.assets.extras[id] = {};
+          jobs.push([ex.image, (img) => { box.sheet = img; }]);
+          if (ex.smoke) jobs.push([ex.smoke.image, (img) => { box.smoke = img; }]);
+          if (ex.scooter) jobs.push([ex.scooter.image, (img) => { box.scooter = img; }]);
+        }
       }
       if (root.TROLINA_FOUNTAIN_DATA) {
         this.assets.fountain = {};

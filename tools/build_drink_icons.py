@@ -2,7 +2,8 @@
 
 Uso: python3 tools/build_drink_icons.py  -> assets/icons/drinks/*.png y assets/icons/smokes/*.png
 Dibujados a mano por código: vaso de Peterete (verde lima con hielo), chupitos,
-puro, habano y chiflo.
+destornillador, Red Label con cola, puro, habano, chiflo y paquetes de tabaco (sin
+logotipos: solo los colores de la cajetilla).
 """
 from pathlib import Path
 from PIL import Image
@@ -43,6 +44,58 @@ def peterete():
     rect(im, x0 + 1, 10, x0 + 1, y1 - 3, SHINE)              # reflejo del vaso
     rect(im, 15, 1, 16, 11, (240, 90, 90, 255))              # pajita
     rect(im, 15, 1, 15, 11, (255, 170, 170, 255))
+    return im
+
+
+def highball(liquid, top, dark, extra=None):
+    """Vaso de tubo con hielo (combinados)."""
+    im = canvas()
+    x0, x1, y0, y1 = 6, 17, 8, 30
+    rect(im, x0, y0, x0, y1, GLASS_D); rect(im, x1, y0, x1, y1, GLASS_D)
+    rect(im, x0, y1, x1, y1, GLASS_D); rect(im, x0 + 1, y1 - 1, x1 - 1, y1 - 1, GLASS)
+    rect(im, x0 + 1, 12, x1 - 1, y1 - 2, liquid)
+    rect(im, x0 + 1, 12, x1 - 1, 12, top)
+    rect(im, x1 - 3, 13, x1 - 1, y1 - 2, dark)
+    for (ix, iy) in [(8, 13), (12, 16)]:                     # hielos
+        rect(im, ix, iy, ix + 2, iy + 2, (230, 246, 255, 235))
+        rect(im, ix, iy, ix + 2, iy, (255, 255, 255, 255))
+    rect(im, x0 + 1, 13, x0 + 1, y1 - 3, SHINE)
+    if extra:
+        extra(im)
+    return im
+
+
+def orange_slice(im):
+    # Rodaja de naranja en el borde y pajita.
+    rect(im, 14, 5, 20, 6, (240, 130, 20, 255)); rect(im, 15, 7, 19, 8, (255, 196, 90, 255))
+    rect(im, 16, 9, 18, 9, (240, 130, 20, 255))
+    rect(im, 9, 2, 10, 13, (40, 40, 40, 255)); rect(im, 9, 2, 9, 13, (90, 90, 90, 255))
+
+
+def cola_bubbles(im):
+    # Burbujas de la cola y rodaja de limón.
+    for (x, y) in [(9, 22), (11, 25), (14, 21), (10, 18)]:
+        im.putpixel((x, y), (214, 150, 90, 255))
+    rect(im, 15, 6, 20, 7, (236, 226, 70, 255)); rect(im, 16, 8, 19, 9, (250, 246, 170, 255))
+
+
+def pack(body, body_d, top, band=None):
+    """Cajetilla de tabaco con dos cigarrillos asomando. Solo colores, sin marcas."""
+    im = canvas()
+    x0, x1, y0, y1 = 5, 18, 9, 30
+    for (cx, h) in [(8, 4), (11, 6)]:                         # cigarrillos (filtro y papel)
+        rect(im, cx, y0 - h, cx + 1, y0 - h + 1, (220, 150, 70, 255))
+        rect(im, cx, y0 - h + 2, cx + 1, y0 - 1, (245, 242, 232, 255))
+    rect(im, x0, y0, x1, y1, body)
+    rect(im, x1 - 3, y0, x1, y1, body_d)                      # lado en sombra
+    rect(im, x0, y0, x1, y0 + 5, top)                          # tapa
+    rect(im, x0, y0 + 5, x1, y0 + 5, body_d)
+    if band:
+        rect(im, x0, 20, x1 - 4, 22, band)
+        rect(im, x1 - 3, 20, x1, 22, tuple(max(0, c - 40) for c in band[:3]) + (255,))
+    rect(im, x0, y0, x0, y1, (20, 20, 28, 255)); rect(im, x1, y0, x1, y1, (20, 20, 28, 255))   # contorno
+    rect(im, x0, y1, x1, y1, (20, 20, 28, 255)); rect(im, x0, y0, x1, y0, (20, 20, 28, 255))
+    rect(im, x0 + 1, y0 + 6, x0 + 1, y1 - 2, (255, 255, 255, 120))
     return im
 
 
@@ -121,10 +174,15 @@ def main():
     shot((60, 24, 14, 245), (110, 50, 26, 255)).save(OUT / 'jager.png')
     shot((52, 28, 12, 245), (120, 74, 36, 255), coffee_foam).save(OUT / 'licor-cafe.png')
     shot((232, 178, 72, 235), (250, 214, 130, 255), lime_wedge).save(OUT / 'tequila.png')
+    highball((247, 160, 40, 240), (255, 205, 110, 255), (214, 120, 20, 245), orange_slice).save(OUT / 'destornillador.png')
+    highball((92, 46, 22, 240), (150, 90, 50, 255), (60, 28, 12, 245), cola_bubbles).save(OUT / 'red-label-cola.png')
     SMOKES.mkdir(parents=True, exist_ok=True)
     cigar(None).save(SMOKES / 'puro.png')
     cigar((200, 40, 40, 255), length=20, width=5).save(SMOKES / 'habano.png')
     chiflo().save(SMOKES / 'chiflo.png')
+    # Ducados negros: cajetilla azul y blanca. Camel: cajetilla color arena.
+    pack((40, 84, 176, 255), (26, 58, 128, 255), (244, 244, 240, 255), (244, 244, 240, 255)).save(SMOKES / 'ducados.png')
+    pack((222, 186, 104, 255), (176, 140, 70, 255), (240, 226, 186, 255), (150, 98, 46, 255)).save(SMOKES / 'camel.png')
     print('ok', sorted(p.name for p in OUT.glob('*.png')), sorted(p.name for p in SMOKES.glob('*.png')))
 
 

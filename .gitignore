@@ -17,3 +17,6 @@ la-trolina-assets-combate/
 
 # Paquete del personaje Rizos (integrado con tools/integrate_character.py; copia en source-art/personajes/rizos)
 la-trolina-personaje-rizos/
+
+# Paquete de la ultimate y la entrada en patinete de Rizos (copia en source-art/personajes/rizos/extras)
+la-trolina-rizos-ultimate-patinete/

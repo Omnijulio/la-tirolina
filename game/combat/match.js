@@ -18,6 +18,11 @@
       for (const p of this.projectiles) {
         if (p.id < first || p.tweaked) continue;
         p.tweaked = true;
+        if (p.scale !== C.S) {
+          // Un luchador más pequeño (Rizos) lanza igual de lejos que los demás.
+          const k = C.S / p.scale;
+          p.vx *= k; p.vy *= k; p.gravity *= k; p.radius *= k; p.scale = C.S;
+        }
         const c = p.owner && p.owner.combatant;
         if (!c) continue;
         const spread = R.impairment(this.match.levelOf(c), c.loadout.aim).throwSpread;
@@ -79,9 +84,13 @@
       // Animaciones de cada luchador (las comunes, con lo propio de su arte si lo tiene).
       const datas = {};
       const dataFor = (ch) => datas[ch.id] || (datas[ch.id] = Match.fighterData(ch));
+      const extrasFor = (ch) => {
+        const art = (root.TROLINA_CHARACTER_ART || {})[ch.id], img = this.assets.extras && this.assets.extras[ch.id];
+        return art && art.extras && img ? { img: img.sheet, def: art.extras, smoke: img.smoke, scooter: img.scooter } : null;
+      };
       const mk = (side, sel, isCPU) => new Combatant({
         character: sel.character, image: this.assets.characters[sel.character.id], data: dataFor(sel.character),
-        loadout: sel.loadout, isCPU, side
+        loadout: sel.loadout, isCPU, side, extras: extrasFor(sel.character)
       });
       this.p1 = mk(0, opts.p1, !!opts.autoplay);
       this.p2 = mk(1, opts.p2, true);
@@ -111,6 +120,7 @@
       this.camera = 0; this.shake = 0; this.hitstop = 0; this.slowmo = 0;
       this.sparks = []; this.popups = []; this.dusts = []; this.smokes = []; this.darts = [];
       this.superFreeze = 0; this.superOwner = null;
+      this.truce = null; this.chinas = []; this.pitiFx = []; this.parked = [];   // ultimate de Rizos y su patinete
       this.stats = { perfectRounds: 0, timeLeft: 0, maxCombo: 0, ultimates: 0 };
       // Policía Local: aparece si el ruido llega a 100 (ver TrolinaRules.NOISE).
       this.noise = 0; this.bottleStreak = -1; this.lastBottleAt = -1e9; this.noiseWarned = false;
@@ -176,8 +186,18 @@
       this.cancelGrab();
       this.bottles.reset();
       this.darts = []; this.smokes = []; this.superFreeze = 0;
+      this.cancelTruce(); this.chinas = []; this.pitiFx = [];
       this.timer = R.ROUND_SECONDS;
       this.phase = 'intro'; this.phaseT = 0; this.fightCalled = false;
+      // Presentación: «¡PELEA!» a los 950 ms y a pelear a los 1650. Si alguien llega en patinete
+      // (primer asalto), se alarga hasta que se baja.
+      this.fightCallMs = 950; this.introMs = 1650;
+      if (this.round === 1) {
+        for (const f of this.fighters) {
+          const ms = this.startEntrance(f);
+          if (ms) { this.introMs = Math.max(this.introMs, ms + 650); this.fightCallMs = this.introMs - 700; }
+        }
+      }
       this.roundWinner = null;
       const final = this.wins[0] === R.ROUNDS_TO_WIN - 1 && this.wins[1] === R.ROUNDS_TO_WIN - 1;
       this.setBanner(final ? 'ASALTO FINAL' : 'ASALTO ' + this.round, '#f8ce73');
@@ -389,6 +409,181 @@
       }
     }
 
+    /* ---------- Rizos: pausa para el piti y entrada en patinete ---------- */
+
+    /** Cuadro de una animación de la segunda hoja a los `t` ms, con sus tiempos escalados a `total`. */
+    extraFrame(anim, t, total) {
+      const fr = anim.frames, sum = fr.reduce((n, f) => n + f[2], 0), k = total ? total / sum : 1;
+      let acc = 0;
+      for (let i = 0; i < fr.length; i++) { acc += fr[i][2] * k; if (t < acc) return i; }
+      return anim.loop && !total ? 0 : fr.length - 1;
+    }
+    /** Punto de una celda de la segunda hoja (coordenadas de celda) en el mundo. */
+    extraPoint(c, anim, pt) {
+      return { x: c.f.x + (pt[0] - anim.ref[0]) * c.S * c.facing, y: c.f.y + (pt[1] - anim.ref[1]) * c.S };
+    }
+
+    /** Ultimate de Rizos. Para la pelea R.PITI.pauseMs: se sienta, fuma, se cura y lanza la china. */
+    startSmokeBreak(att) {
+      if (this.truce || this.phase !== 'fight' || !att.extras || !att.extras.def.anims['ultimate-sit']) return false;
+      const def = att === this.p1 ? this.p2 : this.p1;
+      this.cancelThrow();
+      att.locked = true; att.f.play('idle', true); att.pending = [];
+      att.vx = 0; att.guard = false; att.walking = false; att.dashT = 0;
+      att.facing = Math.sign(def.cx - att.cx) || att.facing; att.sync();
+      // El rival suelta lo que estuviera haciendo y lo que volaba se cae: nadie hace daño.
+      def.f.play('idle', true); def.pending = []; def.guard = false; def.walking = false; def.dashT = 0; def.diving = false;
+      this.bottles.reset(); this.darts = [];
+      this.truce = { att, def, t: 0, flicked: false, emitted: -1, healed: att.hp };
+      this.superText = { text: '¡' + att.char.special.name.toUpperCase() + '!', t: 0, c: att };
+      this.sfx('super');
+      if (att === this.p1) this.stats.ultimates++;
+      return true;
+    }
+
+    updateTruce(dt) {
+      const tr = this.truce;
+      if (!tr) return;
+      const P = R.PITI, att = tr.att, A = att.extras.def.anims;
+      tr.t += dt;
+      const riseMs = Math.max(200, P.pauseMs - P.sitMs - P.smokeMs);
+      if (tr.t < P.sitMs) {
+        att.extraPose = { anim: 'ultimate-sit', frame: this.extraFrame(A['ultimate-sit'], tr.t, P.sitMs) };
+        if (tr.t > P.sitMs - 120 && !tr.lit) { tr.lit = true; this.sfx('lighter'); }
+      } else if (tr.t < P.sitMs + P.smokeMs) {
+        const sm = A['ultimate-smoke'], i = this.extraFrame(sm, tr.t - P.sitMs, P.smokeMs);
+        att.extraPose = { anim: 'ultimate-smoke', frame: i };
+        // Fuma: recupera vida y baja el puntillo.
+        att.hp = Math.min(att.maxHp, att.hp + P.heal * att.maxHp * dt / P.smokeMs);
+        att.relief += P.relief * dt / P.smokeMs;
+        if (sm.emit !== undefined && i === sm.emit && tr.emitted !== i) {
+          tr.emitted = i;
+          const mouth = sm.mouth && sm.mouth[i];
+          if (mouth && att.extras.smoke) this.pitiFx.push({ kind: 'smoke', ...this.extraPoint(att, sm, mouth), t: 0, life: att.extras.def.smoke.frames * att.extras.def.smoke.ms, c: att });
+        }
+      } else {
+        const u = tr.t - P.sitMs - P.smokeMs, ri = A['ultimate-rise'];
+        att.extraPose = { anim: 'ultimate-rise', frame: this.extraFrame(ri, u, riseMs) };
+        if (!tr.popped) { tr.popped = true; this.popup(att, '+' + Math.round(att.hp - tr.healed) + ' VIDA', '#8bf2ce'); }
+        if (!tr.flicked && u >= P.flickMs) { tr.flicked = true; this.spawnChina(att, tr.def, this.extraPoint(att, ri, [134, 132])); }
+      }
+      if (tr.t >= P.sitMs + P.smokeMs + riseMs) this.cancelTruce();
+    }
+
+    cancelTruce() {
+      const tr = this.truce;
+      if (!tr) return;
+      tr.att.locked = false; tr.att.extraPose = null; tr.att.f.play('idle', true);
+      this.truce = null;
+    }
+
+    /** La china del cigarro: vuela recta hacia el rival y, si le da, lo manda para atrás. */
+    spawnChina(owner, target, from) {
+      const hb = target.f.getHurtbox();
+      let dx = hb.x + hb.w / 2 - from.x, dy = hb.y + hb.h * 0.35 - from.y;
+      if (Math.sign(dx) !== owner.facing) { dx = owner.facing; dy = 0; }
+      const len = R.dhypot(dx, dy) || 1, sp = R.PITI.chinaSpeed;
+      this.chinas.push({ owner, target, x: from.x, y: from.y, vx: dx / len * sp, vy: dy / len * sp, age: 0, trail: [] });
+      this.sfx('swing');
+    }
+
+    updateChinas(dt) {
+      for (const d of this.chinas) {
+        let left = dt;
+        while (left > 0 && !d.dead) {
+          const ms = Math.min(16, left); left -= ms;
+          const ax = d.x, ay = d.y;
+          d.x += d.vx * ms / 1000; d.y += d.vy * ms / 1000; d.age += ms;
+          d.trail.push({ x: d.x, y: d.y }); if (d.trail.length > 6) d.trail.shift();
+          if (this.phase === 'fight' && d.target.state !== 'ko' && !d.target.downed) {
+            const t = BottleSystem.segmentBox(ax, ay, d.x, d.y, d.target.f.getHurtbox(), 6);
+            if (t !== null) {
+              d.x = ax + (d.x - ax) * t; d.y = ay + (d.y - ay) * t; d.dead = true;
+              this.applyHit(d.owner, d.target, 'china', d.x, d.y);
+              this.popup(d.target, '¡LA CHINA!', '#ff9a4a');
+            }
+          }
+          if (d.x < -120 || d.x > 1080 || d.y < -100 || d.y > 560 || d.age > 1500) d.dead = true;
+        }
+      }
+      this.chinas = this.chinas.filter((d) => !d.dead);
+    }
+
+    /** Entrada en patinete (primer asalto): devuelve lo que dura, o 0 si no tiene. */
+    startEntrance(f) {
+      const E = f.extras && f.extras.def.entrance;
+      if (!E) return 0;
+      const A = f.extras.def.anims, seq = E.sequence;
+      const sum = (n) => A[n] ? A[n].frames.reduce((k, fr) => k + fr[2], 0) : 0;
+      const e = { t: 0, seq, ride: E.rideMs, brake: sum(seq[1]), off: sum(seq[2]) };
+      e.total = e.ride + e.brake + e.off;
+      e.dx0 = (f.facing > 0 ? -200 : 1160) - f.f.x;   // empieza fuera de la pantalla, por su lado
+      f.entrance = e;
+      return e.total;
+    }
+
+    updateEntrances(dt) {
+      for (const f of this.fighters) {
+        const e = f.entrance;
+        if (!e) continue;
+        e.t += dt;
+        const A = f.extras.def.anims;
+        if (e.t < e.ride) {
+          const u = e.t / e.ride, k = 1 - (1 - u) * (1 - u);       // frena al llegar
+          const ride = A[e.seq[0]];
+          f.extraPose = { anim: e.seq[0], frame: this.extraFrame(ride, e.t % ride.frames.reduce((n, fr) => n + fr[2], 0)), dx: e.dx0 * (1 - k) };
+        } else if (e.t < e.ride + e.brake) {
+          f.extraPose = { anim: e.seq[1], frame: this.extraFrame(A[e.seq[1]], e.t - e.ride) };
+          if (!e.braked) { e.braked = true; this.sfx('dash'); }
+        } else if (e.t < e.total) {
+          f.extraPose = { anim: e.seq[2], frame: this.extraFrame(A[e.seq[2]], e.t - e.ride - e.brake) };
+        } else {
+          // Se baja: el patinete se queda aparcado donde ha frenado (detrás de los luchadores).
+          f.entrance = null; f.extraPose = null;
+          const S = f.extras.def.scooter, ref = A[e.seq[2]].ref;
+          if (S && f.extras.scooter) this.parked.push({ img: f.extras.scooter, def: S, x: f.f.x + (S.at[0] - ref[0]) * f.S * f.facing, flip: f.facing < 0, s: f.S });
+        }
+      }
+    }
+
+    drawParked(c) {
+      for (const p of this.parked) {
+        c.save(); c.imageSmoothingEnabled = false;
+        c.translate(Math.round(p.x), C.GROUND);
+        c.scale(p.s * p.def.scale * (p.flip ? -1 : 1), p.s * p.def.scale);
+        c.drawImage(p.img, -p.def.anchor[0], -p.def.anchor[1]);
+        c.restore();
+      }
+    }
+
+    drawPiti(c) {
+      for (const e of this.pitiFx) {
+        const D = e.c.extras.def.smoke, img = e.c.extras.smoke;
+        if (!img) continue;
+        const i = Math.min(D.frames - 1, Math.floor(e.t / D.ms));
+        c.save(); c.imageSmoothingEnabled = false; c.globalAlpha = D.opacity;
+        c.translate(Math.round(e.x), Math.round(e.y));
+        c.scale(e.c.S * e.c.facing, e.c.S);
+        c.drawImage(img, i * D.cell[0], 0, D.cell[0], D.cell[1], -D.anchor[0], -D.anchor[1], D.cell[0], D.cell[1]);
+        c.restore();
+      }
+      // La china: colilla con la brasa encendida y una estela de chispas.
+      for (const d of this.chinas) {
+        c.save();
+        for (let i = 0; i < d.trail.length; i++) {
+          const p = d.trail[i], k = (i + 1) / d.trail.length;
+          c.fillStyle = 'rgba(255,' + Math.round(120 + 100 * k) + ',60,' + (0.5 * k) + ')';
+          c.fillRect(p.x - 2, p.y - 2, 4, 4);
+        }
+        c.translate(d.x, d.y); c.rotate(d.age / 40);
+        c.fillStyle = '#1b1414'; c.fillRect(-8, -3, 16, 6);
+        c.fillStyle = '#d9913e'; c.fillRect(-7, -2, 6, 4);
+        c.fillStyle = '#f2efe6'; c.fillRect(-1, -2, 5, 4);
+        c.fillStyle = (this.t % 120) < 60 ? '#ff5a1e' : '#ffb347'; c.fillRect(4, -2, 3, 4);
+        c.restore();
+      }
+    }
+
     callPolice() {
       if (!this.police || this.police.active) return;
       // Los agentes se colocan entre los dos luchadores.
@@ -412,7 +607,7 @@
         if (f.state !== 'ko') { f.state = 'ready'; f.f.play('idle', true); }
         f.smoking = null; f.faintT = 0; f.pending = [];
       }
-      this.cancelGrab();
+      this.cancelGrab(); this.cancelTruce(); this.chinas = [];
       this.bottles.reset(); this.darts = []; this.superFreeze = 0; this.slowmo = 0;
       const [ax, bx] = this.policeData.settings.officerTargetX;
       const mid = (ax + bx) / 2;
@@ -500,6 +695,12 @@
     }
 
     controls(c, brain, opp, actions, dt) {
+      const ctl = this.rawControls(c, brain, opp, actions, dt);
+      // Pausa para el piti: el rival no se mueve ni ataca; solo puede fumar.
+      if (this.truce && c !== this.truce.att) return { left: false, right: false, up: false, block: false, actions: (ctl.actions || []).filter((a) => a === 'smoke') };
+      return ctl;
+    }
+    rawControls(c, brain, opp, actions, dt) {
       if (this.netInputs) {
         const k = c === this.p1 ? 0 : 1, i = this.netInputs[k];
         this.netConsumed[k] = true;
@@ -533,11 +734,22 @@
       this.phaseT += dt;
 
       if (this.phase === 'intro') {
-        if (this.phaseT > 950 && !this.fightCalled) { this.fightCalled = true; this.setBanner('¡PELEA!', '#ff4d5e'); this.sfx('fight'); }
-        if (this.phaseT > 1650) { this.phase = 'fight'; this.banner = null; for (const f of this.fighters) f.state = 'fight'; }
+        this.updateEntrances(dt);
+        if (this.phaseT > this.fightCallMs && !this.fightCalled) { this.fightCalled = true; this.setBanner('¡PELEA!', '#ff4d5e'); this.sfx('fight'); }
+        if (this.phaseT > this.introMs) {
+          this.phase = 'fight'; this.banner = null;
+          for (const f of this.fighters) {
+            f.state = 'fight';
+            // STAB: si lleva su bebida o su tabaco, se avisa al empezar la pelea.
+            const st = f.loadout.stab;
+            if (this.round === 1 && st && st.mult > 1) this.popup(f, '★ STAB ×' + String(Math.round(st.mult * 100) / 100).replace('.', ',') + ' FUERZA', '#ffd76a');
+          }
+        }
       } else if (this.phase === 'fight') {
-        this.timer = Math.max(0, this.timer - dt / 1000);
-        this.matchTime += dt / 1000;
+        if (!this.truce) {   // durante la pausa para el piti no corre el reloj
+          this.timer = Math.max(0, this.timer - dt / 1000);
+          this.matchTime += dt / 1000;
+        }
         if (this.timer <= 0) this.timeUp();
         if (this.wild) {
           const ch = this.chaos();
@@ -560,7 +772,7 @@
         if (this.phaseT > 2600 && !this.ended) { this.ended = true; this.o.onEnd && this.o.onEnd(this.result()); }
       }
       if (this.police) {
-        if (this.phase === 'fight' && !this.police.active) {
+        if (this.phase === 'fight' && !this.police.active && !this.truce) {
           const drunk = this.intoxOf(this.p1) + this.intoxOf(this.p2);
           this.noise = Math.max(0, this.noise + (R.NOISE.drunkPerSec * drunk - R.NOISE.decayPerSec) * dt / 1000);
           if (this.noise >= R.NOISE.max) this.callPolice();
@@ -572,17 +784,22 @@
       }
 
       this.updateGrab(dt);
+      this.updateTruce(dt);
       const c1 = this.controls(this.p1, this.brain1, this.p2, actions, dt);
       const c2 = this.controls(this.p2, this.brain2, this.p1, [], dt);
       this.updateThrow(dt, c1, c2);
       this.p1.update(dt, c1, this.p2, this);
       this.p2.update(dt, c2, this.p1, this);
       this.resolvePush();
-      if (this.phase === 'fight') this.checkMelee();
-      const targets = this.phase === 'fight' ? [this.p1.f, this.p2.f] : [];
+      // Durante la pausa para el piti nadie hace daño (solo la china, al final).
+      if (this.phase === 'fight' && !this.truce) this.checkMelee();
+      const targets = this.phase === 'fight' && !this.truce ? [this.p1.f, this.p2.f] : [];
       this.bottles.update(dt, [this.p1.f, this.p2.f], targets);
       this.collectDartEvents();
       this.updateDarts(dt);
+      this.updateChinas(dt);
+      for (const e of this.pitiFx) e.t += dt;
+      this.pitiFx = this.pitiFx.filter((e) => e.t < e.life);
       for (const c of this.fighters) if (c.dropCig) { c.dropCig = false; this.popup(c, '¡SE LE CAE EL PITILLO!', '#ff8a7a'); }
 
       const mid = (this.p1.cx + this.p2.cx) / 2;
@@ -745,9 +962,10 @@
     applyHit(att, def, kind, x, y) {
       const stunned = def.hitstun > 0;
       const n = stunned ? att.combo + 1 : 1;
-      const sc = kind === 'dart' ? { damage: 1, knockback: 1, hitstun: 1 } : R.comboScale(n);
+      const ult = kind === 'dart' || kind === 'china';   // ultimates a distancia: sin escala de combo
+      const sc = ult ? { damage: 1, knockback: 1, hitstun: 1 } : R.comboScale(n);
       const mv = R.MOVES[kind];
-      const melee = kind !== 'bottle' && kind !== 'dart';
+      const melee = kind !== 'bottle' && !ult;
       // ¿Le pillas arrancando un golpe («contra») o recuperándose de uno («castigo»)?
       const type = !stunned && !mv.unblockable && def.state === 'fight' ? R.hitType(def.attackPhase()) : null;
       const tm = R.hitTypeMult(type);
@@ -756,7 +974,7 @@
       if (this.wild && def === this.p1 && this.levelOf(def) > 0.6 && Math.random() < 0.25) this.say(def, 'gotHit');
       const res = def.takeHit(kind, dmg, att.cx, { hitstun: mv.hitstun * sc.hitstun * tm.hitstun, knockback: mv.knockback * sc.knockback, pushMult: sc.knockback });
       if (res === 'miss') return;
-      this.addNoise(res === 'block' || res === 'parry' ? R.NOISE.block : res === 'ko' ? R.NOISE.ko : kind === 'dart' ? R.NOISE.dart : R.NOISE.hit);
+      this.addNoise(res === 'block' || res === 'parry' ? R.NOISE.block : res === 'ko' ? R.NOISE.ko : ult ? R.NOISE.dart : R.NOISE.hit);
       // La patada en picado rebota en el rival (al dar, al bloquearla o al rechazarla).
       const bounce = (k) => {
         if (kind !== 'dive' || !att.air) return;
@@ -806,7 +1024,7 @@
       }
       if (kind === 'punch' || kind === 'kick') att.hitConfirm = att.f.actionId;
       this.spark(x, y, kind === 'bottle' ? 'bottle' : kind === 'dart' ? 'dart' : kind === 'punch' || kind === 'airPunch' ? 'hit' : 'hitHeavy');
-      this.sfx(kind === 'kick' || kind === 'dive' || kind === 'gancho' ? 'kick' : kind === 'dart' ? 'dartHit' : 'punch');
+      this.sfx(kind === 'kick' || kind === 'dive' || kind === 'gancho' ? 'kick' : ult ? 'dartHit' : 'punch');
       if (type) { this.popup(def, type === 'counter' ? '¡CONTRA!' : '¡CASTIGO!', type === 'counter' ? '#ffb347' : '#ff6a5a'); this.sfx('counter'); }
       bounce(1);
       att.combo = n;
@@ -814,13 +1032,13 @@
       if (n >= 2) this.popup(att, n + ' GOLPES', '#8bf2ce');
       if (att === this.p1) this.stats.maxCombo = Math.max(this.stats.maxCombo, n);
       // El ultimate se carga encadenando golpes.
-      if (att.hasSpecial && kind !== 'dart' && !att.meterFull) {
+      if (att.hasSpecial && !ult && !att.meterFull) {
         att.meter = Math.min(R.METER_MAX, att.meter + R.meterGain(n));
         if (att.meterFull) { this.popup(att, '¡' + att.char.special.short + ' LISTO!', '#f8ce73'); this.sfx('ready'); }
       }
       if (kind === 'dart' && att === this.p1) this.stats.ultimates++;
-      this.hitstop = res === 'ko' ? 170 : kind === 'dart' ? 220 : kind === 'gancho' ? 120 : kind === 'kick' || type ? 95 : kind === 'dive' ? 80 : 65;
-      this.shake = res === 'ko' || kind === 'dart' ? 14 : kind === 'punch' || kind === 'airPunch' ? 5 : 8;
+      this.hitstop = res === 'ko' ? 170 : kind === 'dart' ? 220 : kind === 'china' ? 150 : kind === 'gancho' ? 120 : kind === 'kick' || type ? 95 : kind === 'dive' ? 80 : 65;
+      this.shake = res === 'ko' || ult ? 14 : kind === 'punch' || kind === 'airPunch' ? 5 : 8;
       if (res === 'ko') this.onKO(att, def);
     }
 
@@ -911,6 +1129,7 @@
           if (this.police) this.police.drawBack(c, { flashes: !reduce });
           const soaking = this.grab && this.grab.phase === 'soak';
           if (this.fountain) this.fountain.drawBack(c, !soaking);
+          if (this.parked.length) this.drawParked(c);
           for (const f of this.fighters) if (f.state !== 'soaked' && f.state !== 'grabbed') f.drawShadow(c);
           if (I > 0.15) {
             const g = { ghost: true, alpha: Math.min(0.45, 0.32 * I), dx: Math.sin(this.t / 420) * 22 * I * W, dy: Math.cos(this.t / 610) * 6 * I * W };
@@ -921,11 +1140,12 @@
             const p = f.draw(c, this.assets.combatFx ? { fx: true } : undefined);
             if (p.item) {
               const w = f.f.worldPoint(p.item);
-              this.bottles.drawItem(c, w.x, w.y + p.dy, C.S, p.item.rotation || 0, f.facing);
+              this.bottles.drawItem(c, w.x, w.y + p.dy, f.S, p.item.rotation || 0, f.facing);
             }
           }
           this.bottles.draw(c, [this.p1.f, this.p2.f]);
           this.drawDarts(c);
+          this.drawPiti(c);
           if (this.fountain) { if (soaking) this.fountain.drawFront(c); else this.fountain.drawDrops(c); }
           if (this.police) this.police.drawFront(c);
           this.drawWorldFx(c);
@@ -972,7 +1192,7 @@
       for (const w of this.waterFx) {
         const f = w.c;
         if (f.state === 'soaked' || f.state === 'grabbed') continue;
-        draw(c, w.img, w.def, Math.floor(w.t / w.def.ms), f.cx, C.GROUND + f.y, C.S, 0.9, f.facing < 0);
+        draw(c, w.img, w.def, Math.floor(w.t / w.def.ms), f.cx, C.GROUND + f.y, f.S, 0.9, f.facing < 0);
       }
     }
 
@@ -1091,8 +1311,8 @@
           if (f.state !== 'fight') continue;
           const head = f.f.worldPoint({ x: 84, y: 14 });
           // Guardia rota: chapas dando vueltas sobre la cabeza. Sin fuelle: sudor.
-          if (f.dizzyT > 0 && FX.chapas) { const d = D.fx.chapas; cell(FX.chapas, d, Math.floor(f.t / d.ms) % d.cols, 0, head.x, head.y - 16, C.S); }
-          else if (f.exhausted && FX.sweat) { const d = D.fx.sweat; cell(FX.sweat, d, Math.floor(f.t / d.ms) % d.cols, 0, head.x + f.facing * 26, head.y + 30, C.S); }
+          if (f.dizzyT > 0 && FX.chapas) { const d = D.fx.chapas; cell(FX.chapas, d, Math.floor(f.t / d.ms) % d.cols, 0, head.x, head.y - 16, f.S); }
+          else if (f.exhausted && FX.sweat) { const d = D.fx.sweat; cell(FX.sweat, d, Math.floor(f.t / d.ms) % d.cols, 0, head.x + f.facing * 26, head.y + 30, f.S); }
         }
       }
       for (const sm of this.smokes) {
@@ -1215,7 +1435,7 @@
         ctx.font = 'bold 20px ' + FONT; ctx.textAlign = side === 1 ? 'left' : 'right';
         ctx.lineWidth = 4; ctx.strokeStyle = '#05070c'; ctx.fillStyle = '#fff';
         const nx = side === 1 ? x : x + w;
-        const label = c.char.name.toUpperCase() + (this.net ? (c === this.viewer ? '  · TÚ' : '  · RIVAL') : c === this.p2 ? '  · CPU' : '');
+        const label = c.char.name.toUpperCase() + (c.loadout.stab && c.loadout.stab.mult > 1 ? ' ★' : '') + (this.net ? (c === this.viewer ? '  · TÚ' : '  · RIVAL') : c === this.p2 ? '  · CPU' : '');
         ctx.strokeText(label, nx, y + h + 24 + yo); ctx.fillText(label, nx, y + h + 24 + yo);
         // marcador de puntos (solo de quien juega)
         if (this.isHuman(c)) {
@@ -1311,6 +1531,12 @@
       ctx.font = 'bold 34px ' + FONT; ctx.textAlign = 'center';
       ctx.fillStyle = this.timer <= 10 ? '#ff4d5e' : '#fff';
       ctx.fillText(String(Math.ceil(this.timer)).padStart(2, '0'), 480, 52);
+      if (this.truce) {
+        // Pausa para el piti: el reloj está parado.
+        ctx.font = 'bold 13px ' + FONT; ctx.lineWidth = 3; ctx.strokeStyle = '#05070c';
+        ctx.fillStyle = (this.t % 600) < 300 ? '#f8ce73' : '#fff';
+        ctx.strokeText('⏸ PAUSA · NO CORRE EL RELOJ', 480, 136); ctx.fillText('⏸ PAUSA · NO CORRE EL RELOJ', 480, 136);
+      }
       if (this.police) {
         // Medidor de ruido bajo el reloj.
         const nw = 120, nx = 420, ny = 108, k = this.noise / R.NOISE.max;

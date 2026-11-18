@@ -1,0 +1,1036 @@
+{
+  "id": "rizos-ultimate-patinete",
+  "characterId": "rizos",
+  "integrationStatus": "NOT_INTEGRATED",
+  "baseCharacter": "personaje-base/fighter.json",
+  "image": "extras-atlas.png",
+  "frameSize": [
+    256,
+    224
+  ],
+  "columns": 6,
+  "rows": 6,
+  "anchor": [
+    72,
+    208
+  ],
+  "facing": "right",
+  "compositeFramesContainActorAndProp": true,
+  "smokeIsSeparate": true,
+  "animations": {
+    "ultimate-sit": {
+      "file": "tiras/ultimate-sit.png",
+      "row": 0,
+      "frameCount": 6,
+      "loop": false,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            0,
+            256,
+            224
+          ],
+          "stripRect": [
+            0,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            66,
+            66,
+            177,
+            209
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            0,
+            256,
+            224
+          ],
+          "stripRect": [
+            256,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            66,
+            69,
+            165,
+            209
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            0,
+            256,
+            224
+          ],
+          "stripRect": [
+            512,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 140,
+          "bbox": [
+            67,
+            75,
+            154,
+            209
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            0,
+            256,
+            224
+          ],
+          "stripRect": [
+            768,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 180,
+          "bbox": [
+            64,
+            59,
+            130,
+            209
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            1024,
+            0,
+            256,
+            224
+          ],
+          "stripRect": [
+            1024,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 160,
+          "bbox": [
+            63,
+            60,
+            131,
+            209
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            1280,
+            0,
+            256,
+            224
+          ],
+          "stripRect": [
+            1280,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 180,
+          "bbox": [
+            65,
+            61,
+            131,
+            209
+          ]
+        }
+      ]
+    },
+    "ultimate-smoke": {
+      "file": "tiras/ultimate-smoke.png",
+      "row": 1,
+      "frameCount": 6,
+      "loop": true,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            224,
+            256,
+            224
+          ],
+          "stripRect": [
+            0,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 300,
+          "bbox": [
+            70,
+            57,
+            139,
+            209
+          ],
+          "mouthSocket": [
+            109,
+            80
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            224,
+            256,
+            224
+          ],
+          "stripRect": [
+            256,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 400,
+          "bbox": [
+            70,
+            57,
+            139,
+            209
+          ],
+          "mouthSocket": [
+            109,
+            80
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            224,
+            256,
+            224
+          ],
+          "stripRect": [
+            512,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 300,
+          "bbox": [
+            70,
+            57,
+            139,
+            209
+          ],
+          "mouthSocket": [
+            109,
+            80
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            224,
+            256,
+            224
+          ],
+          "stripRect": [
+            768,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 300,
+          "bbox": [
+            72,
+            57,
+            140,
+            209
+          ],
+          "mouthSocket": [
+            110,
+            80
+          ],
+          "events": [
+            {
+              "type": "emit-effect",
+              "effect": "smoke",
+              "socket": "mouthSocket"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            1024,
+            224,
+            256,
+            224
+          ],
+          "stripRect": [
+            1024,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 400,
+          "bbox": [
+            71,
+            57,
+            140,
+            209
+          ],
+          "mouthSocket": [
+            110,
+            80
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            1280,
+            224,
+            256,
+            224
+          ],
+          "stripRect": [
+            1280,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 300,
+          "bbox": [
+            71,
+            57,
+            140,
+            209
+          ],
+          "mouthSocket": [
+            110,
+            80
+          ]
+        }
+      ]
+    },
+    "ultimate-rise": {
+      "file": "tiras/ultimate-rise.png",
+      "row": 2,
+      "frameCount": 6,
+      "loop": false,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            448,
+            256,
+            224
+          ],
+          "stripRect": [
+            0,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 100,
+          "bbox": [
+            66,
+            75,
+            149,
+            209
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            448,
+            256,
+            224
+          ],
+          "stripRect": [
+            256,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            66,
+            79,
+            150,
+            209
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            448,
+            256,
+            224
+          ],
+          "stripRect": [
+            512,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            64,
+            84,
+            157,
+            209
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            448,
+            256,
+            224
+          ],
+          "stripRect": [
+            768,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 150,
+          "bbox": [
+            65,
+            75,
+            156,
+            209
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            1024,
+            448,
+            256,
+            224
+          ],
+          "stripRect": [
+            1024,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            66,
+            66,
+            167,
+            209
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            1280,
+            448,
+            256,
+            224
+          ],
+          "stripRect": [
+            1280,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 150,
+          "bbox": [
+            65,
+            70,
+            175,
+            209
+          ],
+          "handoffActorAnchor": [
+            118,
+            208
+          ],
+          "events": [
+            {
+              "type": "return-to-base",
+              "animation": "idle",
+              "actorAnchorInCell": [
+                118,
+                208
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "scooter-ride": {
+      "file": "tiras/scooter-ride.png",
+      "row": 3,
+      "frameCount": 6,
+      "loop": true,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            672,
+            256,
+            224
+          ],
+          "stripRect": [
+            0,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            60,
+            62,
+            180,
+            209
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            672,
+            256,
+            224
+          ],
+          "stripRect": [
+            256,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            56,
+            64,
+            180,
+            209
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            672,
+            256,
+            224
+          ],
+          "stripRect": [
+            512,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            60,
+            61,
+            180,
+            209
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            672,
+            256,
+            224
+          ],
+          "stripRect": [
+            768,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            61,
+            60,
+            180,
+            209
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            1024,
+            672,
+            256,
+            224
+          ],
+          "stripRect": [
+            1024,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            60,
+            66,
+            180,
+            209
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            1280,
+            672,
+            256,
+            224
+          ],
+          "stripRect": [
+            1280,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            60,
+            58,
+            180,
+            209
+          ]
+        }
+      ]
+    },
+    "scooter-brake": {
+      "file": "tiras/scooter-brake.png",
+      "row": 4,
+      "frameCount": 6,
+      "loop": false,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            896,
+            256,
+            224
+          ],
+          "stripRect": [
+            0,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 100,
+          "bbox": [
+            61,
+            63,
+            181,
+            209
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            896,
+            256,
+            224
+          ],
+          "stripRect": [
+            256,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 100,
+          "bbox": [
+            62,
+            65,
+            182,
+            209
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            896,
+            256,
+            224
+          ],
+          "stripRect": [
+            512,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 100,
+          "bbox": [
+            62,
+            66,
+            182,
+            209
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            896,
+            256,
+            224
+          ],
+          "stripRect": [
+            768,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 100,
+          "bbox": [
+            60,
+            68,
+            180,
+            209
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            1024,
+            896,
+            256,
+            224
+          ],
+          "stripRect": [
+            1024,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 100,
+          "bbox": [
+            60,
+            69,
+            180,
+            209
+          ]
+        },
+        {
+          "index": 5,
+          "rect": [
+            1280,
+            896,
+            256,
+            224
+          ],
+          "stripRect": [
+            1280,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 100,
+          "bbox": [
+            61,
+            61,
+            181,
+            209
+          ]
+        }
+      ]
+    },
+    "scooter-dismount": {
+      "file": "tiras/scooter-dismount.png",
+      "row": 5,
+      "frameCount": 4,
+      "loop": false,
+      "frames": [
+        {
+          "index": 0,
+          "rect": [
+            0,
+            1120,
+            256,
+            224
+          ],
+          "stripRect": [
+            0,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            60,
+            66,
+            180,
+            209
+          ]
+        },
+        {
+          "index": 1,
+          "rect": [
+            256,
+            1120,
+            256,
+            224
+          ],
+          "stripRect": [
+            256,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            60,
+            66,
+            180,
+            209
+          ]
+        },
+        {
+          "index": 2,
+          "rect": [
+            512,
+            1120,
+            256,
+            224
+          ],
+          "stripRect": [
+            512,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            60,
+            66,
+            180,
+            209
+          ]
+        },
+        {
+          "index": 3,
+          "rect": [
+            768,
+            1120,
+            256,
+            224
+          ],
+          "stripRect": [
+            768,
+            0,
+            256,
+            224
+          ],
+          "empty": false,
+          "durationMs": 120,
+          "bbox": [
+            60,
+            67,
+            180,
+            209
+          ],
+          "handoffActorAnchor": [
+            98,
+            208
+          ],
+          "events": [
+            {
+              "type": "return-to-base",
+              "animation": "idle",
+              "actorAnchorInCell": [
+                98,
+                208
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "rect": [
+            1024,
+            1120,
+            256,
+            224
+          ],
+          "stripRect": [
+            1024,
+            0,
+            256,
+            224
+          ],
+          "empty": true,
+          "durationMs": 0,
+          "bbox": null
+        },
+        {
+          "index": 5,
+          "rect": [
+            1280,
+            1120,
+            256,
+            224
+          ],
+          "stripRect": [
+            1280,
+            0,
+            256,
+            224
+          ],
+          "empty": true,
+          "durationMs": 0,
+          "bbox": null
+        }
+      ]
+    }
+  },
+  "objects": {
+    "stool": {
+      "image": "objetos/taburete.png",
+      "cell": [
+        128,
+        144
+      ],
+      "anchor": [
+        64,
+        136
+      ],
+      "suggestedScale": 0.56
+    },
+    "scooter": {
+      "image": "objetos/patinete.png",
+      "cell": [
+        192,
+        176
+      ],
+      "anchor": [
+        96,
+        160
+      ],
+      "suggestedScale": 0.75,
+      "front": "right"
+    },
+    "smokingKit": {
+      "image": "objetos/kit-cigarrillo.png",
+      "cell": [
+        48,
+        48
+      ],
+      "columns": 6,
+      "states": [
+        "cigaretteUnlit",
+        "cigaretteLit",
+        "cigaretteInhale",
+        "lighterClosed",
+        "lighterLit",
+        "ash"
+      ],
+      "suggestedCigaretteScale": 0.3,
+      "note": "Optional standalone accessories; the tiny cigarette is already included in smoking character frames."
+    }
+  },
+  "effects": {
+    "smoke": {
+      "image": "efectos/humo.png",
+      "cell": [
+        96,
+        128
+      ],
+      "anchor": [
+        17,
+        87
+      ],
+      "frameCount": 6,
+      "durationMs": 90,
+      "opacity": 0.75,
+      "loop": false
+    }
+  },
+  "timelines": {
+    "ultimate": {
+      "sequence": [
+        "ultimate-sit",
+        "ultimate-smoke",
+        "ultimate-smoke",
+        "ultimate-rise"
+      ],
+      "visualOnly": true
+    },
+    "entrance": {
+      "sequence": [
+        "scooter-ride",
+        "scooter-brake",
+        "scooter-dismount"
+      ],
+      "fromX": -160,
+      "toX": 180,
+      "rideTravelMs": 1200,
+      "visualOnly": true
+    }
+  },
+  "notes": [
+    "New animations use 256x224 cells and anchor72,208; base fighter stays192x176 anchor56,160. Do not crop or centre visible bounds.",
+    "Use composites directly OR independent props in a custom rig, not both simultaneously.",
+    "Dismount uses four frames, then hands control to base idle; last two cells are empty."
+  ]
+}

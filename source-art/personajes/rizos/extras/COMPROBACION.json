@@ -1,0 +1,43 @@
+{
+  "result": "PASS",
+  "newVisiblePoses": 34,
+  "newEmptyCells": 2,
+  "baseVisiblePoses": 94,
+  "totalCharacterPoses": 128,
+  "newSequences": 6,
+  "newCellSize": [
+    256,
+    224
+  ],
+  "newAnchor": [
+    72,
+    208
+  ],
+  "atlasSize": [
+    1536,
+    1344
+  ],
+  "stoolAndScooterStandalone": true,
+  "smokingKitStates": 6,
+  "smokeEffectFrames": 6,
+  "smokeSeparate": true,
+  "compositeCharacterFramesIncludeProps": true,
+  "alpha": "binary composites and objects; translucent smoke",
+  "allNewCellsInsideBounds": true,
+  "atlasMatchesStrips": true,
+  "basePackageValidation": "PASS",
+  "unchangedSources": {
+    "game": {
+      "unchanged": true,
+      "files": 134
+    },
+    "character": {
+      "unchanged": true,
+      "files": 64
+    }
+  },
+  "gifFrames": {
+    "ultimate.gif": 34,
+    "entrada-patinete.gif": 32
+  }
+}

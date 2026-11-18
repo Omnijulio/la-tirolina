@@ -66,8 +66,26 @@ test('el botellín sale de la mano de cada personaje con arte propio', () => {
   }
 });
 
-test('Rizos está disponible desde el principio y sin ultimate de momento', () => {
+test('Rizos: desde el principio, bajito, tanque y con su pausa para el piti', () => {
   const rizos = CHARACTERS.find((c) => c.id === 'rizos');
+  const others = CHARACTERS.filter((c) => c.id !== 'rizos');
   assert.ok(rizos && rizos.unlock.start);
-  assert.equal(rizos.special, undefined);
+  assert.equal(rizos.special.id, 'piti');
+  assert.ok(others.every((c) => (c.size || 1) > rizos.size), 'más bajito que todos');
+  assert.ok(others.every((c) => c.stats.hp < rizos.stats.hp), 'el que más vida tiene');
+});
+
+test('la segunda hoja de Rizos (ultimate y patinete) está completa', () => {
+  const ex = ART.rizos.extras;
+  assert.ok(ex, 'falta extras en art-data.js');
+  assert.deepEqual(pngSize(ex.image), [6 * ex.cell[0], 6 * ex.cell[1]]);
+  for (const n of [...ex.ultimate.sequence, ...ex.entrance.sequence]) {
+    const a = ex.anims[n];
+    assert.ok(a && a.frames.length >= 4, n);
+    for (const [x, y, ms] of a.frames) assert.ok(x % ex.cell[0] === 0 && y % ex.cell[1] === 0 && ms > 0, n);
+    assert.equal(a.ref.length, 2, n + ': punto de enlace con el luchador');
+  }
+  const sm = ex.anims['ultimate-smoke'];
+  assert.ok(sm.emit !== undefined && sm.mouth[sm.emit], 'el humo sale de la boca');
+  for (const k of ['smoke', 'scooter']) assert.ok(fs.existsSync(path.join(root, ex[k].image)), k);
 });

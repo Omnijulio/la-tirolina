@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.13.0** (18/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.14.0** (18/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -131,6 +131,26 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - **Retrato propio** en la selección, la tienda, el ranking, la policía y los desbloqueos.
 - Si el atlas común gana filas (p. ej. el salto doble) y el suyo no, el combate le pone las poses provisionales en vez de dejarlo invisible.
 
+## Hecho en v0.14 — Ultimate de Rizos, entrada en patinete y STAB
+
+- **Ultimate de Rizos: «Pausa para el piti».** La pelea se para 2 s y el reloj no corre:
+  - Rizos se sienta en un taburete, se fuma un cigarro y recupera el 45 % de su vida.
+  - Al levantarse le lanza **la china** al rival, que no se puede bloquear: poco daño, pero lo manda para atrás y lo tumba.
+  - Mientras dura, el rival no puede moverse ni pegar, solo **fumar** (la CPU también lo hace).
+  - Ajustes en `PITI` y `MOVES.china` (`rules.js`). La CPU la usa cuando ya ha recibido.
+- **Entrada en patinete** en el primer asalto: llega desde fuera de la pantalla, frena, se baja y el patinete se queda aparcado detrás de los luchadores. La presentación se alarga lo que dura la entrada.
+- **Rizos bajito y muy tanque**: dibujado al 85 % (`size`), con sus cajas de golpe también al 85 %. Vida 150, aguante 0,4, más lento (0,86) y fuerza 0,95. Sus botellines vuelan como los de todos.
+- **STAB** (como en Pokémon): cada luchador tiene su bebida y su tabaco. Si los lleva, su fuerza se multiplica ×1,5 por cada uno (×2,25 con los dos).
+  - **Rizos**: destornillador y Ducados negros.
+  - **El Barbas**: Red Label con cola y Camel.
+  - Bebidas y tabaco nuevos en La Barra, con sus iconos: destornillador, Red Label con cola y Camel; el Ducados pasa a «Ducados negros» con cajetilla azul y blanca.
+  - Avisos con ★ en La Barra, la selección, el VS, el marcador y al empezar la pelea.
+  - La CPU pide sus cosas más cuanto más difícil (`CPU_STAB`).
+- **Arte integrado** con `tools/integrate_character.py la-trolina-rizos-ultimate-patinete`:
+  - Segunda hoja de 256×224 con ancla (72,208), con el objeto dibujado dentro.
+  - Humo, patinete suelto y punto de enlace con el luchador.
+  - Copia en `source-art/personajes/rizos/extras`.
+
 ## Próximas fases propuestas
 
 ### Fase 1b — Ajustar el combate jugando
@@ -144,7 +164,8 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 
 ### Fase 2 — Identidad de personajes
 - [ ] Arte propio para cada luchador (fotos de cada amigo → sprites como El Barbas). Hecho: **Rizos** (v0.13); el resto, con `tools/integrate_character.py`.
-- [ ] Ultimate de Rizos (pendiente de diseño) y su nombre definitivo.
+- [x] Ultimate de Rizos (v0.14). Pendiente: ajustar curación, empuje y daño jugando, y su nombre definitivo.
+- [ ] Ajustar el STAB (×1,5 por cosa) y el tanque de Rizos jugando; dar bebida y tabaco al resto de luchadores.
 - [ ] Salto doble de Rizos cuando se entregue el de El Barbas (misma tira, `combat-doublejump.png`).
 - [ ] Animaciones que faltan: caminar, salto, recibir golpe, caída/KO, victoria, beber (las del combate, encargadas en `ASSETS_COMBATE.md`).
 - [ ] Ultimate propio para el resto de personajes (la estructura `special` ya existe; p. ej. bandeja del Camarero, sprint del Runner).
