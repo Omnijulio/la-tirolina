@@ -58,7 +58,25 @@ Peticiones incorporadas, en orden:
     - **Tamaño por luchador** (`character.size`): `Combatant.S` escala el dibujo y las cajas; `MatchBottles` iguala los botellines de quien tiene otro tamaño.
     - **STAB**: `TrolinaRules.STAB`, `stabOf`, `CPU_STAB`; `computeLoadout` multiplica `power` y devuelve `stab`.
 
-El apodo **El Barbas** sigue siendo el nombre del personaje original. **Rizos** (v0.13, nombre provisional, disponible desde el principio, ultimate «Pausa para el piti» desde v0.14) tiene arte propio. Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
+21. **v0.15 — El Sombrerero, armas desarmables y «La bolsita»**.
+    - **Paquete con arma** (`la-trolina-sombrero-combate`: `con-baston/` y `sin-baston/` con 16 tiras cada uno, `extras/` con `extras.json` y `entrada.json`). `tools/integrate_character.py` genera:
+      - `assets/characters/sombrero.png` (con bastón) y `sombrero-sin-arma.png`, con las mismas celdas;
+      - `sombrero-extras.png`, segunda hoja de celdas 192×176 y ancla 56,160: ultimate con y sin bastón, recoger el bastón y entrada en bici;
+      - la bici aparcada, el bastón suelto, su icono y el soplo;
+      - en `art-data.js` → `weapon`: atlas sin arma, agarre `grip["col,fila"] = [x, y, giro]` de cada celda, objeto, icono y soplo. También `animations` (guardHit y parry con 3 fotogramas, que `Match.fighterData` aplica solo a estados de dibujo).
+    - **Armas** (`WEAPONS`, `WEAPON`, `weaponPower`, `disarms` en `rules.js`; dibujo y opción de pruebas en `game/data/weapons.js`):
+      - `Combatant.weapon`, `armed`, `setArmed` (cambia de atlas si la tiene dibujada), `gripAt`/`gripPoint`, `reachFor` (alcance en `checkMelee`) y `guardCost` en `takeHit`.
+      - Desarme en `Match.applyHit`: guardia justa a un golpe cuerpo a cuerpo, o golpe número `disarmCombo` de un combo.
+      - `Match.disarm` / `rearm` / `updateWeapons`: el arma vuela, rebota y queda en el suelo; `startPicking` / `updatePicking` / `cancelPicking` para recogerla al pasar por encima; vuelve sola a los `returnMs` y deja `graceMs` sin que se la quiten.
+      - Sin arte del arma (botellín, o bastón en otros), se dibuja encima en la mano de cada celda: `assets/characters/hands-data.js`, que genera `tools/build_hands.py`.
+    - **La bolsita**: `Match.startBolsa` / `updateBolsas` / `endBolsa` (con `superFlash`), y `MOVES.soplo` / `MOVES.remate` en `ULT_MOVES` (sin escala de combo).
+      - Con `c.bolsa`, `applyHit` y el agarre no le tocan.
+      - `blindT` dibuja la nube en la cara del rival (`drawPuffs`).
+    - **Entrada en bici**: la de Rizos, con `entrance.unarmed` para quien no lleva su arma dibujada.
+    - **Opción de pruebas**: `TROLINA_DEV.weaponPicker` en la elección de luchador (no en el multijugador); `?arma1=` / `?arma2=` con `?autoplay`. La sesión guarda `weapon.p1` / `weapon.p2` y `Game.devWeapon` lo pasa a `Match` (`p1.weapon`: id, `null` = ninguna, `undefined` = la suya).
+    - **Multijugador**: `snapshot()` incluye `ar=` (armado y tiempo sin arma) y `armas=[…]`. En red cada uno lleva la suya.
+
+El apodo **El Barbas** sigue siendo el nombre del personaje original. **Rizos** (v0.13, nombre provisional, disponible desde el principio, ultimate «Pausa para el piti» desde v0.14) tiene arte propio. **El Sombrerero** (v0.15, nombre provisional, `sombrero` en los archivos, disponible desde el principio) tiene arte propio con y sin bastón y la ultimate «La bolsita». Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
 ## Cómo está organizado el juego (v0.2)
 
@@ -81,7 +99,7 @@ Sin frameworks ni dependencias de ejecución: scripts clásicos que se cargan en
 | `game/ui/screens.js` | Pantallas: título, selección, La Barra, cinemática, VS, resultados, pausa, tienda, opciones, ayuda |
 | `game/main.js` | Arranque, carga de recursos, bucle y flujo entre pantallas (incluida la consecuencia policial) |
 | `src/police.js`, `assets/police/` | Controlador y sprites de la intervención policial (paquete v1.4) |
-| `assets/characters/*.png` | Atlas de los 7 luchadores (mismo formato y filas que `fighter.png`) y retrato de Rizos |
+| `assets/characters/*.png` | Atlas de los 8 luchadores (mismo formato y filas que `fighter.png`), El Sombrerero también sin bastón, retratos de Rizos y El Sombrerero y sus segundas hojas |
 | `assets/characters/art-data.js` | Generado por `tools/integrate_character.py`: lo propio de los luchadores con arte propio |
 | `assets/icons/` + `manifest.webmanifest` | Icono y manifest para instalar en la pantalla de inicio |
 
@@ -157,7 +175,7 @@ Detalles y tabla de ruido en `POLICE.md`. Resumen: `Match` acumula `noise` (0–
 ### Economía, progreso y dificultad
 
 - Dinero en céntimos. Se empieza con 30 €. Victoria: 120 € × multiplicador de dificultad (1 / 1,5 / 2,2 / 3,2) + 30 € por asalto ganado + perfectos, tiempo sobrante, combos, ultimates acertados, “valor etílico” por botellines, jefe y primera vez. Derrota: 12 € + 6 € por asalto ganado.
-- Historia: Runner → Peñista → Camarero → Motero → Dueño (jefe). Ganar a cada uno lo desbloquea. El Barbas y Rizos están desde el principio. Tienda: personajes (120–800 €) y 4 mejoras permanentes de 3 niveles.
+- Historia: Runner → Peñista → Camarero → Motero → Dueño (jefe). Ganar a cada uno lo desbloquea. El Barbas, Rizos y El Sombrerero están desde el principio. Tienda: personajes (120–800 €) y 4 mejoras permanentes de 3 niveles.
 - Dificultad elegible en la selección y en Opciones; afecta a reacción, agresividad, guardia, antiaéreos, errores, daño y pedido de la CPU y a la recompensa.
 
 ## Kit base (v1.3, sigue vigente)
@@ -239,9 +257,10 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 
 ## Límites actuales
 
-- Las variantes de personaje son recoloreados con la misma cara; solo Rizos tiene arte propio (sin salto doble propio).
+- Las variantes de personaje son recoloreados con la misma cara; solo Rizos y El Sombrerero tienen arte propio (sin salto doble propio).
 - No hay animaciones dedicadas de caminar, salto, recibir golpe, caída ni victoria (se simulan con poses existentes).
-- Solo El Barbas (dardo), El Peñista (pilón) y Rizos (pausa para el piti) tienen ultimate; no hay agacharse ni especiales con comandos.
+- Solo El Barbas (dardo), El Peñista (pilón), Rizos (pausa para el piti) y El Sombrerero (la bolsita) tienen ultimate; no hay agacharse ni especiales con comandos.
+- Solo El Sombrerero lleva arma propia. El bastón y el botellín empuñado en otros luchadores son de pruebas y se dibujan encima, con la mano aproximada.
 - Solo El Barbas y Rizos tienen bebida y tabaco propios (STAB).
 - Lluvia y nieve son visuales: no cambian la jugabilidad.
 - Cinemáticas: solo texto y retratos provisionales.

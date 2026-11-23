@@ -21,7 +21,7 @@
       this.techTried = false;
     }
 
-    set(type, ms, parry) { this.intent = { type, until: this.t + ms, parry: !!parry }; }
+    set(type, ms, parry, x) { this.intent = { type, until: this.t + ms, parry: !!parry, x }; }
     act(a) { this.actions.push(a); }
     /** Programa una acción tras un tiempo de reacción (más corto que el de decidir). */
     soon(a, ms) { if (!this.reflex) this.reflex = { a, at: this.t + ms }; }
@@ -52,12 +52,15 @@
       const dist = Math.abs(opp.cx - me.cx);
       const toward = Math.sign(opp.cx - me.cx) || me.facing;
       const reflexMs = Math.max(70, d.reactionMs * 0.45);
+      // Rival armado (v0.15): busca más el combo y la guardia justa, que le quitan el arma.
+      const armedOpp = opp.armed && opp.graceT <= 0;
+      const comboP = Math.min(0.95, d.combo * (armedOpp ? 1.25 : 1)), parryP = Math.min(0.9, d.parry * (armedOpp ? 1.6 : 1));
 
       // Combos: un puño que conecta se encadena; puño o patada que conecta, al ultimate.
       if (me.canCancelSpecial() && this.comboAction !== me.f.actionId) {
         this.comboAction = me.f.actionId;
-        if (me.meterFull && me.char.special.id !== 'piti' && r() < d.combo) this.act('special');
-        else if (me.canCancel() && r() < d.combo) this.act(r() < 0.55 ? 'punch' : 'kick');
+        if (me.meterFull && me.char.special.id !== 'piti' && r() < comboP) this.act('special');
+        else if (me.canCancel() && r() < comboP) this.act(r() < 0.55 ? 'punch' : 'kick');
       }
 
       // Reflejos que no esperan a la siguiente decisión.
@@ -69,7 +72,7 @@
           const ms = opp.msToActive();
           if (dist < reach && ms <= 120 && opp.f.animation !== 'grab' && opp.f.animation !== 'throwBottle') {
             this.seenAction = opp.f.actionId;   // una tirada por golpe del rival
-            if (!me.blockInput && me.t - me.blockReleaseT > R().PARRY.lockoutMs && r() < d.parry) {
+            if (!me.blockInput && me.t - me.blockReleaseT > R().PARRY.lockoutMs && r() < parryP) {
               this.set('block', ms + 160, true);
             }
           }
@@ -99,6 +102,7 @@
       if (it.type === 'approach') press(toward);
       else if (it.type === 'retreat') press(-toward);
       else if (it.type === 'block') { ctl.block = true; ctl.noParry = !it.parry; }   // solo cuenta como guardia justa si la buscaba
+      else if (it.type === 'goto' && Math.abs(it.x - me.cx) > 12) press(Math.sign(it.x - me.cx));   // a por su arma
       // Sin fuelle no puede atacar: no pierde el tiempo pulsando (salta, fuma o usa el ultimate).
       ctl.actions = me.exhausted ? this.actions.filter((a) => a === 'jump' || a === 'smoke' || a === 'special') : this.actions;
       this.actions = [];
@@ -123,13 +127,21 @@
         else this.set('approach', 300);
         return;
       }
+      // Sin su arma: si está en el suelo, a por ella (pasando por encima la recoge), salvo con el rival encima.
+      const lost = me.weapon && !me.armed && match.droppedOf ? match.droppedOf(me) : null;
+      if (lost && lost.state === 'ground' && lost.w.pickup && (dist > 170 || opp.downed || opp.hitstun > 0 || r() < 0.35)) {
+        this.set('goto', 350, false, match.droppedMid(lost));
+        return;
+      }
       // Rival en el suelo: no se le puede pegar; se coloca.
       if (opp.downed) { this.set(dist > 260 ? 'approach' : 'idle', 220); return; }
       if (me.meterFull && opp.state === 'fight') {
         const sp = me.char.special.id;
         // El dardo vale a cualquier distancia; el pilón necesita estar cerca y con el rival en el suelo.
         // La pausa para el piti cura: mejor cuando ya ha recibido.
-        const ok = sp === 'fuente' ? dist < 420 && !opp.air : sp === 'piti' ? me.hp < me.maxHp * 0.75 || r() < 0.1 : dist < 850;
+        // La bolsita: soplo y bastonazo de cerca (y le devuelve el bastón si lo ha perdido).
+        const ok = sp === 'fuente' ? dist < 420 && !opp.air : sp === 'piti' ? me.hp < me.maxHp * 0.75 || r() < 0.1 :
+          sp === 'bolsa' ? dist < 300 && !opp.air : dist < 850;
         if (ok && (opp.hitstun > 0 || r() < 0.45)) { this.act('special'); return; }
       }
       const intox = match.intoxOf(me);

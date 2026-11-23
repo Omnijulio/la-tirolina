@@ -5,7 +5,7 @@
 
   const Game = {
     params,
-    assets: { characters: {}, portraits: {}, extras: {}, stage: {}, bottle: null, fountain: null, jardinera: null },
+    assets: { characters: {}, portraits: {}, extras: {}, unarmed: {}, weapons: {}, stage: {}, bottle: null, fountain: null, jardinera: null },
     stageCache: {},
     match: null, paused: false, last: null,
     session: { mode: 'quick', p1: 'barbas', p2: null, difficulty: 'normal', order: {}, cpuOrder: {}, storyIndex: 0 },
@@ -80,7 +80,16 @@
           jobs.push([ex.image, (img) => { box.sheet = img; }]);
           if (ex.smoke) jobs.push([ex.smoke.image, (img) => { box.smoke = img; }]);
           if (ex.scooter) jobs.push([ex.scooter.image, (img) => { box.scooter = img; }]);
+          if (art.weapon && art.weapon.puff) jobs.push([art.weapon.puff.image, (img) => { box.puff = img; }]);
         }
+        // Arma dibujada (v0.15): su atlas sin ella.
+        if (art.weapon && art.weapon.unarmed) jobs.push([art.weapon.unarmed, (img) => { this.assets.unarmed[id] = img; }]);
+      }
+      // Armas sueltas (al caer, en la mano de quien no la tiene dibujada) y sus iconos.
+      for (const [wid, wa] of Object.entries(root.TROLINA_WEAPON_ART || {})) {
+        const box = this.assets.weapons[wid] = { grip: wa.grip, size: wa.size || null };
+        jobs.push([wa.image, (img) => { box.img = img; }]);
+        if (wa.hud) jobs.push([wa.hud, (img) => { box.hud = img; }]);
       }
       if (root.TROLINA_FOUNTAIN_DATA) {
         this.assets.fountain = {};
@@ -225,6 +234,13 @@
       else vs();
     },
 
+    /** Arma elegida en pruebas para un lado ('p1' | 'p2'): undefined = la suya; null = ninguna. */
+    devWeapon(side) {
+      const s = this.session, w = s.mode !== 'online' && s.weapon ? s.weapon[side] : undefined;
+      if (side === 'p2' && s.mode === 'story') return undefined;
+      return w === undefined ? undefined : (w === 'none' ? null : w);
+    },
+
     startMatch() {
       const s = this.session, d = Save.data;
       const c1 = this.charById(s.p1), c2 = this.charById(s.p2);
@@ -237,8 +253,8 @@
         assets: this.assets,
         stage, stageImages: loaded || this.assets.stage,
         jardinera,
-        p1: { character: c1, loadout: R.computeLoadout(c1, s.order, d.upgrades, items, ups, { wild: s.wild, jardinera }) },
-        p2: { character: c2, loadout: R.computeLoadout(c2, s.cpuOrder, {}, items, ups, { wild: s.wild, jardinera, slots: R.cpuSlots(s.difficulty) }) },
+        p1: { character: c1, weapon: this.devWeapon('p1'), loadout: R.computeLoadout(c1, s.order, d.upgrades, items, ups, { wild: s.wild, jardinera }) },
+        p2: { character: c2, weapon: this.devWeapon('p2'), loadout: R.computeLoadout(c2, s.cpuOrder, {}, items, ups, { wild: s.wild, jardinera, slots: R.cpuSlots(s.difficulty) }) },
         wild: !!s.wild,
         difficulty: s.difficulty,
         input: this.input, sfx: Sfx, settings: d.settings,
@@ -608,7 +624,9 @@
         p2: story ? root.TROLINA_STORY[stage] : params.get('p2') || 'runner',
         difficulty: params.get('diff') || 'normal',
         order: { botellin: Number(params.get('bottles') || 4) },
-        wild: params.has('wild')
+        wild: params.has('wild'),
+        // Arma en pruebas (v0.15): ?arma1=baston|botellin|none&arma2=…
+        weapon: { p1: params.get('arma1') || undefined, p2: params.get('arma2') || undefined }
       });
       this.session.cpuOrder = R.cpuOrder(this.session.difficulty, this.charById(this.session.p2));
       this.session.fountain = R.pickFountain(Save.data.settings.fountain, Save.data.settings.fountainLight);
@@ -626,7 +644,8 @@
     },
 
     debugQuickManual() {
-      Object.assign(this.session, { mode: 'quick', wild: params.has('wild'), p1: params.get('p1') || 'barbas', p2: params.get('p2') || 'runner', order: { botellin: Number(params.get('bottles') || 3) } });
+      Object.assign(this.session, { mode: 'quick', wild: params.has('wild'), p1: params.get('p1') || 'barbas', p2: params.get('p2') || 'runner', order: { botellin: Number(params.get('bottles') || 3) },
+        weapon: { p1: params.get('arma1') || undefined, p2: params.get('arma2') || undefined } });
       this.session.cpuOrder = R.cpuOrder(this.session.difficulty, this.charById(this.session.p2));
       this.session.fountain = R.pickFountain(Save.data.settings.fountain, Save.data.settings.fountainLight);
       this.session.stage = this.pickStage();

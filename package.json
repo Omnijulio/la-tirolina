@@ -4,7 +4,7 @@
   "private": true,
   "description": "La Trolina Fighters: juego de lucha 2D en Canvas (1 jugador vs CPU), botellín compartido y escenario de tres planos",
   "scripts": {
-    "test": "node --test tests/bottle.test.cjs tests/stage.test.cjs tests/police.test.cjs tests/demo.test.cjs tests/rules.test.cjs tests/combat.test.cjs tests/net.test.cjs tests/characters.test.cjs",
+    "test": "node --test tests/bottle.test.cjs tests/stage.test.cjs tests/police.test.cjs tests/demo.test.cjs tests/rules.test.cjs tests/combat.test.cjs tests/net.test.cjs tests/characters.test.cjs tests/weapons.test.cjs",
     "build": "python3 tools/build_demo.py",
     "rebuild:assets": "python3 tools/rebuild_assets.py",
     "preview:gif": "python3 tools/render_preview.py",
