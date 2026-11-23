@@ -12,7 +12,9 @@
  *   tolerance  aguante al alcohol (0 = normal, positivo reduce el "puntillo")
  *   aim        puntería: reduce fallos e imprecisión del lanzamiento (1 = normal)
  * special: ultimate propio del personaje (se carga encadenando golpes).
- *   id 'dardo' (El Barbas), 'fuente' (El Peñista) o 'piti' (Rizos). El resto lo recibirá más adelante.
+ *   id 'dardo' (El Barbas), 'fuente' (El Peñista), 'piti' (Rizos) o 'bolsa' (El Sombrerero). El resto lo recibirá más adelante.
+ * weapon: arma que lleva (id de TrolinaRules.WEAPONS, p. ej. 'baston'). Se la pueden quitar y la recupera;
+ *   ver game/data/weapons.js. Con arte propio, su atlas sin arma está en assets/characters/art-data.js.
  * stab: su bebida y su tabaco (ids de game/data/items.js). Si los lleva, su fuerza se
  *   multiplica (TrolinaRules.STAB, como el STAB de Pokémon).
  * size: tamaño en pantalla (1 = normal). Escala el dibujo y sus cajas de golpe; los
@@ -51,6 +53,21 @@
       },
       stab: { drink: 'destornillador', smoke: 'ducados' },
       cpu: { bottles: 1, style: 'brawler' }
+    },
+    {
+      // Arte propio con y sin bastón (source-art/personajes/sombrero). Nombre provisional. Flojo a pelo
+      // y fuerte con el bastón: el rival tiene que quitárselo (guardia justa o combo) y él, recuperarlo.
+      id: 'sombrero', name: 'El Sombrerero', color: '#b4b0c4',
+      atlas: 'assets/characters/sombrero.png',
+      tagline: 'Gorro de pescador y bastón de paseo. Con el bastón no hay quien le tosa; sin él, se le ve el plumero. Llega en bici.',
+      stats: { hp: 96, power: 0.85, speed: 1.0, tolerance: 0.1, aim: 1.0 },
+      weapon: 'baston',
+      unlock: { start: true, price: 0 },
+      special: {
+        id: 'bolsa', name: 'La bolsita', short: 'BOLSA',
+        desc: 'Recupera el bastón si se le había caído, saca una bolsa blanca atada con hilo verde, se la sopla en la cara al rival y le arrea un bastonazo que lo tumba. Se carga encadenando golpes.'
+      },
+      cpu: { bottles: 1, style: 'balanced' }
     },
     {
       id: 'runner', name: 'El Runner', color: '#3fd0d4',

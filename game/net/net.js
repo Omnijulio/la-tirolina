@@ -367,10 +367,11 @@
       const f = (c) => ['hp=' + r(c.hp), 'x=' + r(c.cx), 'y=' + r(c.y), 'vx=' + r(c.vx), 'vy=' + r(c.vy), 'fu=' + r(c.fuelle),
         'st=' + c.state, 'an=' + c.f.animation + ':' + c.f.frameIndex, 'hs=' + r(c.hitstun, 0), 'bs=' + r(c.blockstun, 0),
         'dz=' + r(c.dizzyT, 0), 'dw=' + r(c.downT + c.getupT, 0), 'da=' + r(c.dashT, 0), 'gu=' + (c.guard ? 1 : 0),
-        'am=' + c.ammo, 'me=' + r(c.meter, 1), 'co=' + c.combo, 'fa=' + c.facing].join(' ');
+        'am=' + c.ammo, 'me=' + r(c.meter, 1), 'co=' + c.combo, 'fa=' + c.facing,
+        'ar=' + (c.weapon ? (c.armed ? 1 : 0) + '/' + r(c.disarmT, 0) : '-')].join(' ');
       const b = (m.bottles.projectiles || []).filter((p) => p.alive).map((p) => r(p.x, 0) + '/' + r(p.y, 0)).join(',');
       return ['t=' + this.tick, 'rng=' + this.rngCalls, 'fase=' + m.phase, 'reloj=' + r(m.timer), 'asalto=' + m.round, 'gana=' + m.wins.join('-'),
-        'bot=[' + b + ']', 'dardos=' + m.darts.length, 'agarre=' + (m.throwing ? 1 : 0) + (m.grab ? 'p' : ''),
+        'bot=[' + b + ']', 'dardos=' + m.darts.length, 'armas=[' + (m.dropped || []).map((d) => d.state + '@' + r(d.x, 0)).join(',') + ']', 'agarre=' + (m.throwing ? 1 : 0) + (m.grab ? 'p' : ''),
         '| P1 ' + f(m.p1), '| P2 ' + f(m.p2)].join(' ');
     }
 

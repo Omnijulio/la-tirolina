@@ -262,7 +262,7 @@
           <div class="roster"></div>
           <div class="detail">
             <canvas class="big" width="192" height="176"></canvas>
-            <div class="info"><h3></h3><p class="tag"></p><div class="statwrap"></div><p class="special-info"></p><p class="stab-info"></p><p class="lock muted"></p></div>
+            <div class="info"><h3></h3><p class="tag"></p><div class="statwrap"></div><p class="special-info"></p><p class="stab-info"></p><p class="weapon-info"></p><div class="dev-weapon"></div><p class="lock muted"></p></div>
           </div>
         </div>
         <footer class="actions">
@@ -313,6 +313,18 @@
         const c = chars.find((x) => x.id === chosen);
         drawPortrait(big, g.assets.characters[c.id], { crop: 'full', frame: fr, size: c.size, silhouette: step === 'p1' && !g.save.isUnlocked(c.id) });
       });
+      // Arma (v0.15). Solo en desarrollo: elegir bastón, botellín o nada para algunos luchadores (no en el multijugador).
+      const DEVW = (root.TROLINA_DEV || {}).weaponPicker;
+      const devOn = (c) => !!(DEVW && DEVW.enabled && !online && DEVW.characters.includes(c.id));
+      s.devWeapon = s.devWeapon || {};
+      const devPick = s.devWeapon[step] = s.devWeapon[step] || {};
+      const weaponOf = (c) => (devOn(c) && devPick[c.id] !== undefined ? devPick[c.id] : (c.weapon || 'none'));
+      const devBox = node.querySelector('.dev-weapon');
+      devBox.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-weapon]');
+        if (!b) return;
+        devPick[chosen] = b.dataset.weapon; root.TrolinaSfx.play('select'); refresh();
+      });
       const diffBtns = node.querySelectorAll('[data-diff]');
       const setDiff = (id) => { s.difficulty = id; d.difficulty = id; g.save.save(); diffBtns.forEach((b) => b.classList.toggle('on', b.dataset.diff === id)); };
       diffBtns.forEach((b) => b.addEventListener('click', () => { setDiff(b.dataset.diff); root.TrolinaSfx.play('select'); }));
@@ -328,6 +340,16 @@
           ? '<b>Ultimate · ' + esc(c.special.name) + ':</b> ' + esc(c.special.desc)
           : '<span class="muted">Ultimate: próximamente</span>';
         node.querySelector('.stab-info').innerHTML = c.stab ? '<b>★ STAB:</b> ' + esc(stabNames(c)) + ' (×' + String(R.STAB.drink).replace('.', ',') + ' de fuerza cada uno si los lleva)' : '';
+        const wid = weaponOf(c), w = R.WEAPONS[wid];
+        node.querySelector('.weapon-info').innerHTML = w
+          ? '<b>Arma · ' + esc(w.name) + ':</b> ×' + String(w.power).replace('.', ',') + ' de fuerza' + (w.reach >= 15 ? ', más alcance' : '') +
+            (w.guardCost < 1 ? ' y se cubre mejor' : '') + '. Se le cae con una guardia justa o un combo de ' + R.WEAPON.disarmCombo + ' golpes; ' +
+            (w.pickup ? 'la recoge al pasar por encima o vuelve sola' : 'le ponen otro') + ' a los ' + Math.round(R.WEAPON.returnMs / 1000) + ' s.'
+          : '';
+        devBox.innerHTML = devOn(c)
+          ? '<span class="dev-label">Arma (pruebas)</span><div class="seg">' + ['none'].concat(DEVW.weapons).map((id) =>
+            '<button data-weapon="' + id + '" data-silent="1"' + (id === wid ? ' class="on"' : '') + '>' + (id === 'none' ? 'Ninguna' : esc(R.WEAPONS[id].name)) + '</button>').join('') + '</div>'
+          : '';
         const locked = !g.save.isUnlocked(c.id);
         const lockTxt = locked ? (c.unlock.story !== undefined ? 'Se desbloquea al ganar el combate ' + (c.unlock.story + 1) + ' de la historia · o en la tienda por ' + money(c.unlock.price) : '') : '';
         node.querySelector('.lock').textContent = step === 'p1' ? lockTxt : (locked ? 'Como rival puedes elegirlo aunque esté bloqueado.' : '');
@@ -343,6 +365,10 @@
       };
       refresh();
       node.querySelector('[data-ok]').addEventListener('click', () => {
+        // Arma elegida en pruebas (undefined: la suya).
+        const cc = chars.find((x) => x.id === chosen);
+        s.weapon = s.weapon || {};
+        s.weapon[step] = devOn(cc) ? weaponOf(cc) : undefined;
         if (step === 'p1') {
           s.p1 = chosen; d.selected = chosen; g.save.save();
           if (story) { s.p2 = root.TROLINA_STORY[d.story.stage]; this.show('barra'); }

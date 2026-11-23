@@ -1,0 +1,5662 @@
+{
+  "id": "sombrero",
+  "name": "Sombrero",
+  "nameIsProvisional": true,
+  "frameWidth": 192,
+  "frameHeight": 176,
+  "columns": 6,
+  "anchor": {
+    "x": 56,
+    "y": 160
+  },
+  "facing": "right",
+  "variant": "con-baston",
+  "rows": 16,
+  "image": "fighter.png",
+  "strips": {
+    "idle": {
+      "file": "tiras/idle.png",
+      "guide": "guias/idle.png",
+      "row": 0,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            19,
+            141,
+            161
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            19,
+            138,
+            161
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            21,
+            137,
+            161
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            21,
+            137,
+            161
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            19,
+            138,
+            161
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            19,
+            141,
+            161
+          ]
+        }
+      ]
+    },
+    "punch": {
+      "file": "tiras/punch.png",
+      "guide": "guias/punch.png",
+      "row": 1,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            27,
+            138,
+            161
+          ],
+          "handSocket": {
+            "x": 90,
+            "y": 94,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            27,
+            132,
+            161
+          ],
+          "handSocket": {
+            "x": 80,
+            "y": 75,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            35,
+            25,
+            137,
+            161
+          ],
+          "handSocket": {
+            "x": 62,
+            "y": 54,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            27,
+            182,
+            161
+          ],
+          "handSocket": {
+            "x": 133,
+            "y": 66,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 176,
+            "y": 67,
+            "kind": "baston"
+          }
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            27,
+            165,
+            161
+          ],
+          "handSocket": {
+            "x": 120,
+            "y": 92,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            176,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            27,
+            140,
+            161
+          ],
+          "handSocket": {
+            "x": 88,
+            "y": 94,
+            "kind": "mano"
+          }
+        }
+      ]
+    },
+    "kick": {
+      "file": "tiras/kick.png",
+      "guide": "guias/kick.png",
+      "row": 2,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            26,
+            124,
+            161
+          ],
+          "handSocket": {
+            "x": 89,
+            "y": 75,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            27,
+            135,
+            161
+          ],
+          "handSocket": {
+            "x": 85,
+            "y": 85,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            37,
+            27,
+            103,
+            161
+          ],
+          "handSocket": {
+            "x": 73,
+            "y": 78,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            32,
+            27,
+            132,
+            161
+          ],
+          "handSocket": {
+            "x": 57,
+            "y": 80,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 133,
+            "y": 66,
+            "kind": "pie"
+          }
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            33,
+            27,
+            99,
+            161
+          ],
+          "handSocket": {
+            "x": 61,
+            "y": 77,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            352,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            49,
+            27,
+            121,
+            161
+          ],
+          "handSocket": {
+            "x": 84,
+            "y": 80,
+            "kind": "mano"
+          }
+        }
+      ]
+    },
+    "throwBottle": {
+      "file": "tiras/throwBottle.png",
+      "guide": "guias/throwBottle.png",
+      "row": 3,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            22,
+            135,
+            161
+          ],
+          "handSocket": {
+            "x": 120,
+            "y": 75,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            42,
+            24,
+            148,
+            161
+          ],
+          "handSocket": {
+            "x": 51,
+            "y": 99,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            18,
+            146,
+            161
+          ],
+          "handSocket": {
+            "x": 61,
+            "y": 37,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            18,
+            148,
+            161
+          ],
+          "handSocket": {
+            "x": 139,
+            "y": 50,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            19,
+            139,
+            161
+          ],
+          "handSocket": {
+            "x": 117,
+            "y": 87,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            528,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            19,
+            137,
+            161
+          ],
+          "handSocket": {
+            "x": 113,
+            "y": 66,
+            "kind": "mano"
+          }
+        }
+      ]
+    },
+    "guard": {
+      "file": "tiras/combat-guard.png",
+      "guide": "guias/combat-guard.png",
+      "row": 4,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            19,
+            138,
+            161
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            25,
+            129,
+            161
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            23,
+            146,
+            161
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            23,
+            136,
+            161
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            29,
+            150,
+            161
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            704,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            54,
+            25,
+            147,
+            161
+          ]
+        }
+      ]
+    },
+    "hit": {
+      "file": "tiras/combat-hit.png",
+      "guide": "guias/combat-hit.png",
+      "row": 5,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            23,
+            128,
+            161
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            28,
+            133,
+            161
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            31,
+            25,
+            139,
+            161
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            46,
+            140,
+            161
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            31,
+            24,
+            152,
+            138
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            880,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            30,
+            28,
+            157,
+            151
+          ]
+        }
+      ]
+    },
+    "grab": {
+      "file": "tiras/combat-grab.png",
+      "guide": "guias/combat-grab.png",
+      "row": 6,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            25,
+            140,
+            161
+          ],
+          "handSocket": {
+            "x": 131,
+            "y": 68,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            32,
+            173,
+            161
+          ],
+          "handSocket": {
+            "x": 165,
+            "y": 60,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            30,
+            177,
+            161
+          ],
+          "handSocket": {
+            "x": 160,
+            "y": 68,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 160,
+            "y": 68,
+            "kind": "agarre"
+          }
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            23,
+            154,
+            161
+          ],
+          "handSocket": {
+            "x": 126,
+            "y": 61,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            48,
+            26,
+            168,
+            162
+          ],
+          "handSocket": {
+            "x": 164,
+            "y": 65,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1056,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            23,
+            146,
+            161
+          ],
+          "handSocket": {
+            "x": 131,
+            "y": 68,
+            "kind": "mano"
+          }
+        }
+      ]
+    },
+    "grabbed": {
+      "file": "tiras/combat-grabbed.png",
+      "guide": "guias/combat-grabbed.png",
+      "row": 7,
+      "frameCount": 4,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            28,
+            133,
+            161
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            45,
+            21,
+            138,
+            145
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            23,
+            35,
+            157,
+            151
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            30,
+            28,
+            157,
+            151
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": true,
+          "airborne": false,
+          "lying": false,
+          "bbox": null
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1232,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": true,
+          "airborne": false,
+          "lying": false,
+          "bbox": null
+        }
+      ]
+    },
+    "gancho": {
+      "file": "tiras/combat-gancho.png",
+      "guide": "guias/combat-gancho.png",
+      "row": 8,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            60,
+            128,
+            161
+          ],
+          "handSocket": {
+            "x": 120,
+            "y": 102,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            41,
+            132,
+            161
+          ],
+          "handSocket": {
+            "x": 120,
+            "y": 80,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            54,
+            8,
+            127,
+            157
+          ],
+          "handSocket": {
+            "x": 119,
+            "y": 14,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 119,
+            "y": 14,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            54,
+            11,
+            123,
+            150
+          ],
+          "handSocket": {
+            "x": 103,
+            "y": 19,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            56,
+            19,
+            130,
+            155
+          ],
+          "handSocket": {
+            "x": 121,
+            "y": 52,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1408,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            23,
+            132,
+            161
+          ],
+          "handSocket": {
+            "x": 116,
+            "y": 59,
+            "kind": "mano"
+          }
+        }
+      ]
+    },
+    "air": {
+      "file": "tiras/combat-air.png",
+      "guide": "guias/combat-air.png",
+      "row": 9,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            50,
+            14,
+            121,
+            151
+          ],
+          "handSocket": {
+            "x": 109,
+            "y": 57,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            29,
+            19,
+            154,
+            151
+          ],
+          "handSocket": {
+            "x": 143,
+            "y": 47,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 143,
+            "y": 47,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            52,
+            19,
+            133,
+            114
+          ],
+          "handSocket": {
+            "x": 111,
+            "y": 67,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            2,
+            23,
+            155,
+            134
+          ],
+          "handSocket": {
+            "x": 133,
+            "y": 79,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 145,
+            "y": 121,
+            "kind": "pie"
+          }
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            19,
+            54,
+            149,
+            161
+          ],
+          "handSocket": {
+            "x": 143,
+            "y": 114,
+            "kind": "mano"
+          }
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1584,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            19,
+            138,
+            161
+          ],
+          "handSocket": {
+            "x": 112,
+            "y": 66,
+            "kind": "mano"
+          }
+        }
+      ]
+    },
+    "knockdown": {
+      "file": "tiras/combat-knockdown.png",
+      "guide": "guias/combat-knockdown.png",
+      "row": 10,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            30,
+            28,
+            157,
+            151
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": true,
+          "bbox": [
+            32,
+            69,
+            160,
+            161
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": true,
+          "bbox": [
+            23,
+            105,
+            169,
+            167
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": true,
+          "bbox": [
+            30,
+            80,
+            156,
+            164
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            42,
+            65,
+            159,
+            161
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1760,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            21,
+            137,
+            161
+          ]
+        }
+      ]
+    },
+    "jump": {
+      "file": "tiras/combat-jump.png",
+      "guide": "guias/combat-jump.png",
+      "row": 11,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            55,
+            131,
+            161
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            50,
+            14,
+            121,
+            151
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            52,
+            19,
+            133,
+            114
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            50,
+            20,
+            121,
+            157
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            19,
+            54,
+            149,
+            161
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            1936,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            52,
+            19,
+            141,
+            161
+          ]
+        }
+      ]
+    },
+    "dizzy": {
+      "file": "tiras/combat-dizzy.png",
+      "guide": "guias/combat-dizzy.png",
+      "row": 12,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            54,
+            21,
+            129,
+            161
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            25,
+            127,
+            161
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            31,
+            25,
+            139,
+            161
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            22,
+            133,
+            161
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            53,
+            48,
+            132,
+            161
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            2112,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            42,
+            42,
+            136,
+            161
+          ]
+        }
+      ]
+    },
+    "dash": {
+      "file": "tiras/combat-dash.png",
+      "guide": "guias/combat-dash.png",
+      "row": 13,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            54,
+            47,
+            165,
+            161
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            42,
+            50,
+            188,
+            161
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            55,
+            35,
+            161,
+            161
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            32,
+            24,
+            134,
+            161
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            33,
+            27,
+            114,
+            152
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            2288,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            36,
+            24,
+            147,
+            161
+          ]
+        }
+      ]
+    },
+    "walk": {
+      "file": "tiras/combat-walk.png",
+      "guide": "guias/combat-walk.png",
+      "row": 14,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            54,
+            23,
+            143,
+            161
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            50,
+            25,
+            131,
+            161
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            66,
+            24,
+            135,
+            161
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            49,
+            25,
+            138,
+            161
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            48,
+            25,
+            132,
+            161
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            2464,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            66,
+            25,
+            135,
+            161
+          ]
+        }
+      ]
+    },
+    "ko-win": {
+      "file": "tiras/combat-ko-win.png",
+      "guide": "guias/combat-ko-win.png",
+      "row": 15,
+      "frameCount": 6,
+      "frames": [
+        {
+          "index": 0,
+          "atlasRect": [
+            0,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            0,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": true,
+          "lying": false,
+          "bbox": [
+            19,
+            39,
+            163,
+            155
+          ]
+        },
+        {
+          "index": 1,
+          "atlasRect": [
+            192,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            192,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": true,
+          "bbox": [
+            38,
+            88,
+            165,
+            161
+          ]
+        },
+        {
+          "index": 2,
+          "atlasRect": [
+            384,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            384,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": true,
+          "bbox": [
+            35,
+            110,
+            176,
+            167
+          ]
+        },
+        {
+          "index": 3,
+          "atlasRect": [
+            576,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            576,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            51,
+            21,
+            137,
+            161
+          ]
+        },
+        {
+          "index": 4,
+          "atlasRect": [
+            768,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            768,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            49,
+            14,
+            125,
+            161
+          ]
+        },
+        {
+          "index": 5,
+          "atlasRect": [
+            960,
+            2640,
+            192,
+            176
+          ],
+          "stripRect": [
+            960,
+            0,
+            192,
+            176
+          ],
+          "empty": false,
+          "airborne": false,
+          "lying": false,
+          "bbox": [
+            54,
+            17,
+            140,
+            161
+          ]
+        }
+      ]
+    }
+  },
+  "animations": {
+    "idle": {
+      "label": "Guardia",
+      "strip": "idle",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": true,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 23,
+            "w": 80,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 87,
+            "y": 71,
+            "rotation": -0.5585
+          },
+          "duration": 150
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 21,
+            "w": 80,
+            "h": 140
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 86,
+            "y": 69,
+            "rotation": -0.5236
+          },
+          "duration": 150
+        },
+        {
+          "x": 384,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 17,
+            "w": 81,
+            "h": 144
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 82,
+            "y": 65,
+            "rotation": -0.4887
+          },
+          "duration": 150
+        },
+        {
+          "x": 576,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 19,
+            "w": 80,
+            "h": 142
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 92,
+            "y": 67,
+            "rotation": -0.4538
+          },
+          "duration": 150
+        },
+        {
+          "x": 768,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 24,
+            "w": 80,
+            "h": 137
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 86,
+            "y": 76,
+            "rotation": -0.5585
+          },
+          "duration": 150
+        },
+        {
+          "x": 960,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 23,
+            "w": 81,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 84,
+            "y": 71,
+            "rotation": -0.5061
+          },
+          "duration": 150
+        }
+      ]
+    },
+    "punch": {
+      "label": "Bastonazo",
+      "strip": "punch",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 19,
+            "w": 83,
+            "h": 142
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 90,
+            "y": 94,
+            "rotation": -0.5934
+          },
+          "handSocket": {
+            "x": 90,
+            "y": 94,
+            "kind": "mano"
+          },
+          "duration": 60
+        },
+        {
+          "x": 192,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 84,
+            "h": 142
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 80,
+            "y": 75,
+            "rotation": -0.6981
+          },
+          "handSocket": {
+            "x": 80,
+            "y": 75,
+            "kind": "mano"
+          },
+          "duration": 80
+        },
+        {
+          "x": 384,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 20,
+            "w": 87,
+            "h": 141
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 62,
+            "y": 54,
+            "rotation": 2.5133
+          },
+          "handSocket": {
+            "x": 62,
+            "y": 54,
+            "kind": "mano"
+          },
+          "duration": 45
+        },
+        {
+          "x": 576,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 105,
+            "h": 142
+          },
+          "hitboxes": [
+            {
+              "x": 136,
+              "y": 60,
+              "w": 45,
+              "h": 16
+            }
+          ],
+          "caneSocket": {
+            "x": 133,
+            "y": 66,
+            "rotation": -1.501
+          },
+          "handSocket": {
+            "x": 133,
+            "y": 66,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 176,
+            "y": 67,
+            "kind": "baston"
+          },
+          "events": [
+            {
+              "type": "cane-impact",
+              "box": {
+                "x": 136,
+                "y": 60,
+                "w": 45,
+                "h": 16
+              },
+              "socket": {
+                "x": 133,
+                "y": 66,
+                "kind": "mano"
+              }
+            }
+          ],
+          "duration": 100
+        },
+        {
+          "x": 768,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 84,
+            "h": 142
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 120,
+            "y": 92,
+            "rotation": -0.7854
+          },
+          "handSocket": {
+            "x": 120,
+            "y": 92,
+            "kind": "mano"
+          },
+          "duration": 80
+        },
+        {
+          "x": 960,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 84,
+            "h": 142
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 88,
+            "y": 94,
+            "rotation": -0.5585
+          },
+          "handSocket": {
+            "x": 88,
+            "y": 94,
+            "kind": "mano"
+          },
+          "duration": 100
+        }
+      ],
+      "aliasFor": "bastonazo"
+    },
+    "kick": {
+      "label": "Patada",
+      "strip": "kick",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 54,
+            "y": 21,
+            "w": 79,
+            "h": 140
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 88,
+            "y": 67,
+            "rotation": -0.5934
+          },
+          "handSocket": {
+            "x": 89,
+            "y": 75,
+            "kind": "mano"
+          },
+          "duration": 70
+        },
+        {
+          "x": 192,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 51,
+            "y": 24,
+            "w": 77,
+            "h": 137
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 92,
+            "y": 72,
+            "rotation": -0.5934
+          },
+          "handSocket": {
+            "x": 85,
+            "y": 85,
+            "kind": "mano"
+          },
+          "duration": 100
+        },
+        {
+          "x": 384,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 24,
+            "y": 20,
+            "w": 73,
+            "h": 141
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 73,
+            "y": 69,
+            "rotation": -0.4887
+          },
+          "handSocket": {
+            "x": 73,
+            "y": 78,
+            "kind": "mano"
+          },
+          "duration": 65
+        },
+        {
+          "x": 576,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 15,
+            "y": 22,
+            "w": 126,
+            "h": 139
+          },
+          "hitboxes": [
+            {
+              "x": 121,
+              "y": 54,
+              "w": 24,
+              "h": 24
+            }
+          ],
+          "caneSocket": {
+            "x": 53,
+            "y": 71,
+            "rotation": -0.5061
+          },
+          "handSocket": {
+            "x": 57,
+            "y": 80,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 133,
+            "y": 66,
+            "kind": "pie"
+          },
+          "duration": 140
+        },
+        {
+          "x": 768,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 23,
+            "y": 22,
+            "w": 69,
+            "h": 139
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 61,
+            "y": 66,
+            "rotation": -0.4887
+          },
+          "handSocket": {
+            "x": 61,
+            "y": 77,
+            "kind": "mano"
+          },
+          "duration": 100
+        },
+        {
+          "x": 960,
+          "y": 352,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 48,
+            "y": 21,
+            "w": 81,
+            "h": 140
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 85,
+            "y": 66,
+            "rotation": -0.5061
+          },
+          "handSocket": {
+            "x": 84,
+            "y": 80,
+            "kind": "mano"
+          },
+          "duration": 110
+        }
+      ]
+    },
+    "throwBottle": {
+      "label": "Lanzar botellín",
+      "strip": "throwBottle",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 22,
+            "w": 82,
+            "h": 139
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 85,
+            "y": 73,
+            "rotation": -0.7679
+          },
+          "handSocket": {
+            "x": 120,
+            "y": 75,
+            "kind": "mano"
+          },
+          "itemSocket": {
+            "x": 120,
+            "y": 75,
+            "rotation": 0.08
+          },
+          "duration": 80
+        },
+        {
+          "x": 192,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 42,
+            "y": 24,
+            "w": 96,
+            "h": 137
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 117,
+            "y": 68,
+            "rotation": -0.6632
+          },
+          "handSocket": {
+            "x": 51,
+            "y": 99,
+            "kind": "mano"
+          },
+          "itemSocket": {
+            "x": 51,
+            "y": 99,
+            "rotation": -0.45
+          },
+          "duration": 110
+        },
+        {
+          "x": 384,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 18,
+            "w": 85,
+            "h": 143
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 114,
+            "y": 68,
+            "rotation": -0.6981
+          },
+          "handSocket": {
+            "x": 61,
+            "y": 37,
+            "kind": "mano"
+          },
+          "itemSocket": {
+            "x": 61,
+            "y": 37,
+            "rotation": -0.8
+          },
+          "duration": 100
+        },
+        {
+          "x": 576,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 18,
+            "w": 96,
+            "h": 143
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 112,
+            "y": 79,
+            "rotation": -0.3665
+          },
+          "handSocket": {
+            "x": 139,
+            "y": 50,
+            "kind": "mano"
+          },
+          "itemSocket": {
+            "x": 139,
+            "y": 50,
+            "rotation": 0.75
+          },
+          "events": [
+            {
+              "type": "spawn-projectile",
+              "weapon": "bottle",
+              "socket": {
+                "x": 139,
+                "y": 50,
+                "rotation": 0.75
+              }
+            }
+          ],
+          "duration": 80
+        },
+        {
+          "x": 768,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 85,
+            "h": 142
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 109,
+            "y": 68,
+            "rotation": -0.6283
+          },
+          "handSocket": {
+            "x": 117,
+            "y": 87,
+            "kind": "mano"
+          },
+          "duration": 120
+        },
+        {
+          "x": 960,
+          "y": 528,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 19,
+            "w": 84,
+            "h": 142
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 85,
+            "y": 66,
+            "rotation": -0.5934
+          },
+          "handSocket": {
+            "x": 113,
+            "y": 66,
+            "kind": "mano"
+          },
+          "duration": 130
+        }
+      ]
+    },
+    "guardEnter": {
+      "label": "Entrar en guardia",
+      "strip": "guard",
+      "sourceFrames": [
+        0,
+        1
+      ],
+      "loop": false,
+      "next": "guard",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 21,
+            "w": 80,
+            "h": 140
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 86,
+            "y": 69,
+            "rotation": -0.5236
+          },
+          "duration": 55
+        },
+        {
+          "x": 192,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 25,
+            "w": 76,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 91,
+            "y": 69,
+            "rotation": -0.7679
+          },
+          "duration": 65
+        }
+      ]
+    },
+    "guard": {
+      "label": "Mantener guardia",
+      "strip": "guard",
+      "sourceFrames": [
+        2,
+        3
+      ],
+      "loop": true,
+      "next": "guard",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 384,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 23,
+            "w": 86,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 104,
+            "y": 65,
+            "rotation": -1.0297
+          },
+          "duration": 150
+        },
+        {
+          "x": 576,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 23,
+            "w": 84,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 93,
+            "y": 63,
+            "rotation": -0.9599
+          },
+          "duration": 150
+        }
+      ]
+    },
+    "guardHit": {
+      "label": "Bloquear impacto",
+      "strip": "guard",
+      "sourceFrames": [
+        3,
+        4,
+        2
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 576,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 23,
+            "w": 84,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 93,
+            "y": 63,
+            "rotation": -0.9599
+          },
+          "duration": 50
+        },
+        {
+          "x": 768,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 29,
+            "w": 75,
+            "h": 132
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 107,
+            "y": 52,
+            "rotation": -1.117
+          },
+          "duration": 100
+        },
+        {
+          "x": 384,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 23,
+            "w": 86,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 104,
+            "y": 65,
+            "rotation": -1.0297
+          },
+          "duration": 75
+        }
+      ]
+    },
+    "parry": {
+      "label": "Guardia justa",
+      "strip": "guard",
+      "sourceFrames": [
+        1,
+        5,
+        2
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 192,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 25,
+            "w": 76,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 91,
+            "y": 69,
+            "rotation": -0.7679
+          },
+          "duration": 55
+        },
+        {
+          "x": 960,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 54,
+            "y": 25,
+            "w": 93,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 74,
+            "y": 68,
+            "rotation": -0.9425
+          },
+          "duration": 87
+        },
+        {
+          "x": 384,
+          "y": 704,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 23,
+            "w": 86,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 104,
+            "y": 65,
+            "rotation": -1.0297
+          },
+          "duration": 75
+        }
+      ]
+    },
+    "hit": {
+      "label": "Recibir golpe",
+      "strip": "hit",
+      "sourceFrames": [
+        0,
+        1
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 23,
+            "w": 76,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 94,
+            "y": 69,
+            "rotation": -0.733
+          },
+          "duration": 79
+        },
+        {
+          "x": 192,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 28,
+            "w": 80,
+            "h": 133
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 94,
+            "y": 87,
+            "rotation": -0.7854
+          },
+          "duration": 126
+        }
+      ]
+    },
+    "hitHeavy": {
+      "label": "Recibir golpe fuerte",
+      "strip": "hit",
+      "sourceFrames": [
+        2,
+        3
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 384,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 25,
+            "w": 87,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 64,
+            "y": 88,
+            "rotation": 0.733
+          },
+          "duration": 90
+        },
+        {
+          "x": 576,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 46,
+            "w": 88,
+            "h": 115
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 91,
+            "y": 111,
+            "rotation": -0.8727
+          },
+          "duration": 151
+        }
+      ]
+    },
+    "hitAir": {
+      "label": "Recibir golpe aéreo",
+      "strip": "hit",
+      "sourceFrames": [
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "down",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 768,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 31,
+            "y": 24,
+            "w": 121,
+            "h": 114
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 85,
+            "y": 64,
+            "rotation": 0.6458
+          },
+          "duration": 95
+        },
+        {
+          "x": 960,
+          "y": 880,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 30,
+            "y": 28,
+            "w": 127,
+            "h": 123
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 103,
+            "y": 66,
+            "rotation": -0.925
+          },
+          "duration": 130
+        }
+      ]
+    },
+    "grab": {
+      "label": "Agarrar",
+      "strip": "grab",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 25,
+            "w": 87,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 90,
+            "y": 76,
+            "rotation": -0.767944870877505
+          },
+          "handSocket": {
+            "x": 131,
+            "y": 68,
+            "kind": "mano"
+          },
+          "duration": 75
+        },
+        {
+          "x": 192,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 32,
+            "w": 120,
+            "h": 129
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 120,
+            "y": 84,
+            "rotation": -0.5061454830783556
+          },
+          "handSocket": {
+            "x": 165,
+            "y": 60,
+            "kind": "mano"
+          },
+          "duration": 86
+        },
+        {
+          "x": 384,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 51,
+            "y": 30,
+            "w": 118,
+            "h": 131
+          },
+          "hitboxes": [
+            {
+              "x": 146,
+              "y": 56,
+              "w": 28,
+              "h": 24
+            }
+          ],
+          "caneSocket": {
+            "x": 143,
+            "y": 68,
+            "rotation": -0.5410520681182421
+          },
+          "handSocket": {
+            "x": 160,
+            "y": 68,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 160,
+            "y": 68,
+            "kind": "agarre"
+          },
+          "events": [
+            {
+              "type": "grab-active",
+              "box": {
+                "x": 146,
+                "y": 56,
+                "w": 28,
+                "h": 24
+              },
+              "socket": {
+                "x": 160,
+                "y": 68,
+                "kind": "mano"
+              }
+            }
+          ],
+          "duration": 130
+        },
+        {
+          "x": 576,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 51,
+            "y": 23,
+            "w": 94,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 109,
+            "y": 65,
+            "rotation": -0.7330382858376184
+          },
+          "handSocket": {
+            "x": 126,
+            "y": 61,
+            "kind": "mano"
+          },
+          "duration": 135
+        },
+        {
+          "x": 768,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 48,
+            "y": 26,
+            "w": 120,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 147,
+            "y": 58,
+            "rotation": 0.5934119456780721
+          },
+          "handSocket": {
+            "x": 164,
+            "y": 65,
+            "kind": "mano"
+          },
+          "duration": 90
+        },
+        {
+          "x": 960,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 23,
+            "w": 94,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 91,
+            "y": 76,
+            "rotation": -0.6632251157578453
+          },
+          "handSocket": {
+            "x": 131,
+            "y": 68,
+            "kind": "mano"
+          },
+          "duration": 105
+        }
+      ]
+    },
+    "grabHold": {
+      "label": "Mantener agarre",
+      "strip": "grab",
+      "sourceFrames": [
+        2,
+        3
+      ],
+      "loop": true,
+      "next": "grabHold",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 384,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 51,
+            "y": 30,
+            "w": 118,
+            "h": 131
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 143,
+            "y": 68,
+            "rotation": -0.5410520681182421
+          },
+          "handSocket": {
+            "x": 160,
+            "y": 68,
+            "kind": "mano"
+          },
+          "duration": 140
+        },
+        {
+          "x": 576,
+          "y": 1056,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 51,
+            "y": 23,
+            "w": 94,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 109,
+            "y": 65,
+            "rotation": -0.7330382858376184
+          },
+          "handSocket": {
+            "x": 126,
+            "y": 61,
+            "kind": "mano"
+          },
+          "duration": 130
+        }
+      ]
+    },
+    "grabbed": {
+      "label": "Ser agarrado",
+      "strip": "grabbed",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "loop": false,
+      "next": "down",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1232,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 28,
+            "w": 80,
+            "h": 133
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 94,
+            "y": 87,
+            "rotation": -0.7854
+          },
+          "duration": 85
+        },
+        {
+          "x": 192,
+          "y": 1232,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 45,
+            "y": 21,
+            "w": 93,
+            "h": 124
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 77,
+            "y": 67,
+            "rotation": 0.5585
+          },
+          "duration": 130
+        },
+        {
+          "x": 384,
+          "y": 1232,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 23,
+            "y": 35,
+            "w": 134,
+            "h": 116
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 107,
+            "y": 75,
+            "rotation": 0.4712
+          },
+          "duration": 160
+        },
+        {
+          "x": 576,
+          "y": 1232,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 30,
+            "y": 28,
+            "w": 127,
+            "h": 123
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 103,
+            "y": 66,
+            "rotation": -0.925
+          },
+          "duration": 95
+        }
+      ]
+    },
+    "gancho": {
+      "label": "Gancho",
+      "strip": "gancho",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 60,
+            "w": 75,
+            "h": 101
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 91,
+            "y": 95,
+            "rotation": -0.5410520681182421
+          },
+          "handSocket": {
+            "x": 120,
+            "y": 102,
+            "kind": "mano"
+          },
+          "duration": 65
+        },
+        {
+          "x": 192,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 41,
+            "w": 74,
+            "h": 120
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 90,
+            "y": 79,
+            "rotation": -0.6806784082777885
+          },
+          "handSocket": {
+            "x": 120,
+            "y": 80,
+            "kind": "mano"
+          },
+          "duration": 55
+        },
+        {
+          "x": 384,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 54,
+            "y": 8,
+            "w": 71,
+            "h": 149
+          },
+          "hitboxes": [
+            {
+              "x": 107,
+              "y": 2,
+              "w": 24,
+              "h": 24
+            }
+          ],
+          "caneSocket": {
+            "x": 91,
+            "y": 86,
+            "rotation": -0.5759586531581288
+          },
+          "handSocket": {
+            "x": 119,
+            "y": 14,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 119,
+            "y": 14,
+            "kind": "mano"
+          },
+          "duration": 95
+        },
+        {
+          "x": 576,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 54,
+            "y": 11,
+            "w": 61,
+            "h": 139
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 89,
+            "y": 75,
+            "rotation": -0.5410520681182421
+          },
+          "handSocket": {
+            "x": 103,
+            "y": 19,
+            "kind": "mano"
+          },
+          "duration": 80
+        },
+        {
+          "x": 768,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 56,
+            "y": 19,
+            "w": 74,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 82,
+            "y": 77,
+            "rotation": -0.6108652381980153
+          },
+          "handSocket": {
+            "x": 121,
+            "y": 52,
+            "kind": "mano"
+          },
+          "duration": 65
+        },
+        {
+          "x": 960,
+          "y": 1408,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 23,
+            "w": 80,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 88,
+            "y": 72,
+            "rotation": -0.6283185307179586
+          },
+          "handSocket": {
+            "x": 116,
+            "y": 59,
+            "kind": "mano"
+          },
+          "duration": 85
+        }
+      ]
+    },
+    "airPunch": {
+      "label": "Ataque aéreo",
+      "strip": "air",
+      "sourceFrames": [
+        0,
+        1
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 50,
+            "y": 14,
+            "w": 71,
+            "h": 137
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 86,
+            "y": 63,
+            "rotation": -0.7505
+          },
+          "handSocket": {
+            "x": 109,
+            "y": 57,
+            "kind": "mano"
+          },
+          "duration": 80
+        },
+        {
+          "x": 192,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 29,
+            "y": 19,
+            "w": 125,
+            "h": 132
+          },
+          "hitboxes": [
+            {
+              "x": 129,
+              "y": 35,
+              "w": 28,
+              "h": 24
+            }
+          ],
+          "caneSocket": {
+            "x": 84,
+            "y": 65,
+            "rotation": -0.8378
+          },
+          "handSocket": {
+            "x": 143,
+            "y": 47,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 143,
+            "y": 47,
+            "kind": "mano"
+          },
+          "duration": 105
+        }
+      ]
+    },
+    "dive": {
+      "label": "Patada en descenso",
+      "strip": "air",
+      "sourceFrames": [
+        2,
+        3
+      ],
+      "loop": false,
+      "next": "land",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 384,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 70,
+            "h": 95
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 93,
+            "y": 62,
+            "rotation": -0.9425
+          },
+          "handSocket": {
+            "x": 111,
+            "y": 67,
+            "kind": "mano"
+          },
+          "duration": 75
+        },
+        {
+          "x": 576,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 24,
+            "y": 23,
+            "w": 131,
+            "h": 111
+          },
+          "hitboxes": [
+            {
+              "x": 131,
+              "y": 109,
+              "w": 28,
+              "h": 24
+            }
+          ],
+          "caneSocket": {
+            "x": 47,
+            "y": 51,
+            "rotation": 1.2217
+          },
+          "handSocket": {
+            "x": 133,
+            "y": 79,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 145,
+            "y": 121,
+            "kind": "pie"
+          },
+          "duration": 115
+        }
+      ]
+    },
+    "land": {
+      "label": "Aterrizar",
+      "strip": "air",
+      "sourceFrames": [
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 768,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 49,
+            "y": 54,
+            "w": 100,
+            "h": 107
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 55,
+            "y": 114,
+            "rotation": 0.8378
+          },
+          "handSocket": {
+            "x": 143,
+            "y": 114,
+            "kind": "mano"
+          },
+          "duration": 80
+        },
+        {
+          "x": 960,
+          "y": 1584,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 21,
+            "w": 80,
+            "h": 140
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 86,
+            "y": 69,
+            "rotation": -0.5236
+          },
+          "handSocket": {
+            "x": 112,
+            "y": 66,
+            "kind": "mano"
+          },
+          "duration": 70
+        }
+      ]
+    },
+    "down": {
+      "label": "Caída",
+      "strip": "knockdown",
+      "sourceFrames": [
+        0,
+        1,
+        2
+      ],
+      "loop": false,
+      "next": "getup",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 30,
+            "y": 28,
+            "w": 127,
+            "h": 123
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 103,
+            "y": 66,
+            "rotation": -0.925
+          },
+          "duration": 85
+        },
+        {
+          "x": 192,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 32,
+            "y": 69,
+            "w": 128,
+            "h": 92
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 94,
+            "y": 95,
+            "rotation": -1.0297
+          },
+          "duration": 95
+        },
+        {
+          "x": 384,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 23,
+            "y": 105,
+            "w": 146,
+            "h": 56
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 86,
+            "y": 154,
+            "rotation": -1.6581
+          },
+          "duration": 310
+        }
+      ]
+    },
+    "getup": {
+      "label": "Levantarse",
+      "strip": "knockdown",
+      "sourceFrames": [
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 576,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 33,
+            "y": 80,
+            "w": 123,
+            "h": 81
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 50,
+            "y": 151,
+            "rotation": -1.693
+          },
+          "duration": 115
+        },
+        {
+          "x": 768,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 42,
+            "y": 65,
+            "w": 95,
+            "h": 96
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 117,
+            "y": 111,
+            "rotation": -1.0472
+          },
+          "duration": 140
+        },
+        {
+          "x": 960,
+          "y": 1760,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 17,
+            "w": 81,
+            "h": 144
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 82,
+            "y": 65,
+            "rotation": -0.4887
+          },
+          "duration": 70
+        }
+      ]
+    },
+    "jump": {
+      "label": "Saltar",
+      "strip": "jump",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 55,
+            "w": 79,
+            "h": 106
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 94,
+            "y": 105,
+            "rotation": -0.6458
+          },
+          "duration": 70
+        },
+        {
+          "x": 192,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 50,
+            "y": 14,
+            "w": 71,
+            "h": 137
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 86,
+            "y": 63,
+            "rotation": -0.7505
+          },
+          "duration": 100
+        },
+        {
+          "x": 384,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 70,
+            "h": 95
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 93,
+            "y": 62,
+            "rotation": -0.9425
+          },
+          "duration": 135
+        },
+        {
+          "x": 576,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 50,
+            "y": 20,
+            "w": 71,
+            "h": 137
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 86,
+            "y": 69,
+            "rotation": -0.7505
+          },
+          "duration": 100
+        },
+        {
+          "x": 768,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 49,
+            "y": 54,
+            "w": 100,
+            "h": 107
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 55,
+            "y": 114,
+            "rotation": 0.8378
+          },
+          "duration": 80
+        },
+        {
+          "x": 960,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 23,
+            "w": 81,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 84,
+            "y": 71,
+            "rotation": -0.5061
+          },
+          "duration": 75
+        }
+      ]
+    },
+    "crouch": {
+      "label": "Agacharse",
+      "strip": "jump",
+      "sourceFrames": [
+        0,
+        4
+      ],
+      "loop": true,
+      "next": "crouch",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 55,
+            "w": 79,
+            "h": 106
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 94,
+            "y": 105,
+            "rotation": -0.6458
+          },
+          "duration": 145
+        },
+        {
+          "x": 768,
+          "y": 1936,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 49,
+            "y": 54,
+            "w": 100,
+            "h": 107
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 55,
+            "y": 114,
+            "rotation": 0.8378
+          },
+          "duration": 145
+        }
+      ]
+    },
+    "dizzy": {
+      "label": "Aturdido",
+      "strip": "dizzy",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "loop": true,
+      "next": "dizzy",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 54,
+            "y": 21,
+            "w": 75,
+            "h": 140
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 86,
+            "y": 106,
+            "rotation": -0.6981
+          },
+          "duration": 120
+        },
+        {
+          "x": 192,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 51,
+            "y": 25,
+            "w": 76,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 74,
+            "y": 108,
+            "rotation": -0.6109
+          },
+          "duration": 125
+        },
+        {
+          "x": 384,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 25,
+            "w": 87,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 64,
+            "y": 88,
+            "rotation": 0.733
+          },
+          "duration": 135
+        },
+        {
+          "x": 576,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 22,
+            "w": 80,
+            "h": 139
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 87,
+            "y": 74,
+            "rotation": -0.7505
+          },
+          "duration": 145
+        }
+      ]
+    },
+    "tired": {
+      "label": "Cansado",
+      "strip": "dizzy",
+      "sourceFrames": [
+        4,
+        5
+      ],
+      "loop": true,
+      "next": "tired",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 768,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 48,
+            "w": 79,
+            "h": 113
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 74,
+            "y": 111,
+            "rotation": -0.6109
+          },
+          "duration": 150
+        },
+        {
+          "x": 960,
+          "y": 2112,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 42,
+            "w": 83,
+            "h": 119
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 76,
+            "y": 114,
+            "rotation": 0.7854
+          },
+          "duration": 170
+        }
+      ]
+    },
+    "dash": {
+      "label": "Paso rápido",
+      "strip": "dash",
+      "sourceFrames": [
+        0,
+        1,
+        2
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 54,
+            "y": 47,
+            "w": 111,
+            "h": 114
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 122,
+            "y": 94,
+            "rotation": -0.7679
+          },
+          "duration": 50
+        },
+        {
+          "x": 192,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 43,
+            "y": 50,
+            "w": 145,
+            "h": 111
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 85,
+            "y": 103,
+            "rotation": 1.0996
+          },
+          "duration": 75
+        },
+        {
+          "x": 384,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 55,
+            "y": 35,
+            "w": 106,
+            "h": 126
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 100,
+            "y": 84,
+            "rotation": -0.7854
+          },
+          "duration": 70
+        }
+      ]
+    },
+    "backdash": {
+      "label": "Paso rápido atrás",
+      "strip": "dash",
+      "sourceFrames": [
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 576,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 32,
+            "y": 24,
+            "w": 102,
+            "h": 137
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 62,
+            "y": 72,
+            "rotation": -0.6981
+          },
+          "duration": 50
+        },
+        {
+          "x": 768,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 33,
+            "y": 27,
+            "w": 81,
+            "h": 125
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 66,
+            "y": 69,
+            "rotation": -1.0821
+          },
+          "duration": 75
+        },
+        {
+          "x": 960,
+          "y": 2288,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 36,
+            "y": 24,
+            "w": 111,
+            "h": 137
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 68,
+            "y": 70,
+            "rotation": -0.925
+          },
+          "duration": 75
+        }
+      ]
+    },
+    "walk": {
+      "label": "Andar",
+      "strip": "walk",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": true,
+      "next": "walk",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 54,
+            "y": 23,
+            "w": 89,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 94,
+            "y": 71,
+            "rotation": -0.6981317007977318
+          },
+          "duration": 83
+        },
+        {
+          "x": 192,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 50,
+            "y": 25,
+            "w": 76,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 89,
+            "y": 72,
+            "rotation": -0.6806784082777885
+          },
+          "duration": 83
+        },
+        {
+          "x": 384,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 66,
+            "y": 24,
+            "w": 55,
+            "h": 137
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 93,
+            "y": 72,
+            "rotation": -0.6806784082777885
+          },
+          "duration": 83
+        },
+        {
+          "x": 576,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 49,
+            "y": 25,
+            "w": 89,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 89,
+            "y": 73,
+            "rotation": -0.7155849933176751
+          },
+          "duration": 83
+        },
+        {
+          "x": 768,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 48,
+            "y": 25,
+            "w": 75,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 88,
+            "y": 73,
+            "rotation": -0.7155849933176751
+          },
+          "duration": 83
+        },
+        {
+          "x": 960,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 66,
+            "y": 25,
+            "w": 55,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 91,
+            "y": 73,
+            "rotation": -0.7155849933176751
+          },
+          "duration": 83
+        }
+      ]
+    },
+    "walkBack": {
+      "label": "Andar hacia atrás",
+      "strip": "walk",
+      "sourceFrames": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "loop": true,
+      "next": "walkBack",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 960,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 66,
+            "y": 25,
+            "w": 55,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 91,
+            "y": 73,
+            "rotation": -0.7155849933176751
+          },
+          "duration": 90
+        },
+        {
+          "x": 768,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 48,
+            "y": 25,
+            "w": 75,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 88,
+            "y": 73,
+            "rotation": -0.7155849933176751
+          },
+          "duration": 90
+        },
+        {
+          "x": 576,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 49,
+            "y": 25,
+            "w": 89,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 89,
+            "y": 73,
+            "rotation": -0.7155849933176751
+          },
+          "duration": 90
+        },
+        {
+          "x": 384,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 66,
+            "y": 24,
+            "w": 55,
+            "h": 137
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 93,
+            "y": 72,
+            "rotation": -0.6806784082777885
+          },
+          "duration": 90
+        },
+        {
+          "x": 192,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 50,
+            "y": 25,
+            "w": 76,
+            "h": 136
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 89,
+            "y": 72,
+            "rotation": -0.6806784082777885
+          },
+          "duration": 90
+        },
+        {
+          "x": 0,
+          "y": 2464,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 54,
+            "y": 23,
+            "w": 89,
+            "h": 138
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 94,
+            "y": 71,
+            "rotation": -0.6981317007977318
+          },
+          "duration": 90
+        }
+      ]
+    },
+    "ko": {
+      "label": "KO",
+      "strip": "ko-win",
+      "sourceFrames": [
+        0,
+        1,
+        2
+      ],
+      "loop": false,
+      "next": null,
+      "holdLastFrame": true,
+      "frames": [
+        {
+          "x": 0,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 39,
+            "y": 39,
+            "w": 124,
+            "h": 116
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 64,
+            "y": 63,
+            "rotation": 1.2217
+          },
+          "duration": 95
+        },
+        {
+          "x": 192,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 38,
+            "y": 88,
+            "w": 124,
+            "h": 73
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 118,
+            "y": 141,
+            "rotation": -1.6057
+          },
+          "duration": 135
+        },
+        {
+          "x": 384,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 35,
+            "y": 110,
+            "w": 136,
+            "h": 51
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 129,
+            "y": 154,
+            "rotation": -1.6406
+          },
+          "duration": 320
+        }
+      ]
+    },
+    "win": {
+      "label": "Victoria",
+      "strip": "ko-win",
+      "sourceFrames": [
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": null,
+      "holdLastFrame": true,
+      "frames": [
+        {
+          "x": 576,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 17,
+            "w": 81,
+            "h": 144
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 82,
+            "y": 65,
+            "rotation": -0.4887
+          },
+          "duration": 80
+        },
+        {
+          "x": 768,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 49,
+            "y": 14,
+            "w": 76,
+            "h": 147
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 70,
+            "y": 82,
+            "rotation": -0.6632
+          },
+          "duration": 130
+        },
+        {
+          "x": 960,
+          "y": 2640,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 54,
+            "y": 17,
+            "w": 86,
+            "h": 144
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 89,
+            "y": 72,
+            "rotation": -0.6632
+          },
+          "duration": 460
+        }
+      ]
+    },
+    "bastonazo": {
+      "label": "Bastonazo",
+      "strip": "punch",
+      "sourceFrames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loop": false,
+      "next": "idle",
+      "holdLastFrame": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 19,
+            "w": 83,
+            "h": 142
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 90,
+            "y": 94,
+            "rotation": -0.5934
+          },
+          "handSocket": {
+            "x": 90,
+            "y": 94,
+            "kind": "mano"
+          },
+          "duration": 60
+        },
+        {
+          "x": 192,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 84,
+            "h": 142
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 80,
+            "y": 75,
+            "rotation": -0.6981
+          },
+          "handSocket": {
+            "x": 80,
+            "y": 75,
+            "kind": "mano"
+          },
+          "duration": 80
+        },
+        {
+          "x": 384,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 53,
+            "y": 20,
+            "w": 87,
+            "h": 141
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 62,
+            "y": 54,
+            "rotation": 2.5133
+          },
+          "handSocket": {
+            "x": 62,
+            "y": 54,
+            "kind": "mano"
+          },
+          "duration": 45
+        },
+        {
+          "x": 576,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 105,
+            "h": 142
+          },
+          "hitboxes": [
+            {
+              "x": 136,
+              "y": 60,
+              "w": 45,
+              "h": 16
+            }
+          ],
+          "caneSocket": {
+            "x": 133,
+            "y": 66,
+            "rotation": -1.501
+          },
+          "handSocket": {
+            "x": 133,
+            "y": 66,
+            "kind": "mano"
+          },
+          "activePoint": {
+            "x": 176,
+            "y": 67,
+            "kind": "baston"
+          },
+          "events": [
+            {
+              "type": "cane-impact",
+              "box": {
+                "x": 136,
+                "y": 60,
+                "w": 45,
+                "h": 16
+              },
+              "socket": {
+                "x": 133,
+                "y": 66,
+                "kind": "mano"
+              }
+            }
+          ],
+          "duration": 100
+        },
+        {
+          "x": 768,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 84,
+            "h": 142
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 120,
+            "y": 92,
+            "rotation": -0.7854
+          },
+          "handSocket": {
+            "x": 120,
+            "y": 92,
+            "kind": "mano"
+          },
+          "duration": 80
+        },
+        {
+          "x": 960,
+          "y": 176,
+          "w": 192,
+          "h": 176,
+          "hurtbox": {
+            "x": 52,
+            "y": 19,
+            "w": 84,
+            "h": 142
+          },
+          "hitboxes": [],
+          "caneSocket": {
+            "x": 88,
+            "y": 94,
+            "rotation": -0.5585
+          },
+          "handSocket": {
+            "x": 88,
+            "y": 94,
+            "kind": "mano"
+          },
+          "duration": 100
+        }
+      ]
+    }
+  },
+  "portraits": {
+    "select": "../portraits/select-128.png",
+    "hud": "../portraits/hud-64.png"
+  },
+  "extras": "../extras/extras.json"
+}

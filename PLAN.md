@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.14.1** (18/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.15** (23/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -161,6 +161,35 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - Se desvanecen solos a los 1,7 s. Así queda un momento para ver dónde se pelea, al presentar el asalto y en la entrada en patinete, y dónde se ha peleado, al final.
 - Si coinciden varios, se apilan hacia abajo; con el aviso de la policía bajo el reloj, empiezan más abajo. Posición y tiempos en `TOP_Y`, `BANNER_HOLD` y `BANNER_FADE` (`game/combat/match.js`).
 
+## Hecho en v0.15 — El Sombrerero y las armas
+
+- **El Sombrerero** (nombre provisional; `sombrero` en los archivos). Gorro de pescador, chaqueta gris y bastón de paseo. Disponible desde el principio.
+  - Paquete `la-trolina-sombrero-combate` con las 16 tiras del juego en **dos versiones, con y sin bastón**. Se integra con `tools/integrate_character.py`, que ahora entiende paquetes con arma.
+  - Copia en `source-art/personajes/sombrero` (`sin-arma/` y `arma/`).
+  - Encajar en guardia y guardia justa con 3 fotogramas propios.
+  - Flojo a pelo y fuerte con el bastón: fuerza 0,85 (×1,35 con el bastón ≈ 1,15), vida 96, velocidad 1,0. Sin STAB todavía.
+  - **Entrada en bici** (BH Gacela blanca) en el primer asalto, con y sin bastón. La bici se queda aparcada detrás.
+- **Armas** (`WEAPONS` y `WEAPON` en `rules.js`; dibujo en `game/data/weapons.js`):
+  - Con el arma en la mano: más fuerza cuerpo a cuerpo, el puño llega más lejos y cubrirse gasta menos fuelle.
+    - Bastón: ×1,35 de fuerza, +25 px de alcance (la punta del bastonazo) y un 30 % menos de fuelle al cubrirse.
+    - Botellín empuñado: ×1,2 de fuerza.
+  - **Desarme**: con una guardia justa a un golpe suyo cuerpo a cuerpo o con el 3.er golpe seguido de un combo.
+  - En el suelo, el bastón se **recoge al pasar por encima** (se agacha 0,44 s; si le pegan, se queda en el suelo). Si no, **vuelve solo a los 10 s** volando a su mano.
+  - El botellín se rompe al caer y a los 10 s le ponen otro.
+  - Al recuperarlo, 3 s en los que no se lo pueden quitar. La ultimate se lo devuelve al instante.
+  - Marcador: icono del arma y «SIN BASTÓN 7s» con la cuenta atrás. Desarmar da 500 puntos.
+  - La CPU busca más el combo y la guardia justa contra un rival armado, y va a por su bastón si se le cae.
+  - Multijugador: el estado del arma entra en la comprobación de sincronía. Cada uno lleva la suya (sin opción de pruebas).
+- **Ultimate de El Sombrerero: «La bolsita»**:
+  - recupera el bastón;
+  - saca una bolsa blanca atada con hilo verde, la abre y le sopla en la cara al rival (`MOVES.soplo`: si le pilla delante, le deja vendido 1,1 s con la nube en la cara);
+  - le arrea un **bastonazo** que no se puede bloquear y lo tumba (`MOVES.remate`).
+  - Mientras dura no le pueden pegar ni agarrar. Ajustes en `BOLSA`.
+- **Solo en desarrollo**: en la elección de luchador, **«Arma (pruebas)»** para El Sombrerero, El Barbas y Rizos: ninguna, bastón o botellín.
+  - Quien no tiene el arma dibujada la lleva dibujada encima, en la mano de cada celda (`assets/characters/hands-data.js`, `tools/build_hands.py`; aproximado).
+  - Se quita con `TROLINA_DEV.weaponPicker.enabled = false`. Para probar sin menús: `?autoplay=1&p1=barbas&arma1=baston&arma2=botellin`.
+- **Pruebas**: `tests/weapons.test.cjs`.
+
 ## Próximas fases propuestas
 
 ### Fase 1b — Ajustar el combate jugando
@@ -173,7 +202,10 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - [ ] Ajustar equilibrio con lo que digan: daño, duración de asaltos, fuerza de la niebla, precios.
 
 ### Fase 2 — Identidad de personajes
-- [ ] Arte propio para cada luchador (fotos de cada amigo → sprites como El Barbas). Hecho: **Rizos** (v0.13); el resto, con `tools/integrate_character.py`.
+- [ ] Arte propio para cada luchador (fotos de cada amigo → sprites como El Barbas). Hecho: **Rizos** (v0.13) y **El Sombrerero** (v0.15); el resto, con `tools/integrate_character.py`.
+- [ ] Ajustar las armas jugando (`WEAPON`, `WEAPONS`): si el combo de 3 y la guardia justa desarman demasiado o demasiado poco, los 10 s de vuelta y la fuerza del bastón. Nombre definitivo de El Sombrerero y de «La bolsita», y su bebida y tabaco (STAB).
+- [ ] ¿Más luchadores con arma (p. ej. la bandeja del Camarero, de defensa)? Con arte con y sin ella, como El Sombrerero.
+- [ ] Quitar la opción «Arma (pruebas)» cuando acaben las pruebas (`game/data/weapons.js`).
 - [x] Ultimate de Rizos (v0.14). Pendiente: ajustar curación, empuje y daño jugando, y su nombre definitivo.
 - [ ] Ajustar el STAB (×1,5 por cosa) y el tanque de Rizos jugando; dar bebida y tabaco al resto de luchadores.
 - [ ] Salto doble de Rizos cuando se entregue el de El Barbas (misma tira, `combat-doublejump.png`).

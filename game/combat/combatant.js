@@ -37,10 +37,22 @@
     ctx.beginPath(); ctx.moveTo(-23, 0); ctx.lineTo(-31, 6); ctx.lineTo(-29, 0); ctx.closePath(); ctx.fill();
   }
 
+  /** Clave de la celda de un fotograma del atlas ("col,fila"), la de los puntos de agarre del arma. */
+  function cellKey(fr) { return Math.round(fr.x / 192) + ',' + Math.round(fr.y / 176); }
+  // Animaciones en las que la mano del arma está ocupada (lanzar): el arma dibujada encima no se ve.
+  const BUSY_HAND = { throwBottle: 1, throwDart: 1, throwGrab: 1 };
+
   class Combatant {
-    constructor({ character, image, data, loadout, isCPU, side, extras }) {
+    /** weapon (v0.15): null o { id, drawn (dibujada en su atlas), grips ({"col,fila": [x, y, giro]}), prop ({img, grip, size}) }.
+     * images: { armed, unarmed } atlas con y sin el arma (iguales si no la tiene dibujada). */
+    constructor({ character, image, data, loadout, isCPU, side, extras, weapon, images }) {
       this.char = character;
       this.image = image;
+      this.images = images || { armed: image, unarmed: image };
+      this.weapon = weapon && root.TrolinaRules.WEAPONS[weapon.id] ? root.TrolinaRules.WEAPONS[weapon.id] : null;
+      this.weaponDrawn = !!(this.weapon && weapon.drawn);
+      this.grips = (weapon && weapon.grips) || null;
+      this.prop = (weapon && weapon.prop) || null;
       // Tamaño (Rizos es más bajito): escala el dibujo y las cajas de golpe.
       this.size = character.size || 1;
       this.S = C.S * this.size;
@@ -95,6 +107,10 @@
       // Para las animaciones de estado: cuándo empezó cada cosa.
       this.hitAt = -1e9; this.hitHeavy = false; this.parryAt = -1e9; this.guardAt = -1e9; this.dashAt = -1e9;
       this.landAt = -1e9; this.thrownAt = -1; this.throwPose = null; this.koLandAt = 0; this.walkBack = false;
+      this.blockAt = -1e9;
+      // Arma (v0.15): cada asalto empieza armado. disarmT: lo que lleva sin ella; graceT: no se la pueden quitar.
+      this.setArmed(!!this.weapon); this.disarmT = 0; this.graceT = 0;
+      this.picking = null; this.bolsa = null; this.blindT = 0;
       this.f.enabled = true;
       this.f.play('idle', true);
       this.sync();
@@ -115,6 +131,29 @@
     get downed() { return this.downT > 0 || this.getupT > 0; }
     get hasSpecial() { return !!this.char.special; }
     get meterFull() { return this.hasSpecial && this.meter >= R().METER_MAX; }
+
+    /* ---------- arma (v0.15) ---------- */
+
+    /** Con o sin el arma: si la tiene dibujada, cambia de atlas (mismas celdas). */
+    setArmed(on) {
+      this.armed = !!on && !!this.weapon;
+      this.image = this.armed ? this.images.armed : this.images.unarmed;
+    }
+    /** Lleva en la mano el arma que su atlas tiene dibujada (entrada y ultimate «con arma»). */
+    get drawnArmed() { return this.armed && this.weaponDrawn; }
+    /** Punto de agarre del arma en un fotograma: [x, y, giro] en coordenadas de celda. */
+    gripAt(fr) {
+      const g = this.grips && fr ? (this.grips[cellKey(fr)] || this.grips['0,0']) : null;
+      return g || [this.f.data.anchor.x + 40, this.f.data.anchor.y - 80, -0.5];
+    }
+    /** La mano del arma en el mundo ahora mismo (de ahí sale volando al quitársela). */
+    gripPoint() {
+      const fr = this.extraPose ? this.f.frame : (this.pose().frame || this.f.frame);
+      const g = this.gripAt(fr), w = this.f.worldPoint({ x: g[0], y: g[1] });
+      return { x: w.x, y: w.y, rot: g[2] };
+    }
+    /** Alcance de más (px de canvas) de un golpe con el arma en la mano. */
+    reachFor(anim) { return this.armed && this.weapon && R().WEAPON_REACH[anim] ? this.weapon.reach * this.S : 0; }
 
     /** Combo: un puño que conecta se puede cancelar en otro puño o en una patada. */
     canCancel() {
@@ -506,9 +545,18 @@
         return false;
       }
       const id = this.char.special.id;
+      // Cualquier ultimate le devuelve el arma si se le había caído (v0.15).
+      const rearm = () => { if (this.weapon && !this.armed && match.rearm) match.rearm(this, 'ult'); };
       if (id === 'piti') {
         // Pausa para el piti: la dirige el combate (Match.startSmokeBreak).
         if (this.smoking || !match.startSmokeBreak || !match.startSmokeBreak(this)) return false;
+        this.meter = 0; this.chain = 0; this.ultimates++;
+        rearm();
+        return true;
+      }
+      if (id === 'bolsa') {
+        // La bolsita: la dirige el combate (Match.startBolsa), que también le devuelve el bastón.
+        if (this.smoking || !match.startBolsa || !match.startBolsa(this)) return false;
         this.meter = 0; this.chain = 0; this.ultimates++;
         return true;
       }
@@ -518,6 +566,7 @@
       } else if (!this.f.play('throwDart', true)) return false;
       this.meter = 0; this.chain = 0; this.ultimates++;
       this.pending = [];
+      rearm();
       match.superFlash(this);
       if (id === 'fuente') match.startFountainThrow(this);
       return true;
@@ -595,13 +644,14 @@
         return 'parry';
       }
       if (canGuard) {
-        this.blockstun = mv.blockstun;
+        this.blockstun = mv.blockstun; this.blockAt = this.t;
         this.vx = away * rules.pushSpeed((mv.blockPush || 20) * (o.pushMult || 1));
         this.facing = -away;
         // Desgaste: el botellín puede rematar; el resto deja al menos 1 de vida.
         const chip = damage * (mv.chip || 0);
         this.hp = kind === 'bottle' ? Math.max(0, this.hp - chip) : Math.max(Math.min(this.hp, 1), this.hp - chip);
-        this.fuelle = Math.max(0, this.fuelle - (mv.guard || 0));
+        // Cubrirse con el arma en la mano gasta menos fuelle.
+        this.fuelle = Math.max(0, this.fuelle - (mv.guard || 0) * (this.armed ? this.weapon.guardCost : 1));
         this.flash = 60; this.flashColor = '#9fd8ff';
         if (this.hp <= 0) return this.knockOut(away);
         if (this.fuelle <= 0) { this.guardBreak(away); return 'break'; }
@@ -756,7 +806,7 @@
         if (!art('hit')) rot = -0.16 * Math.min(1, this.hitstun / 200);
       } else if (this.blockstun > 0) {
         const parried = this.t - (this.parryAt === undefined ? -1e9 : this.parryAt) < 260;
-        frame = at(parried ? 'parry' : 'guardHit', parried ? this.parryAt : this.t);
+        frame = at(parried ? 'parry' : 'guardHit', parried ? this.parryAt : this.blockAt);
         shield = art('guardHit') ? 0.5 : 1;
       } else if (this.dashT > 0) {
         const fwd = this.dashDir === this.facing;
@@ -831,6 +881,15 @@
         ctx.translate(-p.pivot.x, -p.pivot.y);
       } else if (p.rot) ctx.rotate(p.rot);
       ctx.drawImage(src, sx, sy, fr.w, fr.h, -a.x, -a.y, fr.w, fr.h);
+      // Arma que su atlas no tiene dibujada (botellín empuñado, bastón en pruebas): en la mano de esta celda.
+      if (this.armed && !this.weaponDrawn && this.prop && this.prop.img && !BUSY_HAND[this.f.animation]) {
+        const g = this.gripAt(fr), P = this.prop;
+        ctx.save();
+        ctx.translate(g[0] - a.x, g[1] - a.y);
+        ctx.rotate(g[2]);
+        ctx.drawImage(P.img, -P.grip[0], -P.grip[1], P.size ? P.size[0] : P.img.width, P.size ? P.size[1] : P.img.height);
+        ctx.restore();
+      }
       if (this.wetT > 0 && this.flash <= 0 && !o.ghost) {
         // Mojado: brillo azulado sobre el sprite.
         tintCtx.clearRect(0, 0, 192, 176);
@@ -925,5 +984,6 @@
 
   root.TrolinaCombat = C;
   root.Combatant = Combatant;
+  Combatant.cellKey = cellKey;
   root.drawDartShape = drawDartShape;
 })(window);

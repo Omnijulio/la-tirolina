@@ -62,6 +62,9 @@
     }
   }
 
+  // Animaciones que solo se dibujan (sin cajas de golpe ni eventos): un paquete de arte propio puede alargarlas.
+  const DRAW_ONLY = { guardHit: 1, parry: 1 };
+
   class Match {
     /** Datos de animación de un personaje: los comunes (assets/fighter.json) con el botellín, las
      * ultimates y Combate 2.0 (game/data/moves.js). Si tiene arte propio (assets/characters/art-data.js),
@@ -75,6 +78,13 @@
         const H = data.frameHeight || 176, gone = new Set(art.missingRows || []);
         for (const [name, a] of Object.entries(data.animations)) {
           if (a.frames.some((f) => f.y + f.h > art.rows * H || gone.has(Math.floor(f.y / H)))) delete data.animations[name];
+        }
+        // Estados solo de dibujo que su paquete alarga (encajar en guardia y guardia justa): [col, fila, ms].
+        for (const [name, cells] of Object.entries(art.animations || {})) {
+          const a = data.animations[name];
+          if (!a || !DRAW_ONLY[name] || !cells.length) continue;
+          const W = data.frameWidth || 192, base = a.frames[0];
+          a.frames = cells.map(([c, r, ms]) => ({ ...base, x: c * W, y: r * H, duration: ms, hitboxes: [], events: [] }));
         }
       }
       // Ultimate de El Barbas: misma animación de lanzamiento, pero suelta un dardo.
@@ -100,12 +110,26 @@
       const dataFor = (ch) => datas[ch.id] || (datas[ch.id] = Match.fighterData(ch));
       const extrasFor = (ch) => {
         const art = (root.TROLINA_CHARACTER_ART || {})[ch.id], img = this.assets.extras && this.assets.extras[ch.id];
-        return art && art.extras && img ? { img: img.sheet, def: art.extras, smoke: img.smoke, scooter: img.scooter } : null;
+        return art && art.extras && img ? { img: img.sheet, def: art.extras, smoke: img.smoke, scooter: img.scooter, puff: img.puff, puffDef: art.weapon && art.weapon.puff } : null;
       };
-      const mk = (side, sel, isCPU) => new Combatant({
-        character: sel.character, image: this.assets.characters[sel.character.id], data: dataFor(sel.character),
-        loadout: sel.loadout, isCPU, side, extras: extrasFor(sel.character)
-      });
+      // Arma (v0.15): la suya (character.weapon) o, en pruebas, la elegida (sel.weapon: id o null = ninguna).
+      const weaponFor = (ch, sel) => {
+        const atlas = this.assets.characters[ch.id];
+        const art = (root.TROLINA_CHARACTER_ART || {})[ch.id], aw = art && art.weapon;
+        const unarmed = (aw && this.assets.unarmed && this.assets.unarmed[ch.id]) || atlas;
+        const wid = sel.weapon === undefined ? (ch.weapon || null) : sel.weapon;
+        if (!wid || !R.WEAPONS[wid]) return { images: { armed: unarmed, unarmed }, weapon: null };
+        const drawn = !!(aw && aw.id === wid);
+        const grips = drawn ? aw.grip : ((root.TROLINA_HANDS || {})[ch.id] || (aw && aw.grip) || null);
+        return { images: { armed: drawn ? atlas : unarmed, unarmed }, weapon: { id: wid, drawn, grips, prop: (this.assets.weapons || {})[wid] || null } };
+      };
+      const mk = (side, sel, isCPU) => {
+        const w = weaponFor(sel.character, sel);
+        return new Combatant({
+          character: sel.character, image: w.images.armed, images: w.images, weapon: w.weapon, data: dataFor(sel.character),
+          loadout: sel.loadout, isCPU, side, extras: extrasFor(sel.character)
+        });
+      };
       this.p1 = mk(0, opts.p1, !!opts.autoplay);
       this.p2 = mk(1, opts.p2, true);
       this.fighters = [this.p1, this.p2];
@@ -135,6 +159,7 @@
       this.sparks = []; this.popups = []; this.dusts = []; this.smokes = []; this.darts = [];
       this.superFreeze = 0; this.superOwner = null;
       this.truce = null; this.chinas = []; this.pitiFx = []; this.parked = [];   // ultimate de Rizos y su patinete
+      this.dropped = []; this.puffs = [];   // armas por el suelo (v0.15) y soplos de la bolsita
       this.stats = { perfectRounds: 0, timeLeft: 0, maxCombo: 0, ultimates: 0 };
       // Policía Local: aparece si el ruido llega a 100 (ver TrolinaRules.NOISE).
       this.noise = 0; this.bottleStreak = -1; this.lastBottleAt = -1e9; this.noiseWarned = false;
@@ -201,6 +226,7 @@
       this.bottles.reset();
       this.darts = []; this.smokes = []; this.superFreeze = 0;
       this.cancelTruce(); this.chinas = []; this.pitiFx = [];
+      this.dropped = []; this.puffs = [];   // reset() ya los ha armado y ha cortado bolsitas y recogidas
       this.timer = R.ROUND_SECONDS;
       this.phase = 'intro'; this.phaseT = 0; this.fightCalled = false;
       // Presentación: «¡PELEA!» a los 950 ms y a pelear a los 1650. Si alguien llega en patinete
@@ -524,11 +550,211 @@
       this.chinas = this.chinas.filter((d) => !d.dead);
     }
 
+    /* ---------- armas (v0.15): desarme, arma por el suelo, recogerla y vuelta ---------- */
+
+    /** Le quitan el arma a `c` (por guardia justa o combo de `by`). Sale volando desde su mano. */
+    disarm(c, by, via) {
+      if (!c.weapon || !c.armed || c.graceT > 0 || c.state === 'ko' || c.bolsa) return false;
+      const W = R.WEAPON, from = c.gripPoint();
+      const away = Math.sign(c.cx - by.cx) || -c.facing;
+      c.setArmed(false); c.disarmT = 0;
+      this.dropped = this.dropped.filter((d) => d.owner !== c);
+      this.dropped.push({ owner: c, w: c.weapon, x: from.x, y: from.y, vx: away * W.flyVx, vy: W.flyVy,
+        rot: from.rot, vr: away * W.spin, flip: c.facing, state: 'fly', t: 0, bounced: 0 });
+      this.popup(c, '¡DESARMADO!', '#ff8a7a');
+      this.addScore(by, W.score, from.x, from.y - 40);
+      this.addNoise(W.noise);
+      this.sfx(via === 'parry' ? 'guardBreak' : 'whiff');
+      this.shake = Math.max(this.shake, 6);
+      return true;
+    }
+
+    /** Recupera el arma: al recogerla ('pickup'), cuando vuelve sola ('return') o con la ultimate ('ult'). */
+    rearm(c, via) {
+      if (!c.weapon || c.armed) return;
+      c.setArmed(true); c.disarmT = 0; c.graceT = R.WEAPON.graceMs;
+      this.dropped = this.dropped.filter((d) => d.owner !== c);
+      if (via === 'pickup') this.popup(c, '¡' + c.weapon.short + '!', '#8bf2ce');
+      else if (via === 'return') this.popup(c, c.weapon.breaks ? '¡OTRO ' + c.weapon.short + '!' : '¡VUELVE EL ' + c.weapon.short + '!', '#8bf2ce');
+      if (via !== 'ult') this.sfx('buy');
+    }
+
+    /** El arma de `c` por el suelo (o volando), si la hay. */
+    droppedOf(c) { return this.dropped.find((d) => d.owner === c) || null; }
+    /** Punto medio del arma tumbada (para recogerla al pasar por encima). */
+    droppedMid(d) {
+      const P = (this.assets.weapons || {})[d.w.id], S = d.owner.S;
+      const len = P && P.size ? P.size[1] - P.grip[1] : 40;
+      return d.x + d.flip * len * 0.5 * S;
+    }
+
+    updateWeapons(dt) {
+      const W = R.WEAPON, s = dt / 1000;
+      for (const c of this.fighters) {
+        c.graceT = Math.max(0, c.graceT - dt);
+        c.blindT = Math.max(0, c.blindT - dt);
+        if (c.picking) this.updatePicking(c, dt);
+        if (!c.weapon || c.armed || this.phase !== 'fight' || c.picking) continue;
+        c.disarmT += dt;
+        if (c.disarmT < W.returnMs) continue;
+        // Vuelve sola: la que está en el suelo vuela a su mano; si se rompió (botellín), le ponen otra.
+        const d = this.droppedOf(c);
+        if (!d) this.rearm(c, 'return');
+        else if (d.state === 'ground') { d.state = 'return'; d.t = 0; d.x0 = d.x; d.y0 = d.y; d.r0 = d.rot; }
+      }
+      for (const d of this.dropped) {
+        d.t += dt;
+        if (d.state === 'fly') {
+          d.vy += C.GRAVITY * s; d.x += d.vx * s; d.y += d.vy * s; d.rot += d.vr * s;
+          // Rebota en los bordes: tiene que caer donde se pueda ir a por ella.
+          if (d.x < C.MIN_X || d.x > C.MAX_X) { d.x = Math.max(C.MIN_X, Math.min(C.MAX_X, d.x)); d.vx = -d.vx * 0.5; d.vr = -d.vr; }
+          const P = (this.assets.weapons || {})[d.w.id], rest = C.GROUND - (P ? P.grip[0] : 5) * d.owner.S;
+          if (d.y >= rest && d.vy > 0) {
+            if (d.w.breaks) { d.state = 'gone'; this.shatter(d); }
+            else if (d.bounced < 1 && d.vy > 300) {
+              d.bounced++; d.y = rest; d.vy = -d.vy * W.bounce; d.vx *= 0.5; d.vr *= 0.5;
+              this.sfx('land');
+            } else {
+              // Tumbada en el suelo, apuntando hacia el centro (siempre a mano de su dueño).
+              d.state = 'ground'; d.y = rest; d.vx = 0; d.vy = 0; d.rot = -Math.PI / 2;
+              d.flip = d.x < 480 ? 1 : -1;
+              d.x = Math.max(C.MIN_X - 30, Math.min(C.MAX_X + 30, d.x));
+              this.dust(d.x, C.GROUND, 0.5);
+            }
+          }
+        } else if (d.state === 'ground') {
+          // Si pasa por encima, la recoge.
+          const o = d.owner;
+          if (d.w.pickup && this.phase === 'fight' && o.state === 'fight' && !o.air && !o.locked && !o.busy && !o.attacking &&
+              !o.picking && Math.abs(o.cx - this.droppedMid(d)) < W.pickupRange * o.size) this.startPicking(o, d);
+        } else if (d.state === 'return') {
+          const k = Math.min(1, d.t / W.returnFlyMs), to = d.owner.gripPoint();
+          d.x = d.x0 + (to.x - d.x0) * k;
+          d.y = d.y0 + (to.y - d.y0) * k - 180 * 4 * k * (1 - k);
+          d.rot = d.r0 + (to.rot - d.r0) * k; d.flip = d.owner.facing;
+          if (k >= 1) this.rearm(d.owner, 'return');
+        } else if (d.state === 'held' && d.owner.picking) {
+          // Recogiéndola: se va a su mano mientras se agacha.
+          const A = d.owner.extras.def.anims.recoger, i = Math.min(A.hand.length - 1, d.owner.extraPose ? d.owner.extraPose.frame : 0);
+          const to = this.extraPoint(d.owner, A, A.hand[i]);
+          d.x += (to.x - d.x) * Math.min(1, dt / 60); d.y += (to.y - d.y) * Math.min(1, dt / 60);
+        }
+      }
+      this.dropped = this.dropped.filter((d) => d.state !== 'gone');
+      for (const p of this.puffs) p.t += dt;
+      this.puffs = this.puffs.filter((p) => p.t < p.life);
+    }
+
+    /** Se agacha a recoger el arma (con animación si la tiene; si no, la coge al pasar). */
+    startPicking(o, d) {
+      const A = o.extras && o.extras.def.anims.recoger;
+      if (!A || !o.weaponDrawn) { this.rearm(o, 'pickup'); return; }
+      o.picking = { t: 0, done: false, d };
+      d.state = 'held';
+      o.locked = true; o.vx = 0; o.guard = false; o.walking = false; o.pending = []; o.dashT = 0;
+      o.f.play('idle', true);
+    }
+
+    updatePicking(c, dt) {
+      const P = c.picking, A = c.extras.def.anims.recoger;
+      P.t += dt;
+      const i = this.extraFrame(A, P.t);
+      c.extraPose = { anim: 'recoger', frame: i };
+      if (!P.done && i >= A.pickup) { P.done = true; this.rearm(c, 'pickup'); }
+      if (P.t >= A.frames.reduce((n, f) => n + f[2], 0)) { c.picking = null; c.locked = false; c.extraPose = null; c.f.play('idle', true); }
+    }
+
+    /** Le pegan o le agarran recogiéndola: el arma se queda en el suelo. */
+    cancelPicking(c) {
+      const P = c.picking;
+      if (!P) return;
+      if (!P.done && P.d && this.dropped.includes(P.d)) { P.d.state = 'ground'; P.d.y = C.GROUND - (((this.assets.weapons || {})[P.d.w.id] || { grip: [5] }).grip[0]) * c.S; }
+      c.picking = null; c.locked = false; c.extraPose = null;
+    }
+
+    /** El botellín empuñado se rompe al caer: cristales (solo decorado). */
+    shatter(d) {
+      const rnd = root.__trolinaRealRandom || Math.random;
+      for (let i = 0; i < 8; i++) {
+        this.dusts.push({ glass: true, x: d.x, y: C.GROUND - 4, vx: (rnd() - 0.5) * 360, vy: -120 - rnd() * 260, r: 2 + rnd() * 2, t: 0, life: 520 });
+      }
+      this.sfx('glass');
+    }
+
+    /* ---------- ultimate de Sombrero: «La bolsita» ---------- */
+
+    /** Recupera el bastón, saca la bolsa, sopla (MOVES.soplo) y bastonazo (MOVES.remate). No le pueden pegar mientras. */
+    startBolsa(att) {
+      const X = att.extras && att.extras.def;
+      if (this.phase !== 'fight' || this.truce || !X || !X.anims['ultimate-arma']) return false;
+      const def = att === this.p1 ? this.p2 : this.p1;
+      this.cancelPicking(att);
+      if (att.weapon) this.rearm(att, 'ult');
+      const name = att.drawnArmed || !X.anims['ultimate-mano'] ? 'ultimate-arma' : 'ultimate-mano';
+      att.locked = true; att.f.play('idle', true); att.pending = []; att.vx = 0; att.guard = false; att.walking = false; att.dashT = 0;
+      att.facing = Math.sign(def.cx - att.cx) || att.facing; att.sync();
+      att.bolsa = { name, def, t: 0, puffed: false, struck: false };
+      att.extraPose = { anim: name, frame: 0 };
+      this.superFlash(att);
+      if (att === this.p1) this.stats.ultimates++;
+      return true;
+    }
+
+    /** Caja de una celda de la segunda hoja ([x, y, w, h] de celda) en el mundo. */
+    extraBox(c, anim, b) {
+      const p = this.extraPoint(c, anim, [b[0], b[1]]), q = this.extraPoint(c, anim, [b[0] + b[2], b[1] + b[3]]);
+      return { x: Math.min(p.x, q.x), y: Math.min(p.y, q.y), w: Math.abs(q.x - p.x), h: Math.abs(q.y - p.y) };
+    }
+    reaches(box, def) {
+      if (def.state !== 'fight' || def.downed) return false;
+      const h = def.f.getHurtbox();
+      return box.x < h.x + h.w && box.x + box.w > h.x && box.y < h.y + h.h && box.y + box.h > h.y;
+    }
+
+    updateBolsas(dt) {
+      for (const att of this.fighters) {
+        const b = att.bolsa;
+        if (!b) continue;
+        if (this.phase !== 'fight') { this.endBolsa(att); continue; }   // se acaba el tiempo o el asalto
+        const A = att.extras.def.anims[b.name];
+        b.t += dt;
+        const i = this.extraFrame(A, b.t);
+        att.extraPose = { anim: b.name, frame: i };
+        if (!b.puffed && A.puff && i >= A.puff.frame) {
+          // Sopla: la nube sale de la boca hacia el rival; si le pilla delante, le deja vendido.
+          b.puffed = true;
+          const at = this.extraPoint(att, A, A.puff.at);
+          const PD = att.extras.puffDef;
+          if (att.extras.puff && PD) this.puffs.push({ c: att, x: at.x, y: at.y, facing: att.facing, t: 0, life: PD.ms });
+          this.sfx('throw');
+          const pb = A.puff.box, box = this.extraBox(att, A, [pb[0], pb[1], pb[2] + R.BOLSA.puffReach, pb[3]]);
+          if (this.reaches(box, b.def)) {
+            this.applyHit(att, b.def, 'soplo', box.x + box.w / 2, box.y + box.h / 2);
+            b.def.blindT = R.BOLSA.blindMs;
+            this.popup(b.def, '¡PUAJ!', '#c8f5dc');
+          }
+        }
+        if (!b.struck && A.impact && i >= A.impact.frame) {
+          b.struck = true;
+          const box = this.extraBox(att, A, A.impact.box);
+          if (this.reaches(box, b.def)) this.applyHit(att, b.def, 'remate', att.facing > 0 ? box.x + box.w : box.x, box.y + box.h / 2);
+          else { this.popup(att, '¡AL AIRE!', '#f8ce73'); this.sfx('whiff'); }
+        }
+        if (b.t >= A.frames.reduce((n, f) => n + f[2], 0)) this.endBolsa(att);
+      }
+    }
+
+    endBolsa(att) {
+      if (!att.bolsa) return;
+      att.bolsa = null; att.locked = false; att.extraPose = null; att.f.play('idle', true);
+    }
+
     /** Entrada en patinete (primer asalto): devuelve lo que dura, o 0 si no tiene. */
     startEntrance(f) {
       const E = f.extras && f.extras.def.entrance;
       if (!E) return 0;
-      const A = f.extras.def.anims, seq = E.sequence;
+      // Con su arma dibujada, la entrada con ella; sin ella (o con otra en pruebas), la otra si la hay.
+      const A = f.extras.def.anims, seq = E.unarmed && !f.drawnArmed ? E.unarmed : E.sequence;
       const sum = (n) => A[n] ? A[n].frames.reduce((k, fr) => k + fr[2], 0) : 0;
       const e = { t: 0, seq, ride: E.rideMs, brake: sum(seq[1]), off: sum(seq[2]) };
       e.total = e.ride + e.brake + e.off;
@@ -623,6 +849,7 @@
         f.smoking = null; f.faintT = 0; f.pending = [];
       }
       this.cancelGrab(); this.cancelTruce(); this.chinas = [];
+      for (const f of this.fighters) { this.endBolsa(f); this.cancelPicking(f); }
       this.bottles.reset(); this.darts = []; this.superFreeze = 0; this.slowmo = 0;
       const [ax, bx] = this.policeData.settings.officerTargetX;
       const mid = (ax + bx) / 2;
@@ -802,12 +1029,14 @@
 
       this.updateGrab(dt);
       this.updateTruce(dt);
+      this.updateBolsas(dt);
       const c1 = this.controls(this.p1, this.brain1, this.p2, actions, dt);
       const c2 = this.controls(this.p2, this.brain2, this.p1, [], dt);
       this.updateThrow(dt, c1, c2);
       this.p1.update(dt, c1, this.p2, this);
       this.p2.update(dt, c2, this.p1, this);
       this.resolvePush();
+      this.updateWeapons(dt);
       // Durante la pausa para el piti nadie hace daño (solo la china, al final).
       if (this.phase === 'fight' && !this.truce) this.checkMelee();
       const targets = this.phase === 'fight' && !this.truce ? [this.p1.f, this.p2.f] : [];
@@ -865,8 +1094,11 @@
         if (att.lastHitAction === att.f.actionId || def.state !== 'fight' || att.state !== 'fight' || att.locked || def.downed) continue;
         // El gancho gana a lo que venga por el aire mientras arranca o tiene el golpe fuera.
         if ((anim === 'airPunch' || anim === 'dive') && def.f.animation === 'gancho' && def.attackPhase() !== 'recovery') continue;
-        const hbs = att.f.getHitboxes();
+        let hbs = att.f.getHitboxes();
         if (!hbs.length) continue;
+        // Con el arma en la mano, el puño (y el gancho) llega más lejos.
+        const reach = att.reachFor(anim);
+        if (reach) hbs = hbs.map((h) => (att.facing > 0 ? { ...h, w: h.w + reach } : { ...h, x: h.x - reach, w: h.w + reach }));
         const hurt = def.f.getHurtbox();
         const hit = hbs.find((h) => h.x < hurt.x + hurt.w && h.x + h.w > hurt.x && h.y < hurt.y + hurt.h && h.y + h.h > hurt.y);
         if (!hit) continue;
@@ -890,8 +1122,9 @@
       if (this.throwing || this.grab || att.state !== 'fight' || att.attackPhase() !== 'active' || att.grabTried === att.f.actionId) return;
       const G = R.GRAB;
       if (Math.abs(def.cx - att.cx) > G.range || Math.sign(def.cx - att.cx) !== att.facing) return;
-      if (def.state !== 'fight' || def.air || def.downed) return;
+      if (def.state !== 'fight' || def.air || def.downed || def.bolsa) return;
       att.grabTried = att.f.actionId;
+      this.cancelPicking(def);
       // Agarre contra agarre: se zafan los dos.
       if (def.f.animation === 'grab' && def.attackPhase() !== 'recovery') { this.techThrow(att, def); return; }
       // No se puede agarrar a quien está recibiendo o bloqueando un golpe: hay que esperar a que se suelte.
@@ -977,9 +1210,10 @@
     }
 
     applyHit(att, def, kind, x, y) {
+      if (def.bolsa) return;   // sacando la bolsa no le tocan
       const stunned = def.hitstun > 0;
       const n = stunned ? att.combo + 1 : 1;
-      const ult = kind === 'dart' || kind === 'china';   // ultimates a distancia: sin escala de combo
+      const ult = !!R.ULT_MOVES[kind];   // ultimates a distancia o guiadas: sin escala de combo
       const sc = ult ? { damage: 1, knockback: 1, hitstun: 1 } : R.comboScale(n);
       const mv = R.MOVES[kind];
       const melee = kind !== 'bottle' && !ult;
@@ -987,10 +1221,12 @@
       const type = !stunned && !mv.unblockable && def.state === 'fight' ? R.hitType(def.attackPhase()) : null;
       const tm = R.hitTypeMult(type);
       const wildBonus = this.wild ? 1 + R.WILD.damageBonus * Math.min(1, this.chaos()) : 1;
-      const dmg = R.damageFor(kind, att.powerNow, att === this.p2 ? this.diff.cpuDamage : 1) * sc.damage * wildBonus * tm.damage;
+      const dmg = R.damageFor(kind, att.powerNow, att === this.p2 ? this.diff.cpuDamage : 1) * sc.damage * wildBonus * tm.damage *
+        R.weaponPower(att.weapon, kind, att.armed);   // con el arma en la mano pega más
       if (this.wild && def === this.p1 && this.levelOf(def) > 0.6 && Math.random() < 0.25) this.say(def, 'gotHit');
       const res = def.takeHit(kind, dmg, att.cx, { hitstun: mv.hitstun * sc.hitstun * tm.hitstun, knockback: mv.knockback * sc.knockback, pushMult: sc.knockback });
       if (res === 'miss') return;
+      if (res === 'hit' || res === 'ko') this.cancelPicking(def);   // recogiendo el arma: se queda en el suelo
       this.addNoise(res === 'block' || res === 'parry' ? R.NOISE.block : res === 'ko' ? R.NOISE.ko : ult ? R.NOISE.dart : R.NOISE.hit);
       // La patada en picado rebota en el rival (al dar, al bloquearla o al rechazarla).
       const bounce = (k) => {
@@ -1016,6 +1252,8 @@
         att.combo = 0;
         this.popup(def, '¡JUSTA!', '#e8fbff');
         this.addScore(def, R.SCORE.parry, x, y - 40);
+        // Guardia justa a un golpe con el arma: se le cae.
+        if (melee && att.armed && R.disarms('parry', 0, kind)) this.disarm(att, def, 'parry');
         if (def.hasSpecial && !def.meterFull) def.meter = Math.min(R.METER_MAX, def.meter + 8);
         return;
       }
@@ -1048,13 +1286,15 @@
       this.addScore(att, Math.round(R.hitPoints(kind, n, this.intoxOf(att)) * (type ? 1 + R.SCORE.counterBonus : 1) / 10) * 10, x, y - 40);
       if (n >= 2) this.popup(att, n + ' GOLPES', '#8bf2ce');
       if (att === this.p1) this.stats.maxCombo = Math.max(this.stats.maxCombo, n);
+      // El golpe número R.WEAPON.disarmCombo de un combo le quita el arma.
+      if (res !== 'ko' && def.armed && R.disarms('combo', n, kind)) this.disarm(def, att, 'combo');
       // El ultimate se carga encadenando golpes.
       if (att.hasSpecial && !ult && !att.meterFull) {
         att.meter = Math.min(R.METER_MAX, att.meter + R.meterGain(n));
         if (att.meterFull) { this.popup(att, '¡' + att.char.special.short + ' LISTO!', '#f8ce73'); this.sfx('ready'); }
       }
       if (kind === 'dart' && att === this.p1) this.stats.ultimates++;
-      this.hitstop = res === 'ko' ? 170 : kind === 'dart' ? 220 : kind === 'china' ? 150 : kind === 'gancho' ? 120 : kind === 'kick' || type ? 95 : kind === 'dive' ? 80 : 65;
+      this.hitstop = res === 'ko' ? 170 : kind === 'dart' || kind === 'remate' ? 220 : kind === 'china' ? 150 : kind === 'gancho' ? 120 : kind === 'kick' || type ? 95 : kind === 'dive' ? 80 : 65;
       this.shake = res === 'ko' || ult ? 14 : kind === 'punch' || kind === 'airPunch' ? 5 : 8;
       if (res === 'ko') this.onKO(att, def);
     }
@@ -1125,6 +1365,47 @@
 
     /* ---------- dibujo ---------- */
 
+    /** behind: las que están en el suelo (detrás de los luchadores); si no, las que vuelan (delante). */
+    drawDropped(c, behind) {
+      for (const d of this.dropped) {
+        if ((d.state === 'ground' || d.state === 'held') !== !!behind) continue;
+        const P = (this.assets.weapons || {})[d.w.id];
+        if (!P || !P.img) continue;
+        c.save(); c.imageSmoothingEnabled = false;
+        c.translate(Math.round(d.x), Math.round(d.y));
+        c.scale(d.owner.S * d.flip, d.owner.S);
+        c.rotate(d.rot);
+        c.drawImage(P.img, -P.grip[0], -P.grip[1], P.size ? P.size[0] : P.img.width, P.size ? P.size[1] : P.img.height);
+        c.restore();
+      }
+    }
+
+    /** El soplo y la nube que se le queda al rival en la cara. */
+    drawPuffs(c) {
+      const draw = (owner, x, y, facing, i, alpha, scale) => {
+        const img = owner.extras && owner.extras.puff, PD = owner.extras && owner.extras.puffDef;
+        if (!img || !PD) return;
+        const fr = PD.frames[Math.max(0, Math.min(PD.frames.length - 1, i))];
+        c.save(); c.imageSmoothingEnabled = false; c.globalAlpha = alpha;
+        c.translate(Math.round(x), Math.round(y));
+        c.scale(owner.S * facing * scale, owner.S * scale);
+        c.drawImage(img, fr[0], fr[1], fr[2], fr[3], 0, -fr[3] / 2, fr[2], fr[3]);
+        c.restore();
+      };
+      for (const p of this.puffs) {
+        const PD = p.c.extras.puffDef, k = p.t / PD.ms;
+        draw(p.c, p.x + p.facing * PD.travel * p.c.S * k, p.y, p.facing, Math.floor(k * PD.frames.length), 1 - Math.max(0, k - 0.75) * 2, 1);
+      }
+      for (const v of this.fighters) {
+        if (v.blindT <= 0 || v.state !== 'fight') continue;
+        const owner = v === this.p1 ? this.p2 : this.p1;
+        const hb = v.f.getHurtbox(), k = v.blindT / R.BOLSA.blindMs;
+        const x = hb.x + hb.w / 2 - 50 * owner.S * 0.6, y = hb.y + 28 + Math.sin(this.t / 160) * 3;
+        draw(owner, x, y, 1, 2, 0.75 * k, 0.6);
+      }
+    }
+
+
     draw(ctx) {
       const I = this.levelOf(this.viewer);
       const W = this.wild ? 1.8 : 1;   // en el modo salvaje todo se mueve el doble
@@ -1148,6 +1429,7 @@
           if (this.fountain) this.fountain.drawBack(c, !soaking);
           if (this.parked.length) this.drawParked(c);
           for (const f of this.fighters) if (f.state !== 'soaked' && f.state !== 'grabbed') f.drawShadow(c);
+          if (this.dropped.length) this.drawDropped(c, true);
           if (I > 0.15) {
             const g = { ghost: true, alpha: Math.min(0.45, 0.32 * I), dx: Math.sin(this.t / 420) * 22 * I * W, dy: Math.cos(this.t / 610) * 6 * I * W };
             this.p2.draw(c, g); this.p1.draw(c, { ...g, dx: -g.dx });
@@ -1161,6 +1443,8 @@
             }
           }
           this.bottles.draw(c, [this.p1.f, this.p2.f]);
+          if (this.dropped.length) this.drawDropped(c, false);
+          this.drawPuffs(c);
           this.drawDarts(c);
           this.drawPiti(c);
           if (this.fountain) { if (soaking) this.fountain.drawFront(c); else this.fountain.drawDrops(c); }
@@ -1399,6 +1683,13 @@
           c.fillRect(Math.round(d.x), Math.round(d.y + d.vy * d.t / 1000 + 300 * (d.t / 1000) ** 2), 2, 3);
           continue;
         }
+        if (d.glass) {
+          // Cristales del botellín empuñado que se rompe al caer.
+          const s = d.t / 1000, gy = Math.min(C.GROUND, d.y + d.vy * s + 1300 * s * s);
+          c.fillStyle = 'rgba(' + (d.r > 3 ? '120,90,40' : '210,190,120') + ',' + (1 - k) + ')';
+          c.fillRect(Math.round(d.x + d.vx * s), Math.round(gy), Math.ceil(d.r), Math.ceil(d.r));
+          continue;
+        }
         c.fillStyle = 'rgba(190,180,170,' + (0.45 * (1 - k)) + ')';
         c.beginPath(); c.arc(d.x + d.vx * d.t / 1000, d.y - 6 - k * 18, d.r * (1 + k), 0, Math.PI * 2); c.fill();
       }
@@ -1571,6 +1862,20 @@
           status(cur ? cur.short.toUpperCase() + ' ×' + cur.left + (rest ? ' (+' + rest + ')' : '') : '×0', c.smoking ? '#ffb347' : '#e8e6df');
         }
         if (c.wetT > 0) status('MOJADO ' + Math.ceil(c.wetT / 1000) + 's', '#9ff0ff');
+        if (c.weapon) {
+          // Arma (v0.15): icono y, si se le ha caído, lo que le falta para que vuelva sola.
+          const P = (this.assets.weapons || {})[c.weapon.id], isz = 18;
+          if (P && (P.hud || P.img)) {
+            const ix = side === 1 ? sx : sx - isz;
+            ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = c.armed ? 1 : 0.35;
+            if (P.hud) ctx.drawImage(P.hud, ix, my + 12, isz, isz);
+            else ctx.drawImage(P.img, ix + 3, my + 11, 12, 16);
+            ctx.restore();
+            sx += side * (isz + 4);
+          }
+          if (c.armed) status(c.weapon.short, c.graceT > 0 ? '#8bf2ce' : '#e8d2a8');
+          else status('SIN ' + c.weapon.short + ' ' + Math.max(1, Math.ceil((R.WEAPON.returnMs - c.disarmT) / 1000)) + 's', (this.t % 500) < 250 ? '#ff8a7a' : '#ffd0c8');
+        }
         for (const b of c.buffs || []) status(b.label + ' ' + Math.ceil((b.until - c.t) / 1000) + 's', b.powerPct > 0 ? '#ffd27a' : '#b7c4ff');
         if (c.invertT > 0) status('⇄ AL REVÉS', (this.t % 400) < 200 ? '#ff4d5e' : '#ffb3a8');
         if (c.loadout.sugar) {

@@ -166,6 +166,12 @@ header.bar h2 { flex: 1; font-size: clamp(18px, 3.4vw, 28px); }
 .special-info b { color: var(--yellow); }
 .stab-info { margin: 6px 0 0; font-size: 12px; color: #f3e6c4; }
 .stab-info b, .kv.stab b, .kv.stab span { color: #ffd76a; }
+.weapon-info { margin: 6px 0 0; font-size: 12px; color: #f3e6c4; }
+.weapon-info b { color: #e8d2a8; }
+.dev-weapon { margin: 8px 0 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dev-weapon:empty { display: none; }
+.dev-weapon .dev-label { font-size: 11px; font-weight: 700; color: #ff9fd0; text-transform: uppercase; letter-spacing: .04em; }
+.dev-weapon .seg button { padding: 6px 10px; font-size: 12px; }
 .stab-tag { display: inline-block; padding: 1px 6px; border-radius: 6px; background: #ffd76a; color: #2a1a00; font-size: 11px; font-weight: 800; letter-spacing: .02em; }
 .item.stab { box-shadow: inset 0 0 0 2px #ffd76a; }
 .stab-intro { border-left: 3px solid #ffd76a; }

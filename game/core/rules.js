@@ -43,8 +43,49 @@
     // Ultimate de El Peñista: agarre y chapuzón en la fuente (no se puede bloquear).
     fountain: { damage: 38, hitstun: 300, knockback: 0, blockstun: 0, unblockable: true },
     // Ultimate de Rizos: la china del cigarro. Poco daño, pero lo manda para atrás y lo tumba.
-    china: { damage: 6, hitstun: 700, knockback: 1250, blockstun: 0, unblockable: true, knockdown: true, launch: -360 }
+    china: { damage: 6, hitstun: 700, knockback: 1250, blockstun: 0, unblockable: true, knockdown: true, launch: -360 },
+    // Ultimate de Sombrero: el soplo de la bolsa (le deja vendido, sin poder cubrirse) y el bastonazo que remata.
+    soplo: { damage: 2, hitstun: 1100, knockback: 0, blockstun: 0, unblockable: true, push: 6 },
+    remate: { damage: 24, hitstun: 700, knockback: 900, blockstun: 0, unblockable: true, knockdown: true, launch: -380 }
   };
+  /** Golpes a distancia o de ultimate: sin escala de combo ni carga del ultimate. */
+  const ULT_MOVES = { dart: 1, china: 1, soplo: 1, remate: 1 };
+
+  /* ---------- Armas (v0.15) ----------
+   * Algunos luchadores llevan un arma (`weapon` en game/data/characters.js; en pruebas, cualquiera de
+   * los de DEV en game/data/weapons.js). Armado pega más (power, solo cuerpo a cuerpo), llega más lejos
+   * con el puño (reach, px nativos) y se cubre gastando menos fuelle (guardCost).
+   * Se le cae si le hacen guardia justa a un golpe suyo cuerpo a cuerpo o al encajar el golpe número
+   * `disarmCombo` de un combo. En el suelo, si pasa por encima la recoge (pickup); si no, vuelve sola a
+   * los `returnMs`. El botellín se rompe al caer (breaks) y le ponen otro a los `returnMs`. Al recuperarla
+   * tiene `graceMs` en los que no se la pueden quitar, y la ultimate se la devuelve al instante.
+   */
+  const WEAPONS = {
+    baston: { id: 'baston', name: 'Bastón', short: 'BASTÓN', power: 1.35, reach: 25, guardCost: 0.7, pickup: true, breaks: false },
+    botellin: { id: 'botellin', name: 'Botellín', short: 'BOTELLÍN', power: 1.2, reach: 8, guardCost: 1, pickup: false, breaks: true }
+  };
+  const WEAPON = {
+    disarmCombo: 3, disarmParry: true, returnMs: 10000, graceMs: 3000,
+    pickupRange: 60,                 // px de canvas entre el luchador y el arma para cogerla
+    flyVx: 380, flyVy: -760, spin: 14, bounce: 0.3, returnFlyMs: 450,
+    score: 500, noise: 3
+  };
+  /** Golpes que reciben la fuerza del arma (cuerpo a cuerpo) y los que alargan su alcance (con el arma en la mano). */
+  const WEAPON_MELEE = { punch: 1, kick: 1, gancho: 1, airPunch: 1, dive: 1 };
+  const WEAPON_REACH = { punch: 1, gancho: 1, airPunch: 1 };
+  /** Multiplicador de daño del arma para un golpe. */
+  function weaponPower(weapon, kind, armed) { return armed && weapon && WEAPON_MELEE[kind] ? weapon.power : 1; }
+  /** ¿Le quitan el arma? via: 'parry' (guardia justa a su golpe) o 'combo' (n = golpe del combo que encaja). */
+  function disarms(via, n, kind) {
+    if (via === 'parry') return WEAPON.disarmParry && !!WEAPON_MELEE[kind];
+    return n >= WEAPON.disarmCombo;
+  }
+  /**
+   * Ultimate de Sombrero, «La bolsita»: recupera el arma, saca la bolsa, la abre y sopla (MOVES.soplo si
+   * el rival está delante, a tiro de la nube) y arrea un bastonazo (MOVES.remate). Mientras dura no le
+   * pueden pegar. `blindMs`: lo que dura la nube alrededor de la cabeza del rival.
+   */
+  const BOLSA = { blindMs: 1300, puffReach: 40 };
 
   /* Fuelle: una sola barra para pegar y para cubrirse.
    * Pegar gasta (unos 10 golpes mezclados); se recupera entero en ~3 s empezando
@@ -186,7 +227,7 @@
    * la victoria. Al final se multiplica por la dificultad y por el modo salvaje.
    */
   const SCORE = {
-    hit: { punch: 100, kick: 150, gancho: 250, airPunch: 120, dive: 200, grab: 250, bottle: 200, dart: 1500, fountain: 2000, china: 1200 },
+    hit: { punch: 100, kick: 150, gancho: 250, airPunch: 120, dive: 200, grab: 250, bottle: 200, dart: 1500, fountain: 2000, china: 1200, soplo: 300, remate: 1500 },
     comboStep: 0.5,       // cada golpe más del combo vale un 50 % más
     styleMax: 1,          // hasta +100 % con el puntillo al máximo
     block: 20,
@@ -561,13 +602,14 @@
   function dhypot(x, y) { return Math.sqrt(x * x + y * y); }
 
   /** Versión del juego: se muestra en el multijugador y se compara con la del rival. */
-  const GAME_VERSION = '0.14.1';
+  const GAME_VERSION = '0.15.0';
 
   const Rules = {
     GAME_VERSION, dsin, dcos, datan2, dhypot,
     BOTTLE_PRICE, MAX_BOTTLES, START_COINS, DIFFICULTIES, DIFFICULTY_ORDER, MOVES,
     ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX, NOISE, POLICE, WET, FOUNTAIN,
     PITI, STAB, stabOf, CPU_STAB,
+    ULT_MOVES, WEAPONS, WEAPON, WEAPON_MELEE, WEAPON_REACH, weaponPower, disarms, BOLSA,
     FUELLE, GUARD_BREAK, PARRY, COUNTER, KNOCKDOWN, DASH, GRAB, DIVE, GANCHO,
     fuelleRegen, isParry, hitType, hitTypeMult, frameData, blockAdvantage, PUSH, pushSpeed, splitPush,
     WILD, chaosAt, wildLevel,

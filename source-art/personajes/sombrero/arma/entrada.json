@@ -1,0 +1,120 @@
+{
+  "image": "entrada.png",
+  "parkedImage": "bicicleta.png",
+  "facing": "right",
+  "anchor": {
+    "x": 90,
+    "y": 160
+  },
+  "units": "logicalPixels",
+  "frameCount": 6,
+  "next": "idle",
+  "parkedBike": {
+    "x": -54,
+    "y": -77
+  },
+  "frames": [
+    {
+      "x": 0,
+      "y": 0,
+      "w": 192,
+      "h": 176,
+      "duration": 114,
+      "phase": "pedaleo",
+      "fromX": -210,
+      "toX": -180
+    },
+    {
+      "x": 192,
+      "y": 0,
+      "w": 192,
+      "h": 176,
+      "duration": 114,
+      "phase": "pedaleo",
+      "fromX": -180,
+      "toX": -150
+    },
+    {
+      "x": 384,
+      "y": 0,
+      "w": 192,
+      "h": 176,
+      "duration": 114,
+      "phase": "pedaleo",
+      "fromX": -150,
+      "toX": -120
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "w": 192,
+      "h": 176,
+      "duration": 114,
+      "phase": "pedaleo",
+      "fromX": -120,
+      "toX": -90
+    },
+    {
+      "x": 192,
+      "y": 0,
+      "w": 192,
+      "h": 176,
+      "duration": 114,
+      "phase": "pedaleo",
+      "fromX": -90,
+      "toX": -60
+    },
+    {
+      "x": 384,
+      "y": 0,
+      "w": 192,
+      "h": 176,
+      "duration": 114,
+      "phase": "pedaleo",
+      "fromX": -60,
+      "toX": -30
+    },
+    {
+      "x": 192,
+      "y": 0,
+      "w": 192,
+      "h": 176,
+      "duration": 114,
+      "phase": "pedaleo",
+      "fromX": -30,
+      "toX": -6
+    },
+    {
+      "x": 576,
+      "y": 0,
+      "w": 192,
+      "h": 176,
+      "duration": 215,
+      "phase": "freno",
+      "fromX": -6,
+      "toX": 0
+    },
+    {
+      "x": 768,
+      "y": 0,
+      "w": 192,
+      "h": 176,
+      "duration": 220,
+      "phase": "pie-a-tierra",
+      "fromX": 0,
+      "toX": 0
+    },
+    {
+      "x": 960,
+      "y": 0,
+      "w": 192,
+      "h": 176,
+      "duration": 260,
+      "phase": "desmontar",
+      "fromX": 0,
+      "toX": 0
+    }
+  ],
+  "armedImage": "entrada-con-baston.png",
+  "unarmedImage": "entrada.png"
+}

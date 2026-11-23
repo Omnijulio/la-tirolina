@@ -88,6 +88,30 @@ Por dificultad (`DIFFICULTIES` en `rules.js`):
 
 En Fácil casi no hace nada de esto; en Pesadilla castiga casi todo y hace guardia justa una de cada cuatro veces que puede. Las guardias «normales» de la CPU nunca cuentan como guardia justa por casualidad.
 
+## Armas (v0.15)
+
+Algunos luchadores llevan un arma (`weapon` en `game/data/characters.js`): de momento, **El Sombrerero** y su bastón. En desarrollo se puede dar el bastón o un botellín empuñado a El Barbas y Rizos desde la elección de luchador («Arma (pruebas)»).
+
+| | Bastón | Botellín empuñado |
+| --- | --- | --- |
+| Fuerza cuerpo a cuerpo | ×1,35 | ×1,2 |
+| Alcance de más del puño | 25 px nativos (la punta del bastonazo) | 8 px |
+| Fuelle al cubrirse | −30 % | igual |
+| Si se le cae | se queda en el suelo: lo recoge al pasar por encima o vuelve solo a los 10 s | se rompe; le ponen otro a los 10 s |
+
+- **Cómo se le quita**: con una **guardia justa** a un golpe suyo cuerpo a cuerpo, o con el **3.er golpe seguido de un combo**. Es la piedra que faltaba: contra el armado hay que cubrirse a tiempo o encadenar.
+- **Al recuperarlo**: 3 s en los que no se lo pueden quitar, para que no haya bucles de desarme. Cualquier ultimate se lo devuelve.
+- **Recogerlo** cuesta 0,44 s agachado: si le pegan o le agarran mientras, el bastón se queda en el suelo.
+- **Equilibrio**: El Sombrerero es el que menos pega sin bastón (0,85) y queda por encima de la media con él (≈1,15).
+- **La bolsita** (su ultimate) le devuelve el bastón:
+  - el soplo (`soplo`) le deja al rival 1,1 s sin poder hacer nada;
+  - el bastonazo (`remate`) llega antes de que se recupere, no se puede bloquear y lo tumba;
+  - mientras dura no le pueden pegar ni agarrar;
+  - si el rival está lejos o salta, el soplo y el bastonazo se pierden.
+- **CPU**: contra un rival armado busca más el combo (×1,25) y la guardia justa (×1,6); sin su arma, va a por ella si el rival no está encima.
+
+Dónde se ajusta: `WEAPONS`, `WEAPON`, `WEAPON_MELEE`, `WEAPON_REACH`, `BOLSA` y `MOVES.soplo` / `MOVES.remate` en `game/core/rules.js`; desarme en `Match.applyHit`, arma por el suelo en `Match.updateWeapons`, la bolsita en `Match.updateBolsas`. Pruebas en `tests/weapons.test.cjs`.
+
 ## Dónde se ajusta
 
 | Qué | Dónde |
