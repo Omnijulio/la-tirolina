@@ -220,8 +220,9 @@
       this.flash = Math.max(0, this.flash - dt);
       this.noAmmoCooldown = Math.max(0, this.noAmmoCooldown - dt);
       this.displayHp += (this.hp - this.displayHp) * Math.min(1, s * 3);
+      this.bounds = match && match.clampX ? match : null;   // límites del suelo (physics, aunque no reciba match)
 
-      if (this.state === 'ko') return this.updateKO(dt);
+      if (this.state === 'ko') return this.updateKO(dt, opp, match);
       if (this.state === 'win') { this.winT += dt; this.physics(s, false); this.sync(); return; }
 
       this.hitstun = Math.max(0, this.hitstun - dt);
@@ -482,7 +483,8 @@
         }
         this.cx += this.vx * s;
       }
-      this.cx = Math.max(C.MIN_X, Math.min(C.MAX_X, this.cx));
+      // Hasta el borde del escenario (en el bar, también el de la pantalla: a 820 px del rival como mucho).
+      this.cx = this.bounds ? this.bounds.clampX(this) : Math.max(C.MIN_X, Math.min(C.MAX_X, this.cx));
     }
 
     startAttack(kind, imp, match, cancel) {
@@ -561,7 +563,7 @@
         return true;
       }
       if (id === 'fuente') {
-        if (!match.fountain) return false;
+        if (!match.fountain && !match.interior) return false;   // en el bar, al fregadero
         this.f.play('idle', true);
       } else if (!this.f.play('throwDart', true)) return false;
       this.meter = 0; this.chain = 0; this.ultimates++;
@@ -700,7 +702,7 @@
       return 'ko';
     }
 
-    updateKO(dt) {
+    updateKO(dt, opp, match) {
       this.koT += dt;
       const s = dt / 1000;
       if (this.air) {
@@ -712,7 +714,8 @@
         this.cx += this.vx * s;
       }
       // El cuerpo tumbado ocupa ~160 px a cada lado: se mantiene dentro de la pantalla.
-      this.cx = Math.max(C.MIN_X + 90, Math.min(C.MAX_X - 90, this.cx));
+      const L = match && match.limitsFor && opp ? match.limitsFor(opp) : { min: C.MIN_X, max: C.MAX_X };
+      this.cx = Math.max(L.min + 90, Math.min(L.max - 90, this.cx));
       this.sync();
     }
 
@@ -748,6 +751,10 @@
       } else if (this.state === 'grabbed') {
         if (this.throwPose && art(this.throwPose)) frame = st(this.throwPose);    // agarre normal
         else { frame = anims.idle.frames[0]; rot = this.grabRot; }               // el pilón lo levanta y lo gira
+      } else if (this.state === 'soaked' && this.soakUpright) {
+        // En el fregadero del bar: de pie detrás de la barra, mareado.
+        frame = st('dizzy');
+        if (!art('dizzy')) { rot = Math.sin(this.t / 140) * 0.08; }
       } else if (this.state === 'soaked') {
         frame = anims.idle.frames[0];
         lying(1); dy = Math.sin(this.t / 180) * 3;

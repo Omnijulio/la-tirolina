@@ -85,7 +85,9 @@
       unlock: { story: 1, price: 20000 },
       special: {
         id: 'fuente', name: 'Al pilón', short: 'PILÓN',
-        desc: 'Se lanza a por el rival, lo agarra y lo tira a la fuente de la izquierda: le quita muchísima vida y lo deja empapado y más lento un buen rato. No se puede bloquear. Se carga encadenando combos.'
+        desc: 'Se lanza a por el rival, lo agarra y lo tira a la fuente de la izquierda (en el interior del bar, por encima de la barra al fregadero): le quita muchísima vida y lo deja empapado y más lento un buen rato. No se puede bloquear. Se carga encadenando combos.',
+        // En el interior del bar no hay fuente (v0.16): mismo golpe, al fregadero.
+        interior: { name: 'Al fregadero', short: 'FREGADERO' }
       },
       cpu: { bottles: 2, style: 'brawler' }
     },

@@ -18,3 +18,7 @@ Imágenes ya generadas durante el trabajo, conservadas para volver a empaquetar 
 - `police-patrol.png`: coche base sin escena ni personas. Los cuatro estados geométricos de luz se empaquetan desde este original.
 
 `tools/build_police.py` produce los PNG y metadatos. No necesita una nueva generación de imágenes.
+
+## Interior del bar (v0.16)
+
+`escenarios/interior/`: lo necesario del paquete `la-trolina-interior-assets` (fondos, mostradores, muebles, `escenario.json` y `LEEME.md`). `tools/integrate_interior.py` lo reescala y escribe `assets/stages/interior/`. Sin argumentos usa esta copia.

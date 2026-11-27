@@ -83,3 +83,47 @@ Ejecuta `node tests/stage.test.cjs` desde la carpeta del paquete. Comprueba orde
 ## Elementos policiales de v1.4
 
 El coche y los agentes son elementos dinámicos del plano delantero. Orden recomendado: pared, mesas, suelo frontal, patrulla, luchadores/proyectiles, agentes. El mensaje policial se dibuja fuera del desplazamiento de cámara. Ningún elemento policial se incrusta en los tres PNG de fondo. Consulta `POLICE.md`.
+
+## Interior del bar (v0.16)
+
+Segundo escenario: el interior de La Trolina, una **panorámica ancha** que la cámara recorre siguiendo a los luchadores. A diferencia de la terraza, el fondo es una sola imagen (el suelo va pintado en ella): fondo y luchadores se mueven juntos con la cámara, sin paralaje.
+
+| Archivo (`assets/stages/interior/`) | Contenido |
+| --- | --- |
+| `encendidas.png`, `apagadas.png` | Fondo de **1620 × 540 px** con el futbolín y los taburetes ya colocados. Con las luces apagadas, sin los reflejos de la bola |
+| `barra-<luz>.png` | Los dos mostradores, recortados: se dibujan encima de quien está detrás de la barra |
+| `muebles-<luz>.png` | Futbolín y taburetes, recortados: encima de los mostradores |
+| `brillos-apagadas.png` | Reflejos de la bola de discoteca, lo que suman al fondo (se pintan con `lighter`) |
+| `interior-data.js` | `TROLINA_INTERIOR_DATA`: posiciones, cámara, suelo, mostradores y bola |
+
+Todo se genera con `python3 tools/integrate_interior.py <carpeta-del-paquete>` (sin carpeta, desde la copia de `source-art/escenarios/interior`). El paquete trae la panorámica a 2172 × 724 para un escenario de 810 × 270 unidades. La herramienta la reescala una vez, con buen filtro, a 2 px por unidad, la misma escala que la terraza en el canvas de 960 × 540. Así en el juego se pinta sin escalar.
+
+### Coordenadas
+
+- **Mundo**: el de siempre (canvas 960 × 540, apoyo y = 486). El borde izquierdo de la panorámica está en x = `worldX` = −330, así que su centro cae en 480, donde empiezan los asaltos (luchadores en 330 y 630, delante de la barra principal).
+- **Cámara**: `Match.camera`, en unidades como en la terraza (pantalla = mundo − cámara × 2), de −165 a 165. Va al centro entre los dos luchadores y nunca deja a ninguno a menos de 70 px del borde.
+- **Suelo de pelea**: de −260 a 1220 (70 px dentro de cada pared). Los luchadores **no pueden separarse más de 820 px**, lo mismo que en la terraza: el borde de la pantalla hace de pared (cuenta para la regla de esquina).
+- **Línea de apoyo**: el paquete propone y = 247 unidades; el juego usa 243 (486 en el canvas) para no desplazar la imagen. Sigue dentro de la franja del suelo del paquete (232–260).
+
+### Orden de dibujo
+
+`InteriorScene.draw(ctx, { cameraX, t, drawBehind, drawActors })`:
+
+1. Fondo (con los muebles).
+2. Si hay alguien detrás de la barra (`drawBehind`): esa persona, recortada (se ve por encima de las encimeras y, por debajo, solo donde la tapan los mostradores), luego los mostradores y luego los muebles.
+3. Con las luces apagadas, los reflejos de la bola girando y sus destellos.
+4. Luchadores, botellines y efectos (`drawActors`, con la cámara aplicada).
+
+Los muebles están más al fondo que la línea de apoyo: los luchadores siempre pasan por delante.
+
+### Bola de discoteca
+
+Con las luces apagadas, `tools/integrate_interior.py` busca los reflejos pintados en el fondo: manchas pequeñas, muy saturadas y más claras que lo que las rodea. Hay zonas excluidas porque tienen luces propias: pantallas, neveras, el mosaico, las botellas y las pegatinas de la barra.
+
+- **Fondo**: los quita y rellena el hueco en gris.
+- **Capa de brillos**: guarda lo que cada reflejo suma. Pintada con `lighter` en su sitio, sale la imagen original.
+- **En el juego**: la capa se desplaza en bucle hacia la derecha por paredes y techo, y hacia la izquierda y más rápido por el suelo, como una bola que gira. Saltan destellos en los reflejos y en la propia bola.
+
+### El Peñista, al fregadero
+
+Dentro no hay fuente. Su ultimate lo tira por encima de la barra principal, siempre a un sitio que se vea y lejos de los extremos. Detrás de la barra se le dibuja al 85 % (está más lejos) con los pies bajo la encimera, así que se le ve de pecho para arriba. Luego salta de vuelta. Los números están en `BEHIND_BAR` (`game/combat/match.js`).

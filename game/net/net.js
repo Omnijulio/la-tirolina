@@ -44,10 +44,10 @@
     try {
       const R = root.TrolinaRules, parts = [R.GAME_VERSION];
       for (const k of Object.keys(R).sort()) { const v = R[k]; parts.push(k + '=' + (typeof v === 'function' ? v.toString() : JSON.stringify(v))); }
-      for (const c of [root.Combatant, root.Match, root.BottleSystem, root.BottleAttack, root.Fighter, root.Fountain]) parts.push(c ? c.toString() : '-');
+      for (const c of [root.Combatant, root.Match, root.BottleSystem, root.BottleAttack, root.Fighter, root.Fountain, root.InteriorScene]) parts.push(c ? c.toString() : '-');
       const M = root.TrolinaMoves;
       parts.push(M ? JSON.stringify(M.ANIMS) + M.install.toString() : '-');
-      parts.push(JSON.stringify(root.FIGHTER_DATA || null), JSON.stringify(root.BOTTLE_DATA || null), JSON.stringify(root.TROLINA_CHARACTERS || null), JSON.stringify(root.TROLINA_CHARACTER_ART || null));
+      parts.push(JSON.stringify(root.FIGHTER_DATA || null), JSON.stringify(root.BOTTLE_DATA || null), JSON.stringify(root.TROLINA_CHARACTERS || null), JSON.stringify(root.TROLINA_CHARACTER_ART || null), JSON.stringify(root.TROLINA_INTERIOR_DATA || null));
       return fnv(parts.join('\n'));
     } catch (e) { return 'error'; }
   }
@@ -371,7 +371,7 @@
         'ar=' + (c.weapon ? (c.armed ? 1 : 0) + '/' + r(c.disarmT, 0) : '-')].join(' ');
       const b = (m.bottles.projectiles || []).filter((p) => p.alive).map((p) => r(p.x, 0) + '/' + r(p.y, 0)).join(',');
       return ['t=' + this.tick, 'rng=' + this.rngCalls, 'fase=' + m.phase, 'reloj=' + r(m.timer), 'asalto=' + m.round, 'gana=' + m.wins.join('-'),
-        'bot=[' + b + ']', 'dardos=' + m.darts.length, 'armas=[' + (m.dropped || []).map((d) => d.state + '@' + r(d.x, 0)).join(',') + ']', 'agarre=' + (m.throwing ? 1 : 0) + (m.grab ? 'p' : ''),
+        'bot=[' + b + ']', 'dardos=' + m.darts.length, 'armas=[' + (m.dropped || []).map((d) => d.state + '@' + r(d.x, 0)).join(',') + ']', 'agarre=' + (m.throwing ? 1 : 0) + (m.grab ? 'p' : ''), 'cam=' + r(m.camera),
         '| P1 ' + f(m.p1), '| P2 ' + f(m.p2)].join(' ');
     }
 

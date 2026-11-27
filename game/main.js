@@ -120,7 +120,7 @@
 
     stageById(id) { return (root.TROLINA_STAGES || []).find((s) => s.id === id) || { id: 'noche', name: 'Noche', night: true, weather: null }; },
 
-    /** Carga (una vez) las tres capas de un ambiente. Si falla, se queda la noche. */
+    /** Carga (una vez) las capas de un ambiente (las tres de la terraza o las del interior). Si falla, se queda la noche. */
     loadStage(id) {
       if (this.stageCache[id]) return Promise.resolve(this.stageCache[id]);
       const st = this.stageById(id), imgs = {};
@@ -128,9 +128,10 @@
       return Promise.all(jobs).then(() => (this.stageCache[id] = imgs)).catch(() => this.assets.stage);
     },
 
+    /** Escenario (terraza o interior del bar) y ambiente, según Opciones. Para probar: ?stage=interior-apagado. */
     pickStage() {
-      const ids = (root.TROLINA_STAGES || [{ id: 'noche' }]).map((s) => s.id);
-      return params.get('stage') && ids.includes(params.get('stage')) ? params.get('stage') : R.pickStage(Save.data.settings.stage, ids);
+      const stages = root.TROLINA_STAGES || [{ id: 'noche' }], ids = stages.map((s) => s.id);
+      return params.get('stage') && ids.includes(params.get('stage')) ? params.get('stage') : R.pickArena(Save.data.settings, stages);
     },
 
     applySettings() {

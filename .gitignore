@@ -20,3 +20,7 @@ la-trolina-personaje-rizos/
 
 # Paquete de la ultimate y la entrada en patinete de Rizos (copia en source-art/personajes/rizos/extras)
 la-trolina-rizos-ultimate-patinete/
+
+# Paquete del interior del bar (integrado con tools/integrate_interior.py; copia en source-art/escenarios/interior)
+la-trolina-interior-assets/
+la-trolina-interior-assets.zip

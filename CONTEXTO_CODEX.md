@@ -76,6 +76,23 @@ Peticiones incorporadas, en orden:
     - **Opción de pruebas**: `TROLINA_DEV.weaponPicker` en la elección de luchador (no en el multijugador); `?arma1=` / `?arma2=` con `?autoplay`. La sesión guarda `weapon.p1` / `weapon.p2` y `Game.devWeapon` lo pasa a `Match` (`p1.weapon`: id, `null` = ninguna, `undefined` = la suya).
     - **Multijugador**: `snapshot()` incluye `ar=` (armado y tiempo sin arma) y `armas=[…]`. En red cada uno lleva la suya.
 
+22. **v0.16 — El interior del bar**.
+    - **Paquete** `la-trolina-interior-assets` (panorámica 2172×724 para un escenario de 810×270 unidades, luces encendidas y apagadas, mostradores recortados y muebles). `tools/integrate_interior.py <carpeta>` (sin carpeta, desde `source-art/escenarios/interior`) lo reescala una vez a 2 px por unidad y escribe en `assets/stages/interior/`:
+      - `<luz>.png`: fondo de 1620×540 con los muebles ya puestos;
+      - `barra-<luz>.png` y `muebles-<luz>.png`: mostradores y muebles recortados, para dibujar a quien está detrás de la barra;
+      - `brillos-apagadas.png`: los reflejos de la bola de discoteca, sacados del fondo (OpenCV: manchas pequeñas, saturadas y más claras que su alrededor; zonas con luces propias excluidas en `DISCO.keep`). El fondo a oscuras queda sin ellos y la capa guarda lo que suman (se pinta con `lighter`);
+      - `interior-data.js` → `TROLINA_INTERIOR_DATA`: `worldX` (−330: x del mundo del borde de la panorámica), `camera` (±165, en unidades como la terraza), `arena` (−260…1220), `counters` (x en el mundo, encimera y pie en el canvas) y `lightings` (imágenes y `disco`: bola, línea del suelo y centros de los reflejos).
+    - **Escenario ancho** (`game/combat/interior.js` → `InteriorScene`, misma interfaz que `TerraceStage.draw` más `drawBehind` y `t`):
+      - `Match.arenaFor(interior)` → `this.arena` (`minX`, `maxX`, `span` = 820, `wide`, `cam`). En la terraza da 70…890 y ±24: todo queda igual que antes.
+      - `limitsFor(rival)` / `clampX(c)` (en `Combatant.physics` vía `Combatant.bounds`), `reach()` (armas en el suelo), `cameraTarget()` y `viewLeft()` (= `camera × 2`). Usan el escenario en vez de `C.MIN_X/MAX_X`: empujes, regla de esquina (`limitsFor(att)`: en el bar cuenta el borde de la pantalla), agarre, armas, chinas, dardos, botellines (`bottles.minX/maxX`), separación de la policía y K.O.
+      - Cámara: va al centro entre los dos y, en el bar, nunca deja a nadie a menos de 70 px del borde. Al empezar cada asalto se centra. Es parte de la simulación (la usa «Al fregadero»), así que va en `snapshot()` (`cam=`).
+    - **Bola de discoteca** (`InteriorScene.drawDisco`): dos copias de `brillos` (para dar la vuelta) recortadas por encima y por debajo de `disco.floorY`, desplazadas con `discoShift(t, suelo)`; destellos (`updateGlints`, con `__trolinaRealRandom`) que viajan con su reflejo; facetas que pasan por la bola (`drawBall`). Con «Reducir mareo», a mitad de velocidad.
+    - **Escenarios** (`game/data/stages.js`): `TROLINA_PLACES` y `place`, `lighting` y `music` en cada ambiente (`interior`, `interior-apagado`). `TrolinaRules.pickArena(settings, stages)`: primero `settings.place`, luego `settings.stage` (terraza) o `settings.interiorLights`. `Game.pickStage` lo usa (y `?stage=`).
+    - **Sin fuente dentro** (`this.fountain = null`). `music` hace en `addBottleNoise` lo que la fuente encendida.
+    - **«Al fregadero»** (`special.interior` en `characters.js`; `Match.specialOf(c)` da el nombre según el escenario): `updateGrab` comparte la carrera y el levantamiento y sigue en `updateBarGrab` (lanzar → fregadero → `soak` de pie con `Combatant.soakUpright` → `vault` de vuelta). `g.bar` = `InteriorScene.behindBar(x, viewLeft)`; `g.behind` y `g.scale` (`barDepth`, `scaledDraw`): detrás de la barra se dibuja en `drawBehind`, recortado por las encimeras y al 85 %. Números en `BEHIND_BAR` (`match.js`). Salpicadura: `BarSplash`.
+    - **Policía**: en el bar sin `drawBack` (coche) y `officerSpawnX` a la derecha de la pantalla.
+    - **Multijugador**: el escenario va en `cfg.stage`; el suelo sale de la info del ambiente (no de si cargaron las imágenes), así que los dos pelean igual aunque a uno le falle una imagen. `InteriorScene` y `TROLINA_INTERIOR_DATA` entran en la huella.
+
 El apodo **El Barbas** sigue siendo el nombre del personaje original. **Rizos** (v0.13, nombre provisional, disponible desde el principio, ultimate «Pausa para el piti» desde v0.14) tiene arte propio. **El Sombrerero** (v0.15, nombre provisional, `sombrero` en los archivos, disponible desde el principio) tiene arte propio con y sin bastón y la ultimate «La bolsita». Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
 ## Cómo está organizado el juego (v0.2)
@@ -153,6 +170,10 @@ Ver `MULTIJUGADOR.md`. `game/net/net.js` (`TrolinaNet.NetLink`, `TrolinaNet.Lock
 - `Combatant`: `smokeBag` (lo de cada hueco, en orden), `currentSmoke`, `cigs` (total), `buffs` temporales (`buffPct`, `powerNow`). Al fumar baja el puntillo y sube la vida poco a poco; al acabar aplica el efecto extra.
 - Pantalla completa: `#fsBtn` fijo, visible siempre que no se esté a pantalla completa (`Game.setupFullscreen`); en iPhone explica cómo añadir a la pantalla de inicio.
 
+### El interior del bar (v0.16)
+
+Ver el punto 22 de arriba y `STAGE.md`. El combate se dibuja con `InteriorScene` cuando el ambiente tiene `place: 'interior'`; todo lo que depende del ancho del suelo pasa por `Match.arena`. La terraza no cambia.
+
 ### Fuente y ambientes (v0.7)
 
 Ver `FUENTE.md`. `Fountain` (`game/combat/fountain.js`) usa `TROLINA_FOUNTAIN_DATA` y las imágenes de `Game.assets.fountain`; tintes de luz con lienzos auxiliares (sin `getImageData`). `Match` recibe `stage` (de `TROLINA_STAGES`), `stageImages` y `jardinera`; `Game.loadStage(id)` carga las capas bajo demanda y cae en la noche si fallan. `?stage=<id>` fuerza un ambiente en las URL de prueba.
@@ -217,6 +238,7 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 | `templates/index.template.html` | Fuente del Fighter Lab (`fighter-preview.html`). **`index.html` ya no se genera**: es el juego |
 | `tools/build_characters.py` | Regenera los atlas de variantes desde `assets/fighter.png` (Pillow + NumPy); no toca los de arte propio |
 | `tools/integrate_character.py` | Integra un paquete de personaje con arte propio (`python3 tools/integrate_character.py <carpeta>`; sin carpeta, reintegra `source-art/personajes/*`) |
+| `tools/integrate_interior.py` | Integra el paquete del interior del bar (`python3 tools/integrate_interior.py <carpeta>`; sin carpeta, desde `source-art/escenarios/interior`). Necesita Pillow, NumPy y OpenCV (sin OpenCV, la bola no gira) |
 | `tools/package_web.py` | ZIP solo con lo necesario para jugar (itch.io, Netlify) |
 | `references/`, `source-art/` | Fotos del usuario y originales gráficos. `references/` está en `.gitignore` para no publicarse |
 
@@ -263,8 +285,9 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 - Solo El Sombrerero lleva arma propia. El bastón y el botellín empuñado en otros luchadores son de pruebas y se dibujan encima, con la mano aproximada.
 - Solo El Barbas y Rizos tienen bebida y tabaco propios (STAB).
 - Lluvia y nieve son visuales: no cambian la jugabilidad.
+- El interior del bar no tiene ambientes de clima ni de día; los reflejos de la bola se sacaron del fondo con un filtro y alguno muy tenue se queda quieto.
 - Cinemáticas: solo texto y retratos provisionales.
-- Sin música; los efectos de sonido son sintéticos.
+- Sin música grabada (la del bar solo cuenta para el ruido); los efectos de sonido son sintéticos.
 - Sin multijugador (ni local ni online).
 
 ## Siguiente trabajo recomendado

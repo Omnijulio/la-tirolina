@@ -589,7 +589,14 @@
       const node = el(`<div class="scr vs">
         <div class="side l" style="--c:${c1.color}"><canvas width="192" height="176"></canvas><h3>${esc(c1.name)}</h3><p>${online && side === 1 ? 'Rival' : 'Tú'} · ${esc(R.describeOrder(s.order, items))}${stabText(c1, s.order) ? ' <b class="stab-tag">' + stabText(c1, s.order) + '</b>' : ''}</p></div>
         <div class="vs-mid"><b>VS</b>${s.wild ? '<span class="wild-badge">MODO SALVAJE</span>' : ''}${online ? '<span class="wild-badge exp">MULTIJUGADOR · EXPERIMENTAL</span>' : ''}<span>${online ? 'Al mejor de 3' : esc(R.DIFFICULTIES[s.difficulty].name)}${s.mode === 'story' ? ' · Historia ' + (s.storyIndex + 1) + '/' + root.TROLINA_STORY.length : ''}</span>
-          ${(() => { const st = g.stageById(s.stage || 'noche'); return `<span class="stage-state">${st.icon || ''} ${esc(st.name)}</span>` + (g.jardinera() ? '<span class="stage-state jard">🪴 Jardinera llena: +2 botellines para lanzar cada uno</span>' : '') + (s.fountain ? `<span class="fountain-state">⛲ Fuente ${s.fountain.on ? 'encendida' : 'apagada'}${st.night !== false ? ' · ' + (s.fountain.lit ? 'con luz' : 'sin luz') : ''}${s.fountain.on && !online ? ' — tapa el ruido de los botellines' : ''}</span>` : ''); })()}</div>
+          ${(() => {
+            const st = g.stageById(s.stage || 'noche'), inside = st.place === 'interior';
+            const where = inside ? '🍺 Interior del bar · luces ' + (st.lighting === 'apagadas' ? 'apagadas ✨' : 'encendidas') : (st.icon || '') + ' ' + st.name;
+            return `<span class="stage-state">${esc(where)}</span>` +
+              (g.jardinera() ? `<span class="stage-state jard">${inside ? '🍺 Botellines de sobra' : '🪴 Jardinera llena'}: +2 botellines para lanzar cada uno</span>` : '') +
+              (st.music ? `<span class="fountain-state">🎵 Música a tope${online ? '' : ' — tapa el ruido de los botellines'}</span>` : '') +
+              (s.fountain && !inside ? `<span class="fountain-state">⛲ Fuente ${s.fountain.on ? 'encendida' : 'apagada'}${st.night !== false ? ' · ' + (s.fountain.lit ? 'con luz' : 'sin luz') : ''}${s.fountain.on && !online ? ' — tapa el ruido de los botellines' : ''}</span>` : '');
+          })()}</div>
         <div class="side r" style="--c:${c2.color}"><canvas width="192" height="176"></canvas><h3>${esc(c2.name)}</h3><p>${online ? (side === 1 ? 'Tú' : 'Rival') : 'CPU'} · ${esc(R.describeOrder(s.cpuOrder, items))}${stabText(c2, s.cpuOrder) ? ' <b class="stab-tag">' + stabText(c2, s.cpuOrder) + '</b>' : ''}</p></div>
         <span class="hint">Toca para empezar</span>
       </div>`);
@@ -734,8 +741,12 @@
             <select data-k="touch"><option value="auto">Automático</option><option value="always">Mostrar siempre</option><option value="never">Ocultar</option></select></label>
           <label class="row">Reducir mareo de pantalla <input type="checkbox" data-k="reduceMotion"></label>
           <label class="row">Policía Local (ruido, multas y calabozo) <input type="checkbox" data-k="police"></label>
-          <label>Ambiente
-            <select data-k="stage"><option value="random">Aleatorio en cada pelea</option>${(root.TROLINA_STAGES || []).map((st) => `<option value="${st.id}">${st.icon} ${esc(st.name)}</option>`).join('')}</select></label>
+          <label>Escenario
+            <select data-k="place"><option value="random">Aleatorio en cada pelea</option>${(root.TROLINA_PLACES || []).map((pl) => `<option value="${pl.id}">${pl.icon} ${esc(pl.name)}</option>`).join('')}</select></label>
+          <label>Ambiente de la terraza
+            <select data-k="stage"><option value="random">Aleatorio en cada pelea</option>${(root.TROLINA_STAGES || []).filter((st) => (st.place || 'terraza') === 'terraza').map((st) => `<option value="${st.id}">${st.icon} ${esc(st.name)}</option>`).join('')}</select></label>
+          <label>Luces del interior del bar
+            <select data-k="interiorLights"><option value="random">Aleatorias en cada pelea</option><option value="encendidas">💡 Encendidas</option><option value="apagadas">✨ Apagadas, con la bola de discoteca</option></select></label>
           <label class="row">Botellines en la jardinera (+2 para lanzar cada uno) <input type="checkbox" data-k="jardinera"></label>
           <label>Fuente de la terraza
             <select data-k="fountain"><option value="random">Aleatoria en cada pelea</option><option value="on">Siempre encendida</option><option value="off">Siempre apagada</option></select></label>
@@ -1007,11 +1018,13 @@
           <section><h3>Puntuación y ranking</h3><p>Cada golpe da puntos: más si es parte de un combo y más cuanto más <b>puntillo</b> llevas al pegar (estilo). También puntúan los bloqueos, los ultimates, cada asalto ganado (más si es perfecto y con el tiempo que sobre) y la victoria. Al final se multiplica por la dificultad (fácil ×0,5, difícil ×1,5, pesadilla ×2) y el modo salvaje (×1,5).</p>
           <p>Al acabar puedes <b>firmar con tu nombre</b>: quedas en el ranking de este móvil (top 20) y, si está activado, en el <b>ranking de La Trolina</b>, compartido entre todos los móviles. Es opcional, pero la casa te invita a una ronda (+10 €).</p></section>
           <section><h3>Multijugador (experimental)</h3><p>Contra un amigo en otro móvil: uno pulsa <b>Crear sala</b> y le pasa el código de 4 letras (o el enlace); el otro pulsa <b>Unirse</b> y lo escribe. Cada uno elige luchador y pide en la barra (gratis) y la pelea empieza cuando los dos están listos. Sin policía ni modo salvaje.</p></section>
-          <section><h3>Ambientes</h3><p>La terraza cambia de una pelea a otra: noche, día, lluvia, nieve o Navidad (o el que fijes en Opciones). De día la luz de la fuente no se nota. Si la jardinera aparece llena de botellines (opción, y siempre en el modo salvaje), cada uno tiene 2 más para lanzar.</p></section>
+          <section><h3>Escenarios y ambientes</h3><p>Se pelea en <b>la terraza</b> o en <b>el interior del bar</b> (al azar o el que fijes en Opciones). La terraza cambia de una pelea a otra: noche, día, lluvia, nieve o Navidad. De día la luz de la fuente no se nota.</p>
+          <p>El interior es más ancho: la cámara os sigue de la escalera al futbolín, pero nunca os podéis separar más que en la terraza. Unas veces tiene las luces encendidas y otras <b>apagadas, con la bola de discoteca girando</b>. Dentro no hay fuente, pero con la bola suena la música tan alta que, como la fuente encendida, <b>tapa el ruido de los botellines</b>.</p>
+          <p>Si la jardinera aparece llena de botellines (opción, y siempre en el modo salvaje), cada uno tiene 2 más para lanzar, también dentro del bar.</p></section>
           <section><h3>Huecos de La Barra</h3><p>Puedes tomar hasta <b>7 bebidas</b> por pelea (botellines, chupitos, Peterete, Red Bull, café, agua…) y llevar <b>1 cosa para fumar</b>. Más huecos en la Tienda: <b>Hígado de hierro</b> (+1 bebida por nivel, hasta 10) y <b>Pitillera de plata</b> (segundo hueco para fumar).</p>
           <p>Para fumar hay tabaco (Marlboro, Ducados, de liar), puros, habanos y chiflos. Cada uno tarda más o menos y hace más o menos efecto; todos bajan el puntillo (unos más que otros) y, irónicamente, <b>devuelven vida</b>.</p></section>
           <section><h3>La fuente</h3><p>A la izquierda de la terraza hay una fuente, a veces <b>encendida</b> (con chorros) y a veces <b>apagada</b>, con o sin luz. Encendida hace tanto ruido que <b>los botellines no cuentan para la policía</b>.</p>
-          <p><b>El Peñista</b> tiene el ultimate <b>¡Al pilón!</b>: se lanza a por el rival, lo agarra y lo tira a la fuente. Quita muchísima vida, no se puede bloquear y deja al rival <b>mojado</b> y más lento durante 12 s.</p></section>
+          <p><b>El Peñista</b> tiene el ultimate <b>¡Al pilón!</b>: se lanza a por el rival, lo agarra y lo tira a la fuente. Quita muchísima vida, no se puede bloquear y deja al rival <b>mojado</b> y más lento durante 12 s. En el interior del bar es <b>¡Al fregadero!</b>: lo tira por encima de la barra, al fregadero, y sale igual de empapado.</p></section>
           <section><h3>Policía Local</h3><p>Cada golpe, botella rota o KO hace <b>ruido</b> (barra bajo el reloj). Lo que más ruido hace es <b>lanzar muchos botellines seguidos</b>; el ruido baja solo si os calmáis, y el puntillo os hace más escandalosos.</p>
           <p>Si llega al máximo, viene la patrulla: para la pelea, <b>multa</b> a los dos y la pelea se reinicia. Si pasa <b>3 veces seguidas</b>, noche en el <b>calabozo</b>: esos luchadores no se pueden usar durante 1 minuto. Se puede desactivar en Opciones.</p></section>
           <section><h3>Teclado</h3><table>

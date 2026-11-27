@@ -7,6 +7,9 @@
   // marcador, para que el escenario y los luchadores se vean enteros. TOP_Y = primera línea;
   // TOP_Y_POLICE si está el aviso de la policía bajo el reloj.
   const TOP_Y = 188, TOP_Y_POLICE = 214;
+  // Detrás de la barra del bar (ultimate de El Peñista): tamaño por la distancia, pie bajo la encimera
+  // (se le ve de pecho para arriba) y el salto de vuelta a la sala.
+  const BEHIND_BAR = { scale: 0.85, foot: 128, arc: 150, vaultMs: 520, vaultHeight: 170 };
   const BANNER_HOLD = 1700, BANNER_FADE = 450;
   /** '#rgb' o '#rrggbb' → 'rgba(r,g,b,a)' (para degradados que se desvanecen sin oscurecer). */
   function rgba(hex, a) {
@@ -100,6 +103,47 @@
       return data;
     }
 
+    /** Suelo de pelea (v0.16). En la terraza, la pantalla (70…890) y la cámara apenas se mueve (±24).
+     * En el interior del bar, la panorámica entera: la cámara sigue a los luchadores y, como en la
+     * terraza, nunca pueden separarse más de 820 px (el ancho de pantalla útil). */
+    static arenaFor(interior) {
+      const span = C.MAX_X - C.MIN_X;
+      if (!interior) return { minX: C.MIN_X, maxX: C.MAX_X, span, wide: false, cam: [-24, 24] };
+      return { minX: interior.arena.minX, maxX: interior.arena.maxX, span, wide: true, cam: [interior.camera.min, interior.camera.max] };
+    }
+
+    /** Hasta dónde puede ir un luchador con el rival en `other`: el escenario y, en uno ancho, el borde de la pantalla. */
+    limitsFor(other) {
+      const A = this.arena;
+      return { min: Math.max(A.minX, other.cx - A.span), max: Math.min(A.maxX, other.cx + A.span) };
+    }
+
+    clampX(c) {
+      const L = this.limitsFor(c === this.p1 ? this.p2 : this.p1);
+      return Math.max(L.min, Math.min(L.max, c.cx));
+    }
+
+    /** Zona a la que llegan los dos (armas en el suelo, separar a los luchadores). */
+    reach() {
+      const A = this.arena, lo = Math.min(this.p1.cx, this.p2.cx), hi = Math.max(this.p1.cx, this.p2.cx);
+      return { min: Math.max(A.minX, hi - A.span), max: Math.min(A.maxX, lo + A.span) };
+    }
+
+    /** x del mundo del borde izquierdo de la pantalla (para lo que se coloca respecto a lo que se ve). */
+    viewLeft() { return this.camera * 2; }
+
+    /** Cámara hacia la que va: centrada entre los dos, dentro del escenario. */
+    cameraTarget() {
+      const mid = (this.p1.cx + this.p2.cx) / 2, [lo, hi] = this.arena.cam;
+      return Math.max(lo, Math.min(hi, (mid - 480) / 2));
+    }
+
+    /** La ultimate de un luchador, con su nombre de este escenario (El Peñista: al fregadero en el bar). */
+    specialOf(c) {
+      const sp = c.char.special;
+      return sp && this.interior && sp.interior ? { ...sp, ...sp.interior } : sp;
+    }
+
     constructor(opts) {
       this.o = opts;
       this.assets = opts.assets;
@@ -143,13 +187,26 @@
         { groundY: C.GROUND, minX: -80, maxX: 1040, onHit: (h) => this.onBottleHit(h) }, this);
       // Ambiente (noche, día, lluvia, nieve, Navidad) y capa opcional de la jardinera.
       this.stageInfo = opts.stage || { id: 'noche', night: true, weather: null };
-      let stageImgs = opts.stageImages || this.assets.stage, stageData = root.TERRACE_STAGE_DATA;
-      if (opts.jardinera && this.assets.jardinera) {
-        stageImgs = { ...stageImgs, jardinera: this.assets.jardinera };
-        const L = stageData.layers;
-        stageData = { ...stageData, layers: [L[0], L[1], { id: 'jardinera', name: 'Montón de la jardinera', parallax: L[1].parallax }, ...L.slice(2)] };
+      // Interior del bar (v0.16): escenario ancho. Sale de la info del ambiente, no de si cargaron las
+      // imágenes, para que en el multijugador los dos tengan el mismo suelo aunque a uno le falle una.
+      const ID = root.TROLINA_INTERIOR_DATA;
+      this.interior = this.stageInfo.place === 'interior' && ID && root.InteriorScene ? ID : null;
+      if (this.interior) {
+        this.terrace = new root.InteriorScene(opts.stageImages, ID, this.stageInfo.lighting);
+        this.sink = new root.BarSplash(this.assets.fountain);
+        // Con las luces apagadas suena la música de la bola de discoteca: tapa los botellines, como la fuente.
+        this.music = !!this.stageInfo.music;
+      } else {
+        let stageImgs = opts.stageImages || this.assets.stage, stageData = root.TERRACE_STAGE_DATA;
+        if (opts.jardinera && this.assets.jardinera) {
+          stageImgs = { ...stageImgs, jardinera: this.assets.jardinera };
+          const L = stageData.layers;
+          stageData = { ...stageData, layers: [L[0], L[1], { id: 'jardinera', name: 'Montón de la jardinera', parallax: L[1].parallax }, ...L.slice(2)] };
+        }
+        this.terrace = new TerraceStage(stageImgs, stageData);
       }
-      this.terrace = new TerraceStage(stageImgs, stageData);
+      this.arena = Match.arenaFor(this.interior);
+      this.bottles.minX = this.arena.minX - 150; this.bottles.maxX = this.arena.maxX + 150;
       const reduceFx = !!(opts.settings && opts.settings.reduceMotion);
       this.weather = this.stageInfo.weather && root.TrolinaWeather ? new root.TrolinaWeather(this.stageInfo.weather, { reduce: reduceFx }) : null;
       this.waterFx = [];
@@ -165,8 +222,9 @@
       this.noise = 0; this.bottleStreak = -1; this.lastBottleAt = -1e9; this.noiseWarned = false;
       this.police = null; this.separate = null;
       // Fuente a la izquierda: encendida/apagada y con/sin luz.
+      // Dentro del bar no hay fuente (la ultimate de El Peñista tira al rival al fregadero).
       const fs = opts.fountain || { on: true, lit: true };
-      this.fountain = root.Fountain ? new root.Fountain({ on: fs.on, lit: fs.lit, night: this.stageInfo.night !== false, art: this.assets.fountain }) : null;
+      this.fountain = root.Fountain && !this.interior ? new root.Fountain({ on: fs.on, lit: fs.lit, night: this.stageInfo.night !== false, art: this.assets.fountain }) : null;
       this.grab = null; this.fountainNoted = false;
       this.throwing = null;   // agarre normal en curso (botón AGARRE)
       this.fxAnims = [];      // efectos animados del arte de combate (solo decorado)
@@ -222,6 +280,7 @@
       this.round++;
       this.p1.reset(330, 1);
       this.p2.reset(630, -1);
+      if (this.arena.wide) this.camera = this.cameraTarget();   // cada asalto, otra vez en el centro de la barra
       this.cancelGrab();
       this.bottles.reset();
       this.darts = []; this.smokes = []; this.superFreeze = 0;
@@ -307,12 +366,14 @@
       this.addBottleNoise(R.bottleNoise(this.bottleStreak));
     }
 
-    /** Con los chorros encendidos la fuente tapa el ruido de los botellines. */
+    /** Con los chorros encendidos la fuente tapa el ruido de los botellines. Dentro del bar hace lo
+     * mismo la música, cuando está la bola de discoteca (luces apagadas). */
     addBottleNoise(n) {
-      if (this.fountain && this.fountain.on && R.FOUNTAIN.masksBottleNoise) {
+      if (((this.fountain && this.fountain.on) || this.music) && R.FOUNTAIN.masksBottleNoise) {
         if (this.police && !this.fountainNoted && this.phase === 'fight') {
           this.fountainNoted = true;
-          this.popups.push({ x: 480 + this.camera * 2, y: 250, text: 'LA FUENTE TAPA EL RUIDO DE LOS BOTELLINES', color: '#9ff0ff', t: 0, life: 1600 });
+          const text = this.music ? 'LA MÚSICA TAPA EL RUIDO DE LOS BOTELLINES' : 'LA FUENTE TAPA EL RUIDO DE LOS BOTELLINES';
+          this.popups.push({ x: 480 + this.camera * 2, y: 250, text, color: '#9ff0ff', t: 0, life: 1600 });
         }
         return;
       }
@@ -359,6 +420,8 @@
       if (g.def.state === 'grabbed' || g.def.state === 'soaked') {
         g.def.state = this.phase === 'fight' ? 'fight' : 'ready';
         g.def.y = 0; g.def.air = false; g.def.f.enabled = true; g.def.grabRot = 0;
+        g.def.soakUpright = false; g.def.throwPose = null;
+        if (g.bar) g.def.cx = this.clampX(g.def);   // si estaba detrás de la barra, vuelve a la sala
       }
       this.grab = null;
     }
@@ -370,15 +433,22 @@
       const fo = this.fountain;
       g.t += dt;
       if (g.phase === 'dash') {
-        att.cx = Math.max(C.MIN_X, Math.min(C.MAX_X, att.cx + att.facing * 950 * dt / 1000));
+        att.cx = Math.max(this.arena.minX, Math.min(this.arena.maxX, att.cx + att.facing * 950 * dt / 1000));
         att.sync();
         if (Math.abs(def.cx - att.cx) <= 130 && def.state === 'fight' && Math.abs(def.y) < 160 && !def.downed) {
           g.phase = 'hold'; g.t = 0;
           def.state = 'grabbed'; def.f.play('idle', true); def.f.enabled = false;
           def.smoking = null; def.faintT = 0; def.pending = []; def.hitstun = 0; def.blockstun = 0;
-          att.facing = -1;                              // la fuente está a la izquierda
+          if (this.interior) {
+            // En el bar: por encima de la barra, al fregadero, un poco más allá del rival (para que se
+            // le vea caer y no quede tapado por el Peñista), dentro de lo que se ve.
+            const side = Math.sign(def.cx - att.cx) || att.facing;
+            g.bar = this.terrace.behindBar(def.cx + side * 170, this.viewLeft());
+            if (Math.abs(g.bar.x - att.cx) < 120) g.bar = this.terrace.behindBar(att.cx - side * 200, this.viewLeft());
+            att.facing = Math.sign(g.bar.x - att.cx) || att.facing;
+          } else att.facing = -1;                       // la fuente está a la izquierda
           att.poseOverride = { anim: 'throwBottle', frame: 1 };
-          this.popup(att, '¡AL PILÓN!', '#9ff0ff');
+          this.popup(att, this.interior ? '¡AL FREGADERO!' : '¡AL PILÓN!', '#9ff0ff');
           this.sfx('grab'); this.hitstop = 90; this.shake = 6;
         } else if (g.t > 520) {
           att.locked = false; att.poseOverride = null;
@@ -399,12 +469,14 @@
           g.phase = 'throw'; g.t = 0;
           att.poseOverride = null; att.f.play('throwGrab', true);
           g.x0 = def.cx; g.y0 = def.y;
-          g.x1 = fo.x; g.y1 = fo.waterY - C.GROUND + 50;
+          if (g.bar) { g.x1 = g.bar.x; g.y1 = g.bar.top + BEHIND_BAR.foot - C.GROUND; }
+          else { g.x1 = fo.x; g.y1 = fo.waterY - C.GROUND + 50; }
           g.dur = Math.min(1100, 600 + Math.abs(g.x0 - g.x1) * 0.6);
           this.sfx('swing');
         }
         return;
       }
+      if (g.bar) return this.updateBarGrab(g, dt);
       if (g.phase === 'throw') {
         const u = Math.min(1, g.t / g.dur);
         def.cx = g.x0 + (g.x1 - g.x0) * u;
@@ -450,6 +522,93 @@
       }
     }
 
+    /** «Al fregadero» (El Peñista en el bar): lo tira por encima de la barra, cae al fregadero, se
+     * queda un momento detrás (se le ve de pecho para arriba) y salta de vuelta, empapado. Mismo
+     * daño, misma puntuación y mismo «mojado» que la fuente. */
+    updateBarGrab(g, dt) {
+      const { att, def, bar } = g;
+      const B = BEHIND_BAR, footY = bar.top + B.foot - C.GROUND;
+      if (g.phase === 'throw') {
+        const u = Math.min(1, g.t / g.dur);
+        def.cx = g.x0 + (g.x1 - g.x0) * u;
+        def.y = g.y0 + (g.y1 - g.y0) * u - B.arc * 4 * u * (1 - u);
+        def.grabRot = Math.PI / 2 - u * Math.PI * 3 * def.facing;
+        g.scale = 1 - (1 - B.scale) * u;
+        g.behind = u > 0.55;                        // ya bajando, por encima de la barra: pasa detrás
+        def.sync();
+        if (u >= 1) {
+          if (!att.attacking) att.locked = false;
+          def.grabRot = 0;
+          this.sink.splash(def.cx, bar.top, 1.2);
+          this.sfx('splash'); this.sfx('glass'); this.shake = 14; this.hitstop = 160;
+          this.addNoise(R.FOUNTAIN.splashNoise);
+          const dmg = R.damageFor('fountain', att.powerNow, att === this.p2 ? this.diff.cpuDamage : 1);
+          const res = def.splashHit(dmg);
+          this.addScore(att, R.hitPoints('fountain', 1, this.intoxOf(att)), def.cx, bar.top - 140, true);
+          if (att === this.p1) this.stats.ultimates++;
+          this.popups.push({ x: def.cx, y: bar.top - 110, text: '¡CALADO!', color: '#9ff0ff', t: 0, life: 1100 });
+          if (res === 'ko') {
+            // K.O. detrás de la barra: lo saca a la sala para que se vea caer.
+            def.y = -200; def.cx = this.clampX(def);
+            att.locked = false; this.grab = null;
+            this.onKO(att, def);
+            return;
+          }
+          g.phase = 'soak'; g.t = 0; g.tapAt = 0;
+          def.soakUpright = true;
+        }
+        return;
+      }
+      if (g.phase === 'soak') {
+        def.cx = bar.x; def.y = footY + R.dsin(g.t / 140) * 3; def.sync();
+        if (!att.attacking) att.locked = false;
+        // El grifo sigue echándole agua.
+        if (g.t - g.tapAt > 420) { g.tapAt = g.t; this.sink.splash(def.cx + (Math.random() - 0.5) * 30, bar.top, 0.35); }
+        if (g.t > 1100) {
+          // Salta la barra de vuelta a la sala, alejándose un poco del Peñista.
+          g.phase = 'vault'; g.t = 0;
+          def.soakUpright = false; def.state = 'grabbed'; def.grabRot = 0;
+          const away = Math.sign(def.cx - att.cx) || 1, L = this.limitsFor(att);
+          g.x0 = def.cx; g.y0 = def.y;
+          g.x1 = Math.max(L.min, Math.min(L.max, def.cx + away * 70));
+          def.facing = Math.sign(att.cx - g.x1) || def.facing;
+          this.sfx('jump');
+        }
+        return;
+      }
+      if (g.phase === 'vault') {
+        const u = Math.min(1, g.t / B.vaultMs);
+        def.cx = g.x0 + (g.x1 - g.x0) * u;
+        def.y = g.y0 * (1 - u) - B.vaultHeight * 4 * u * (1 - u);
+        def.throwPose = u < 0.5 ? 'jumpRise' : 'jumpFall';
+        g.scale = B.scale + (1 - B.scale) * u;
+        g.behind = u < 0.45;
+        def.sync();
+        if (u >= 1) {
+          def.state = 'fight'; def.f.enabled = true; def.throwPose = null;
+          def.y = -10; def.air = true; def.vy = 300; def.vx = 0;
+          def.facing = Math.sign(att.cx - def.cx) || def.facing;
+          def.hitstun = 250;
+          this.waterOn(def, 'mojado');
+          att.locked = false; att.poseOverride = null;
+          this.grab = null;
+        }
+      }
+    }
+
+    /** Quien cae al fregadero se dibuja más pequeño (está más lejos) y, detrás de la barra, antes que los mostradores. */
+    barDepth(f) {
+      const g = this.grab;
+      return this.interior && g && g.bar && g.def === f && g.scale ? { behind: !!g.behind, scale: g.scale } : null;
+    }
+
+    scaledDraw(c, f, k, draw) {
+      if (k === 1) return draw();
+      c.save();
+      c.translate(f.f.x, f.f.y); c.scale(k, k); c.translate(-f.f.x, -f.f.y);
+      try { return draw(); } finally { c.restore(); }
+    }
+
     /* ---------- Rizos: pausa para el piti y entrada en patinete ---------- */
 
     /** Cuadro de una animación de la segunda hoja a los `t` ms, con sus tiempos escalados a `total`. */
@@ -476,7 +635,7 @@
       def.f.play('idle', true); def.pending = []; def.guard = false; def.walking = false; def.dashT = 0; def.diving = false;
       this.bottles.reset(); this.darts = [];
       this.truce = { att, def, t: 0, flicked: false, emitted: -1, healed: att.hp };
-      this.superText = { text: '¡' + att.char.special.name.toUpperCase() + '!', t: 0, c: att };
+      this.superText = { text: '¡' + this.specialOf(att).name.toUpperCase() + '!', t: 0, c: att };
       this.sfx('super');
       if (att === this.p1) this.stats.ultimates++;
       return true;
@@ -544,7 +703,7 @@
               this.popup(d.target, '¡LA CHINA!', '#ff9a4a');
             }
           }
-          if (d.x < -120 || d.x > 1080 || d.y < -100 || d.y > 560 || d.age > 1500) d.dead = true;
+          if (d.x < this.arena.minX - 190 || d.x > this.arena.maxX + 190 || d.y < -100 || d.y > 560 || d.age > 1500) d.dead = true;
         }
       }
       this.chinas = this.chinas.filter((d) => !d.dead);
@@ -607,7 +766,8 @@
         if (d.state === 'fly') {
           d.vy += C.GRAVITY * s; d.x += d.vx * s; d.y += d.vy * s; d.rot += d.vr * s;
           // Rebota en los bordes: tiene que caer donde se pueda ir a por ella.
-          if (d.x < C.MIN_X || d.x > C.MAX_X) { d.x = Math.max(C.MIN_X, Math.min(C.MAX_X, d.x)); d.vx = -d.vx * 0.5; d.vr = -d.vr; }
+          const L = this.reach();
+          if (d.x < L.min || d.x > L.max) { d.x = Math.max(L.min, Math.min(L.max, d.x)); d.vx = -d.vx * 0.5; d.vr = -d.vr; }
           const P = (this.assets.weapons || {})[d.w.id], rest = C.GROUND - (P ? P.grip[0] : 5) * d.owner.S;
           if (d.y >= rest && d.vy > 0) {
             if (d.w.breaks) { d.state = 'gone'; this.shatter(d); }
@@ -617,8 +777,8 @@
             } else {
               // Tumbada en el suelo, apuntando hacia el centro (siempre a mano de su dueño).
               d.state = 'ground'; d.y = rest; d.vx = 0; d.vy = 0; d.rot = -Math.PI / 2;
-              d.flip = d.x < 480 ? 1 : -1;
-              d.x = Math.max(C.MIN_X - 30, Math.min(C.MAX_X + 30, d.x));
+              d.flip = d.x < (this.arena.wide ? 480 + this.viewLeft() : 480) ? 1 : -1;
+              d.x = Math.max(L.min - 30, Math.min(L.max + 30, d.x));
               this.dust(d.x, C.GROUND, 0.5);
             }
           }
@@ -827,9 +987,12 @@
 
     callPolice() {
       if (!this.police || this.police.active) return;
-      // Los agentes se colocan entre los dos luchadores.
-      const mid = Math.max(230, Math.min(730, (this.p1.cx + this.p2.cx) / 2));
+      // Los agentes se colocan entre los dos luchadores. En el bar no hay coche: entran andando por
+      // la derecha de la pantalla (las luces azules se ven por las ventanas).
+      const v = this.arena.wide ? this.viewLeft() : 0;
+      const mid = Math.max(v + 230, Math.min(v + 730, (this.p1.cx + this.p2.cx) / 2));
       this.policeData.settings.officerTargetX = [mid - 50, mid + 50];
+      if (this.arena.wide) this.policeData.settings.officerSpawnX = [v + 1010, v + 1130];
       this.noise = R.NOISE.max;
       if (this.police.trigger('noise')) this.sfx('siren');
     }
@@ -854,7 +1017,7 @@
       const [ax, bx] = this.policeData.settings.officerTargetX;
       const mid = (ax + bx) / 2;
       const [l, r] = this.p1.cx <= this.p2.cx ? [this.p1, this.p2] : [this.p2, this.p1];
-      this.separate = [[l, Math.max(C.MIN_X, mid - 200)], [r, Math.min(C.MAX_X, mid + 200)]];
+      this.separate = [[l, Math.max(this.arena.minX, mid - 200)], [r, Math.min(this.arena.maxX, mid + 200)]];
       if (this.o.input) this.o.input.clear();
     }
 
@@ -867,7 +1030,7 @@
     /** Congelado de pantalla al activar el ultimate (como un "super" arcade). */
     superFlash(c) {
       this.superFreeze = 700; this.superOwner = c;
-      this.superText = { text: '¡' + c.char.special.name.toUpperCase() + '!', t: 0, c };
+      this.superText = { text: '¡' + this.specialOf(c).name.toUpperCase() + '!', t: 0, c };
       this.sfx('super');
     }
 
@@ -909,7 +1072,7 @@
               this.applyHit(d.owner, d.target, 'dart', d.x, d.y);
             }
           }
-          if (d.x < -120 || d.x > 1080 || d.y < -100 || d.y > 560 || d.age > 2000) d.dead = true;
+          if (d.x < this.arena.minX - 190 || d.x > this.arena.maxX + 190 || d.y < -100 || d.y > 560 || d.age > 2000) d.dead = true;
         }
       }
       this.darts = this.darts.filter((d) => !d.dead);
@@ -962,6 +1125,7 @@
       const actions = this.o.input ? this.o.input.take() : [];
       if (this.superText) this.superText.t += real;
       if (this.fountain) this.fountain.update(real);
+      if (this.sink) this.sink.update(real);
       if (this.weather) this.weather.update(real);
       for (const w of this.waterFx) w.t += real;
       this.waterFx = this.waterFx.filter((w) => w.def && w.img && w.t < w.def.frames.length * w.def.ms);
@@ -1048,9 +1212,12 @@
       this.pitiFx = this.pitiFx.filter((e) => e.t < e.life);
       for (const c of this.fighters) if (c.dropCig) { c.dropCig = false; this.popup(c, '¡SE LE CAE EL PITILLO!', '#ff8a7a'); }
 
-      const mid = (this.p1.cx + this.p2.cx) / 2;
-      const target = Math.max(-24, Math.min(24, (mid - 480) / 2));
-      this.camera += (target - this.camera) * Math.min(1, dt * 0.006);
+      this.camera += (this.cameraTarget() - this.camera) * Math.min(1, dt * 0.006);
+      if (this.arena.wide) {
+        // En el bar la cámara nunca deja a nadie fuera: los dos a más de 70 px del borde.
+        const lo = Math.min(this.p1.cx, this.p2.cx), hi = Math.max(this.p1.cx, this.p2.cx);
+        this.camera = Math.max(this.arena.cam[0], Math.min(this.arena.cam[1], Math.max((hi - 890) / 2, Math.min((lo - 70) / 2, this.camera))));
+      }
       this.shake = Math.max(0, this.shake - real * 0.03);
       this.blackout = Math.max(0, this.blackout - real);
     }
@@ -1073,12 +1240,12 @@
       if (overlap <= 0) return;
       const s = Math.sign(dx) || (a.facing === 1 ? 1 : -1);
       a.cx -= s * overlap / 2; b.cx += s * overlap / 2;
-      const clamp = (v) => Math.max(C.MIN_X, Math.min(C.MAX_X, v));
+      const A = this.arena, clamp = (v) => Math.max(A.minX, Math.min(A.maxX, v));
       a.cx = clamp(a.cx); b.cx = clamp(b.cx);
       dx = b.cx - a.cx;
       const rest = C.PUSH - Math.abs(dx);
       if (rest > 0) {
-        if (a.cx === C.MIN_X || a.cx === C.MAX_X) b.cx = clamp(b.cx + s * rest);
+        if (a.cx === A.minX || a.cx === A.maxX) b.cx = clamp(b.cx + s * rest);
         else a.cx = clamp(a.cx - s * rest);
       }
       a.sync(); b.sync();
@@ -1146,7 +1313,7 @@
       g.t += dt;
       // Lo sujeta delante, un poco levantado.
       def.facing = -att.facing;
-      def.cx = Math.max(C.MIN_X, Math.min(C.MAX_X, att.cx + att.facing * 70));
+      def.cx = Math.max(this.arena.minX, Math.min(this.arena.maxX, att.cx + att.facing * 70));
       def.y = -24 - Math.min(1, g.t / 200) * 16; def.grabRot = -0.12; def.sync();
       def.throwPose = g.t < 200 ? 'grabbed' : 'grabbedLift';
       // Zafarse: pulsar AGARRE a tiempo.
@@ -1170,7 +1337,7 @@
       this.addScore(att, R.hitPoints('grab', 1, this.intoxOf(att)), def.cx, C.GROUND - 300);
       if (att.hasSpecial && !att.meterFull) {
         att.meter = Math.min(R.METER_MAX, att.meter + R.meterGain(2));
-        if (att.meterFull) { this.popup(att, '¡' + att.char.special.short + ' LISTO!', '#f8ce73'); this.sfx('ready'); }
+        if (att.meterFull) { this.popup(att, '¡' + this.specialOf(att).short + ' LISTO!', '#f8ce73'); this.sfx('ready'); }
       }
       if (def.hp <= 0) { def.knockOut(att.facing); this.onKO(att, def); }
     }
@@ -1238,7 +1405,8 @@
       if (melee && (res === 'hit' || res === 'block' || res === 'break') && !def.air && !att.air && !att.locked) {
         const px = (res === 'hit' ? mv.push : res === 'break' ? 40 : mv.blockPush) * (res === 'hit' ? sc.knockback : 1);
         const away = Math.sign(def.cx - att.cx) || att.facing;
-        const room = away > 0 ? C.MAX_X - def.cx : def.cx - C.MIN_X;
+        const L = this.limitsFor(att);   // el borde del escenario o, en el bar, el de la pantalla
+        const room = away > 0 ? L.max - def.cx : def.cx - L.min;
         const sp = R.splitPush(px || 0, Math.max(0, room - 2));
         if (sp.att > 4) att.vx = -away * R.pushSpeed(sp.att);
       }
@@ -1291,7 +1459,7 @@
       // El ultimate se carga encadenando golpes.
       if (att.hasSpecial && !ult && !att.meterFull) {
         att.meter = Math.min(R.METER_MAX, att.meter + R.meterGain(n));
-        if (att.meterFull) { this.popup(att, '¡' + att.char.special.short + ' LISTO!', '#f8ce73'); this.sfx('ready'); }
+        if (att.meterFull) { this.popup(att, '¡' + this.specialOf(att).short + ' LISTO!', '#f8ce73'); this.sfx('ready'); }
       }
       if (kind === 'dart' && att === this.p1) this.stats.ultimates++;
       this.hitstop = res === 'ko' ? 170 : kind === 'dart' || kind === 'remate' ? 220 : kind === 'china' ? 150 : kind === 'gancho' ? 120 : kind === 'kick' || type ? 95 : kind === 'dive' ? 80 : 65;
@@ -1421,26 +1589,36 @@
         ctx.scale(z, z);
         ctx.translate(-480 + Math.sin(this.t / 900) * 10 * I * sway * W, -300);
       }
+      const behind = this.grab && this.grab.behind && this.barDepth(this.grab.def);
+      if (this.interior) this.terrace.reduce = !!reduce;
       this.terrace.draw(ctx, {
-        cameraX: this.camera, drawActors: (c) => {
+        cameraX: this.camera, t: this.t,
+        drawBehind: behind ? (c) => this.scaledDraw(c, this.grab.def, behind.scale, () => this.grab.def.draw(c, this.assets.combatFx ? { fx: true } : undefined)) : null,
+        drawActors: (c) => {
           if (this.superFreeze > 0 && this.superOwner) this.drawSuperBack(c);
-          if (this.police) this.police.drawBack(c, { flashes: !reduce });
+          if (this.police && !this.interior) this.police.drawBack(c, { flashes: !reduce });
           const soaking = this.grab && this.grab.phase === 'soak';
           if (this.fountain) this.fountain.drawBack(c, !soaking);
           if (this.parked.length) this.drawParked(c);
           for (const f of this.fighters) if (f.state !== 'soaked' && f.state !== 'grabbed') f.drawShadow(c);
           if (this.dropped.length) this.drawDropped(c, true);
+          if (this.sink) this.sink.draw(c);
           if (I > 0.15) {
             const g = { ghost: true, alpha: Math.min(0.45, 0.32 * I), dx: Math.sin(this.t / 420) * 22 * I * W, dy: Math.cos(this.t / 610) * 6 * I * W };
-            this.p2.draw(c, g); this.p1.draw(c, { ...g, dx: -g.dx });
+            if (!this.barDepth(this.p2)) this.p2.draw(c, g);
+            if (!this.barDepth(this.p1)) this.p1.draw(c, { ...g, dx: -g.dx });
           }
           const order = this.p1.attacking ? [this.p2, this.p1] : [this.p1, this.p2];
           for (const f of order) {
-            const p = f.draw(c, this.assets.combatFx ? { fx: true } : undefined);
-            if (p.item) {
-              const w = f.f.worldPoint(p.item);
-              this.bottles.drawItem(c, w.x, w.y + p.dy, f.S, p.item.rotation || 0, f.facing);
-            }
+            const bd = this.barDepth(f);
+            if (bd && bd.behind) continue;
+            this.scaledDraw(c, f, bd ? bd.scale : 1, () => {
+              const p = f.draw(c, this.assets.combatFx ? { fx: true } : undefined);
+              if (p.item) {
+                const w = f.f.worldPoint(p.item);
+                this.bottles.drawItem(c, w.x, w.y + p.dy, f.S, p.item.rotation || 0, f.facing);
+              }
+            });
           }
           this.bottles.draw(c, [this.p1.f, this.p2.f]);
           if (this.dropped.length) this.drawDropped(c, false);
@@ -1615,7 +1793,7 @@
       const k = Math.min(1, (700 - this.superFreeze) / 120);
       c.save();
       c.fillStyle = 'rgba(6,4,14,' + (0.72 * k) + ')';
-      c.fillRect(-100, -50, 1160, 700);
+      c.fillRect(this.viewLeft() - 100, -50, 1160, 700);
       const o = this.superOwner;
       const g = c.createRadialGradient(o.cx, C.GROUND - 170, 10, o.cx, C.GROUND - 170, 260);
       g.addColorStop(0, 'rgba(248,206,115,' + (0.55 * k) + ')'); g.addColorStop(1, 'rgba(248,206,115,0)');
@@ -1896,7 +2074,8 @@
           for (let i = 1; i < 4; i++) { ctx.fillStyle = '#05070c'; ctx.fillRect(ex + ew * i / 4, ey, 2, 8); }
           ctx.textAlign = side === 1 ? 'left' : 'right';
           ctx.font = 'bold 12px ' + FONT;
-          const label = full ? '¡' + c.char.special.short + ' LISTO!' + (c === this.p1 && !this.o.autoplay ? ' (U)' : '') : c.char.special.short + ' ' + Math.floor(c.meter) + '%';
+          const short = this.specialOf(c).short;
+          const label = full ? '¡' + short + ' LISTO!' + (c === this.p1 && !this.o.autoplay ? ' (U)' : '') : short + ' ' + Math.floor(c.meter) + '%';
           ctx.fillStyle = full ? ((this.t % 500) < 250 ? '#f8ce73' : '#ffffff') : '#bfe9f5';
           const lx = side === 1 ? ex + ew + 10 : ex - 10;
           ctx.strokeText(label, lx, ey + 9); ctx.fillText(label, lx, ey + 9);
@@ -1922,7 +2101,7 @@
         ctx.fillRect(nx, ny, nw * k, 8);
         ctx.font = 'bold 11px ' + FONT; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#05070c';
         ctx.fillStyle = '#dfe7f0';
-        const rlabel = this.fountain && this.fountain.on ? 'RUIDO · FUENTE ON' : 'RUIDO';
+        const rlabel = this.fountain && this.fountain.on ? 'RUIDO · FUENTE ON' : this.music ? 'RUIDO · MÚSICA A TOPE' : 'RUIDO';
         ctx.strokeText(rlabel, 480, ny + 22); ctx.fillText(rlabel, 480, ny + 22);
         if (this.police.active && this.phase !== 'police') {
           const label = this.police.getStatus().label.toUpperCase();

@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.15** (23/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.16** (27/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -190,6 +190,23 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
   - Se quita con `TROLINA_DEV.weaponPicker.enabled = false`. Para probar sin menús: `?autoplay=1&p1=barbas&arma1=baston&arma2=botellin`.
 - **Pruebas**: `tests/weapons.test.cjs`.
 
+## Hecho en v0.16 — El interior del bar
+
+- **Nuevo escenario: el interior de La Trolina.** Panorámica del paquete `la-trolina-interior-assets` (barra principal, cafetera, paso de personal, escalera al rincón, futbolín y taburetes), integrada con `tools/integrate_interior.py`. Copia en `source-art/escenarios/interior`.
+- **Misma pelea que en la terraza**, pero en una sala más ancha:
+  - la cámara sigue a los luchadores de la escalera al futbolín;
+  - nunca pueden separarse más que en la terraza (820 px): el borde de la pantalla hace de pared;
+  - cada asalto empieza delante de la barra.
+- **Luces encendidas o apagadas** (aleatorio o fijo en Opciones). Con las luces apagadas está encendida la **bola de discoteca**:
+  - sus reflejos están separados del fondo y giran: por paredes y techo hacia un lado y por el suelo hacia el otro;
+  - destellos en los reflejos y en la propia bola;
+  - suena la música, que **tapa el ruido de los botellines** para la policía, como la fuente encendida en la terraza.
+- **Opciones**: *Escenario* (aleatorio, terraza o interior), *Ambiente de la terraza* y *Luces del interior*. Para probar: `?stage=interior` o `?stage=interior-apagado`.
+- **El Peñista sin fuente: «Al fregadero».** Lo tira por encima de la barra, cae al fregadero y se le ve detrás del mostrador, de pecho para arriba. Luego salta de vuelta, empapado. Mismo daño, puntos y «mojado» que «Al pilón».
+- **Policía**: dentro no hay coche. Los agentes entran andando por la derecha y las luces azules se ven por las ventanas.
+- **Multijugador**: el escenario lo elige el anfitrión. La cámara entra en la comprobación de sincronía y el interior en la huella del código.
+- **Pruebas**: `tests/interior.test.cjs`.
+
 ## Próximas fases propuestas
 
 ### Fase 1b — Ajustar el combate jugando
@@ -223,7 +240,9 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - [ ] Final del modo historia.
 
 ### Fase 4 — Más contenido
-- [ ] Nuevos escenarios (otros bares) con el mismo formato de tres planos.
+- [x] El interior del bar (v0.16), con cámara que recorre la sala.
+- [ ] Ajustar el interior jugando: si la sala ancha cambia mucho las peleas (huir, botellines a distancia), la velocidad de la bola de discoteca y si la música debe tapar los botellines.
+- [ ] Más escenarios (otros bares): terraza de tres planos (`TerraceStage`) o panorámica ancha como el interior (`tools/integrate_interior.py`).
 - [ ] Más objetos de barra y efectos (calimocho, tapa de bravas, chicle de menta…).
 - [ ] Música y efectos de sonido grabados.
 - [ ] Logros y estadísticas.

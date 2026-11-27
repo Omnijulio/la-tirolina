@@ -294,6 +294,19 @@
     return ids[Math.floor((rng || Math.random)() * ids.length) % ids.length];
   }
 
+  /** Escenario y ambiente de un combate (v0.16). Primero el sitio (Opciones → Escenario: `place`
+   * 'terraza' | 'interior' | 'random') y, dentro de él, el ambiente de la terraza (`stage`) o las luces
+   * del interior (`interiorLights`: 'encendidas' | 'apagadas' | 'random'). Devuelve el id del ambiente. */
+  function pickArena(settings, stages, rng) {
+    const r = rng || Math.random, st = settings || {};
+    const placeOf = (s) => s.place || 'terraza';
+    const places = stages.map(placeOf).filter((p, i, a) => a.indexOf(p) === i);
+    const place = places.includes(st.place) ? st.place : places[Math.floor(r() * places.length) % places.length];
+    const here = stages.filter((s) => placeOf(s) === place);
+    const lit = here.find((s) => s.lighting && s.lighting === st.interiorLights);
+    return pickStage(place === 'interior' ? lit && lit.id : st.stage, here.map((s) => s.id), r);
+  }
+
   /** Escalado dentro de un combo (n = número de golpe del combo, 1 = primero). */
   function comboScale(n) {
     const k = Math.max(0, (n || 1) - 1);
@@ -602,7 +615,7 @@
   function dhypot(x, y) { return Math.sqrt(x * x + y * y); }
 
   /** Versión del juego: se muestra en el multijugador y se compara con la del rival. */
-  const GAME_VERSION = '0.15.0';
+  const GAME_VERSION = '0.16.0';
 
   const Rules = {
     GAME_VERSION, dsin, dcos, datan2, dhypot,
@@ -613,7 +626,7 @@
     FUELLE, GUARD_BREAK, PARRY, COUNTER, KNOCKDOWN, DASH, GRAB, DIVE, GANCHO,
     fuelleRegen, isParry, hitType, hitTypeMult, frameData, blockAdvantage, PUSH, pushSpeed, splitPush,
     WILD, chaosAt, wildLevel,
-    comboScale, meterGain, sugarPhase, bottleNoise, policeOutcome, pickFountain, pickStage,
+    comboScale, meterGain, sugarPhase, bottleNoise, policeOutcome, pickFountain, pickStage, pickArena,
     SLOTS, JARDINERA_AMMO, slotsFor, orderUsage, cpuSlots,
     SCORE, hitPoints, roundPoints, finalScore, rankPosition, rankInsert, cleanName, formatPoints,
     formatMoney, orderCost, sanitizeOrder, computeLoadout, intoxAt, impairment,
