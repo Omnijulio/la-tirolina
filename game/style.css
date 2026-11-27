@@ -437,3 +437,113 @@ body:not(.is-fullscreen) .toast { bottom: max(58px, env(safe-area-inset-bottom))
 .netlog { width: min(100%, 720px); margin: 10px auto 0; padding-bottom: 64px; text-align: left; }   /* hueco para el botón de pantalla completa */
 .netlog textarea { width: 100%; height: 220px; resize: vertical; font: 11px/1.35 ui-monospace, Menlo, Consolas, monospace; color: #dfe7f0;
   background: #070b14; border: 1px solid var(--line); border-radius: 8px; padding: 8px; white-space: pre; overflow: auto; }
+
+/* ---------- menú del bar (pantalla de inicio, v0.17) ---------- */
+#hub { position: fixed; inset: 0; display: none; z-index: 5; pointer-events: none; }
+#ui.scr-title { background: none; overflow: hidden; }
+#ui:not(.scr-title):not(.scr-loading):not(.scr-cinematic):not(.scr-vs) { background: linear-gradient(180deg, #04060c99, #04060cdd); }
+.scr.hub { position: relative; height: 100%; min-height: 0; max-width: none; padding: 0; display: block; overflow: hidden; touch-action: pan-y; }
+.scr.hub::before, .scr.hub::after { content: ""; position: absolute; left: 0; right: 0; pointer-events: none; }
+.scr.hub::before { top: 0; height: 22%; background: linear-gradient(#04060ca6, #04060c00); }
+.scr.hub::after { bottom: 0; height: 30%; background: linear-gradient(#04060c00, #04060cb8); }
+.scr.hub.pointing { cursor: pointer; }
+.scr.hub > * { z-index: 1; }
+.scr.hub.intro .hub-logo, .scr.hub.intro .hub-card, .scr.hub.intro .hub-hint { animation: hubIn .7s 1.05s both cubic-bezier(.2,.8,.2,1); }
+.scr.hub.intro .hub-marks, .scr.hub.intro .hub-tag { animation: hubFade .6s 1.25s both; }
+.scr.hub:not(.intro) .hub-logo, .scr.hub:not(.intro) .hub-card, .scr.hub:not(.intro) .hub-hint { animation: hubIn .45s .05s both cubic-bezier(.2,.8,.2,1); }
+.scr.hub:not(.intro) .hub-marks { animation: hubFade .4s .1s both; }
+.scr.hub.leaving .hub-logo, .scr.hub.leaving .hub-card, .scr.hub.leaving .hub-hint, .scr.hub.leaving .hub-marks { transition: opacity .25s, transform .3s; opacity: 0; }
+.scr.hub.leaving .hub-card { transform: translateY(14px); }
+@keyframes hubIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes hubFade { from { opacity: 0; } to { opacity: 1; } }
+
+.hub-logo { position: absolute; top: max(14px, env(safe-area-inset-top)); left: max(20px, env(safe-area-inset-left)); align-items: flex-start; text-align: left; pointer-events: none; }
+.hub-logo .neon { font-size: clamp(30px, 5.2vw, 64px); }
+.hub-logo b { font-size: clamp(16px, 2.7vw, 34px); letter-spacing: clamp(4px, .9vw, 10px); margin-left: 4px; }
+
+/* Marcas: un botón redondo con el icono en cada sitio del bar. */
+.hub-marks { position: absolute; inset: 0; pointer-events: none; }
+.mark {
+  position: absolute; left: 0; top: 0; pointer-events: auto; padding: 0; display: grid; place-items: center;
+  width: var(--mk); height: var(--mk); border-radius: 50%; --mk: clamp(38px, 4.6vw, 58px);
+  border: 2px solid #ffffff3a; background: radial-gradient(circle at 50% 40%, #1a2436e6, #070b14e6);
+  box-shadow: 0 4px 14px #0009, inset 0 0 0 1px #0006; transition: border-color .2s, box-shadow .25s, opacity .25s, width .2s, height .2s;
+  will-change: transform;
+}
+.mark .ico { width: 70%; height: 70%; }
+.mark:hover, .mark.on { border-color: #8ffff2; box-shadow: 0 0 0 3px #46eee233, 0 0 22px #46eee2aa, 0 4px 14px #0009; }
+.mark.on { opacity: 0; pointer-events: none; }
+.mark.soon .ico { filter: grayscale(.6) brightness(.8); }
+.mark.off { opacity: 0; pointer-events: none; }
+.mark:focus-visible { outline: 2px solid #8ffff2; outline-offset: 3px; }
+
+/* Iconos del paquete (iconos-menu.png: 9 de 48×48 en fila). */
+.ico { display: block; background: url(../assets/menu/ui/iconos-menu.png) no-repeat; background-size: 900% 100%; background-position: calc(var(--i, 0) * 12.5%) 0; image-rendering: pixelated; }
+.ico.disco { background: var(--disco-icon) center / contain no-repeat; }
+.ico.big { width: 48px; height: 48px; }
+
+/* Letrero del sitio elegido (letrero.png, nueve trozos ×2). La caja de fuera solo se coloca;
+   la placa de dentro es la que se anima (scale en la de fuera escalaría también su translate). */
+.hub-tag { position: absolute; left: 0; top: 0; cursor: pointer; pointer-events: auto; will-change: transform; filter: drop-shadow(0 6px 10px #000a); }
+.hub-tag .plate {
+  display: flex; align-items: center; gap: 10px; white-space: nowrap;
+  border: 24px solid transparent; border-image: url(../assets/menu/ui/letrero-sel.png) 12 fill / 24px stretch; image-rendering: pixelated;
+  padding: 0 8px 2px 2px; transform-origin: var(--px, 50%) 100%;
+}
+.hub-tag.below .plate { transform-origin: var(--px, 50%) 0; }
+.hub-tag .tx { display: flex; flex-direction: column; margin: -14px 0 -12px; }
+.hub-tag b { font: 900 clamp(15px, 1.7vw, 21px)/1.1 var(--display); letter-spacing: .6px; color: #fff4d8; text-shadow: 0 2px 0 #2a1205; }
+.hub-tag small { font: 700 12px/1.25 system-ui, sans-serif; color: #bff8ef; }
+.hub-tag.soon small { color: #ffb38a; }
+.hub-tag .chapa { width: 24px; height: 24px; margin: -14px 0 -12px -6px; background: url(../assets/menu/ui/cursor-chapa.png) 0 0 / 800% 100%; image-rendering: pixelated; animation: chapa .8s steps(8) infinite; flex: none; }
+@keyframes chapa { to { background-position: 114.2857% 0; } }
+.hub-tag .pico { position: absolute; left: calc(var(--px, 50%) - 16px); bottom: -24px; width: 32px; height: 24px; background: url(../assets/menu/ui/letrero-pico.png) 0 0 / 100% 100%; image-rendering: pixelated; }
+.hub-tag.below .pico { bottom: auto; top: -24px; transform: scaleY(-1); }
+.hub-tag.pop .plate, .hub-tag.pop .pico { animation: tagPop .28s cubic-bezier(.2,1.4,.4,1) both; }
+.hub-tag.pressed .plate { border-image-source: url(../assets/menu/ui/letrero-pulsado.png); }
+.hub-tag.pressed { filter: drop-shadow(0 0 18px #6ff7eb) brightness(1.15); }
+.hub-tag.nope { animation: nope .35s; }
+@keyframes tagPop { from { opacity: 0; scale: .86; } to { opacity: 1; scale: 1; } }
+@keyframes nope { 20%, 60% { translate: -6px 0; } 40%, 80% { translate: 6px 0; } }
+
+/* Carta (pizarra.png, nueve trozos ×2): el sitio elegido, en tiza. */
+.hub-card {
+  position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); width: min(340px, 34vw);
+  border: 32px solid transparent; border-image: url(../assets/menu/ui/pizarra.png) 16 fill / 32px stretch; image-rendering: pixelated;
+  padding: 0; color: #f1efe6; filter: drop-shadow(0 10px 22px #000c);
+}
+.hub-card > * { margin: 0; }
+.hub-card .card-head { display: flex; align-items: center; gap: 12px; margin: -12px -6px 0; }
+.hub-card .card-ico { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 10px; background: #ffffff0d; box-shadow: inset 0 0 0 1px #ffffff14; }
+.hub-card h3 { font: 900 clamp(18px, 2vw, 24px)/1.1 var(--display); letter-spacing: .5px; color: #fbf8ee; text-shadow: 0 0 1px #fff8, 0 2px 0 #0008; }
+.hub-card .sub { font: 700 13px/1.3 system-ui, sans-serif; color: #f8d77a; margin-top: 3px; }
+.hub-card .desc { font-size: 13.5px; line-height: 1.4; color: #e3e0d6cc; margin: 10px -6px 12px; min-height: 2.8em; }
+.hub-card .card-row { display: flex; gap: 8px; align-items: stretch; margin: 0 -6px; }
+.hub-card .enter { flex: 1; font-size: 17px; padding: 11px 14px; letter-spacing: 1px; text-transform: uppercase; }
+.hub-card .nav { width: 42px; flex: none; border-radius: 8px; border: 1px solid #ffffff2a; background: #ffffff10; font: 900 22px/1 var(--display); color: #f1efe6; }
+.hub-card .nav:hover { background: #ffffff22; }
+.hub-card .card-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 12px -6px -14px; }
+.hub-card .card-foot .wallet { font-size: 13px; padding: 4px 10px; }
+.hub-card .card-foot .muted { font-size: 12px; color: #c9c5b8; }
+.hub-card.swap h3, .hub-card.swap .sub, .hub-card.swap .desc, .hub-card.swap .card-ico { animation: chalk .3s both; }
+@keyframes chalk { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+.hub-hint { position: absolute; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0; font-size: 12px; color: #ffffffa0; letter-spacing: .5px; text-shadow: 0 1px 2px #000; pointer-events: none; white-space: nowrap; }
+body.hub-on .fs-btn { left: auto; right: max(14px, env(safe-area-inset-right)); top: max(12px, env(safe-area-inset-top)); bottom: auto; transform: none; padding: 6px 12px; font-size: 12px; }
+@media (max-width: 640px), (max-height: 500px) { body.hub-on .fs-btn span { display: none; } body.hub-on .fs-btn { padding: 6px 10px; font-size: 16px; } }
+
+/* Móvil en horizontal (poca altura): todo más compacto. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hub-logo .neon { font-size: 30px; } .hub-logo b { font-size: 15px; letter-spacing: 4px; }
+  .hub-card { width: 270px; border-width: 24px; border-image-width: 24px; }
+  .hub-card .desc { display: none; }
+  .hub-card .card-head { margin: -10px -4px 6px; } .hub-card .card-ico { width: 44px; height: 44px; }
+  .hub-card .card-row, .hub-card .card-foot { margin-left: -4px; margin-right: -4px; }
+  .hub-card .card-foot { margin-top: 8px; margin-bottom: -10px; }
+  .hub-card .enter { padding: 8px 10px; font-size: 15px; }
+  .hub-hint { display: none; }
+}
+/* En vertical: el bar arriba (la cámara va al sitio elegido) y la carta abajo, a lo ancho. */
+.scr.hub.portrait .hub-logo .neon { font-size: 34px; } .scr.hub.portrait .hub-logo b { font-size: 17px; letter-spacing: 5px; }
+.scr.hub.portrait .hub-card { left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right)); width: auto; bottom: max(30px, env(safe-area-inset-bottom)); }
+.scr.hub.portrait .hub-hint { bottom: max(6px, env(safe-area-inset-bottom)); }
+@media (prefers-reduced-motion: reduce) { .scr.hub *, .hub-tag .chapa { animation-duration: .01s !important; } }

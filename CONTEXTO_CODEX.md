@@ -1,6 +1,6 @@
 # Contexto para continuar en Codex
 
-Estado: **v0.12** (16 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
+Estado: **v0.17** (27 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
 
 ## Objetivo del usuario y decisiones aceptadas
 
@@ -92,6 +92,43 @@ Peticiones incorporadas, en orden:
     - **«Al fregadero»** (`special.interior` en `characters.js`; `Match.specialOf(c)` da el nombre según el escenario): `updateGrab` comparte la carrera y el levantamiento y sigue en `updateBarGrab` (lanzar → fregadero → `soak` de pie con `Combatant.soakUpright` → `vault` de vuelta). `g.bar` = `InteriorScene.behindBar(x, viewLeft)`; `g.behind` y `g.scale` (`barDepth`, `scaledDraw`): detrás de la barra se dibuja en `drawBehind`, recortado por las encimeras y al 85 %. Números en `BEHIND_BAR` (`match.js`). Salpicadura: `BarSplash`.
     - **Policía**: en el bar sin `drawBack` (coche) y `officerSpawnX` a la derecha de la pantalla.
     - **Multijugador**: el escenario va en `cfg.stage`; el suelo sale de la info del ambiente (no de si cargaron las imágenes), así que los dos pelean igual aunque a uno le falle una imagen. `InteriorScene` y `TROLINA_INTERIOR_DATA` entran en la huella.
+
+23. **v0.17 — El menú del bar** (pantalla de inicio).
+    - **Paquetes**: `la-trolina-assets-menu-bar` (capas del menú sobre un primer POV de 2311×1284, interfaz, objetos y efectos) y `la-trolina-vista-entrada` (el bar desde la puerta: día, tarde y noche, con luces encendidas y apagadas, 1672×941). `tools/integrate_menu_bar.py [paquete] [vistas]` (sin argumentos, desde `source-art/menu-bar`) escribe en `assets/menu/`:
+      - `vista-<hora>-<luz>.webp` (WebP 92, ~0,5 MB cada una);
+      - `objetos.png` (siluetas blancas) y `halos.png` (halo turquesa ya difuminado), con la misma colocación;
+      - `ui/` (letrero en sus tres estados, pico, pizarra, fila, iconos y chapa);
+      - `menu-data.js` → `TROLINA_MENU_DATA`: `views`, `objects.<id>` (`src` en el atlas, `at` en la escena y `box`), `ui` y `bulbs` (bombillas que se encienden entre la vista apagada y la encendida).
+    - Las siluetas (`source-art/menu-bar/mascaras/*.png`) se calculan una vez y se reutilizan:
+      - la tele y la carta, con GrabCut;
+      - el futbolín, por su verde;
+      - el reloj, por sus rayos dorados;
+      - la bola, un círculo;
+      - los cuadros, rectángulos medidos a mano;
+      - las neveras, por su azul.
+    - Las capas del paquete pasan a las vistas con `alineacion.json` (escala 0,714 y desplazamiento).
+    - **Diseño** (`game/data/hub.js` → `TROLINA_HUB`):
+      - `floor`: perspectiva medida en la imagen. Punto de fuga (1001, 318), focal 850 y peldaño de 0,0837 alturas de cámara.
+      - `paths`: nodos `[X, Z, nivel]` en el suelo.
+      - `destinations`: `kind`, `anchor` y `focus`, de izquierda a derecha.
+      - `hours.byMonth`: cuándo empiezan la tarde y la noche.
+    - **Motor** (`game/ui/hub.js` → `TrolinaHub`), en su propio `<canvas id="hub">` a pantalla completa y a la resolución del dispositivo (DPR ≤ 2, ≤ 4,2 Mpx), entre `#app` y `#ui`:
+      - **Fondo**: crossfade apagadas → encendidas (`lights`).
+      - **Ambiente**: bombillas, neveras y tele; destellos de la bola; en el Modo salvaje, reflejos de colores girando.
+      - **Foco** radial y objeto elegido: «encendido» (silueta ∘ vista con `lighter`) y halo con pulso.
+      - **Flechas**: `buildPath` mete las contrahuellas como tramos verticales y suaviza cada tramo con Chaikin; se dibujan la cinta, los bordes, las flechitas que avanzan (una sola por peldaño), la ola, la punta y los aros.
+      - Motas de polvo y viñeta.
+      - **Cámara** `{x, y, z}` con muelle exponencial y `fit()` dentro de la imagen y de la zona segura (`setSafe`; en vertical, encima de la carta).
+      - `enterTitle({intro})`: encendido con parpadeo la primera vez. `select`, `confirm` (promesa: avance + fundido) y `enterBackdrop(id)` para el resto de pantallas.
+      - `hitTest(px, py, whole)`: con el ratón, las flechas solo cuentan cerca del final.
+      - `hourFor(setting, date)`.
+      - Sin `getImageData` ni `fetch`: el icono del Modo salvaje y los tintes se hacen con canvas y `source-in`.
+    - **Pantalla** (`screens.js`):
+      - `title` usa `hub` si `TrolinaHub.ready`; si no, `titleClassic` (la lista de siempre sobre la pelea de demostración).
+      - Pone una marca por destino, el letrero (`place()` en cada fotograma; se coloca debajo si arriba no cabe) y la carta (`hub-card`).
+      - `UI.hubScreen(name)` muestra el bar de fondo en el resto de pantallas del menú y lo esconde en `loading`, `cinematic`, `vs` y durante la pelea (`Game.loop` también lo esconde si hay `match`).
+    - **Ajustes**: `settings.menuHour` (`auto` | `dia` | `tarde` | `noche`) y `?hora=` para probar. Sonidos nuevos: `hover`, `enter` y `lightsOn`.
+    - **Carga**: las vistas de la hora actual entran en la carga inicial. Si fallan, el juego arranca con el menú de siempre. Las otras horas se cargan al cambiar la opción.
 
 El apodo **El Barbas** sigue siendo el nombre del personaje original. **Rizos** (v0.13, nombre provisional, disponible desde el principio, ultimate «Pausa para el piti» desde v0.14) tiene arte propio. **El Sombrerero** (v0.15, nombre provisional, `sombrero` en los archivos, disponible desde el principio) tiene arte propio con y sin bastón y la ultimate «La bolsita». Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
@@ -287,6 +324,7 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 - Lluvia y nieve son visuales: no cambian la jugabilidad.
 - El interior del bar no tiene ambientes de clima ni de día; los reflejos de la bola se sacaron del fondo con un filtro y alguno muy tenue se queda quieto.
 - Cinemáticas: solo texto y retratos provisionales.
+- Menú del bar: las Dianas no existen todavía (salen «en obras»), y los objetos jugables del interior están entregados pero sin usar.
 - Sin música grabada (la del bar solo cuenta para el ruido); los efectos de sonido son sintéticos.
 - Sin multijugador (ni local ni online).
 

@@ -1,0 +1,71 @@
+LA TROLINA FIGHTERS
+Sprites del menú del bar y objetos del escenario interior
+
+MENÚ
+Las 62 capas PNG son RGBA y ocupan el lienzo completo de 2311 × 1284.
+Se colocan en (0, 0), cada una sobre el fondo existente del juego.
+No se incluyen los fondos, ni hacen falta coordenadas de recorte.
+
+flecha-1-comedor, flecha-2-barra y flecha-3-pasillo
+  Reposo, seis fotogramas de selección (-sel-00 a -05), y pulsada.
+brillo-4-futbolin, brillo-5-tele, brillo-6-carta, brillo-7-cuadros y brillo-8-reloj
+  Cuatro fotogramas de selección (-00 a -03). Para reposo, ocultar la capa.
+ambiente-guirnaldas, ambiente-bola, ambiente-tele y ambiente-neveras
+  En orden, 4, 6, 6 y 2 fotogramas. La tele se limita al área de pantalla.
+
+INTERFAZ
+letrero.png: tres estados (reposo, seleccionado, pulsado) en columna, celda
+  144 × 40. Márgenes de 12 px para la expansión en nueve trozos.
+letrero-pico.png: pico de 16 × 12.
+pizarra.png: panel de 180 × 270. Márgenes de 16 px para nueve trozos.
+pizarra-fila.png: dos celdas de 160 × 28 en columna. Celda 0 vacía de forma
+  intencional para la fila normal. Celda 1 seleccionada.
+iconos-menu.png: nueve celdas de 48 × 48. Historia, Pelea rápida,
+  Multijugador, Tienda, Dianas, Ranking, Opciones, Cómo se pelea y Volver.
+cursor-chapa.png: ocho celdas de 24 × 24, en bucle.
+ui-arma-taburete.png y ui-arma-botella-rota.png: iconos de 32 × 32.
+
+OBJETOS
+Tiras horizontales, numeradas desde el fotograma 0.
+Celdas pequeñas de 48 × 48, ancla (24, 46).
+Celdas grandes de 96 × 96, ancla (48, 92).
+botellin, cana, copa-balon, sidra, destornillador, peterete, red-label-cola,
+botella-whisky y botella-vino
+  Seis estados: lleno, a medias, vacío, inclinación izquierda, inclinación
+  derecha y tumbado vacío. El botellín lleva chapa en el fotograma 0.
+sidra-pila (grande): quieta, dos tambaleos, se dobla, se separa y cae.
+taburete (grande): de pie, dos tambaleos, vuelco, tumbado y empuñado.
+taburete-colores (grande): rojo, fucsia, azul petróleo y marrón.
+  Cada asiento usa cuatro tonos exclusivos respecto de patas y aro.
+taburete-roto (grande): impacto, estallido, dos estados en el aire,
+  caída de piezas y restos.
+chupitos: oscuro, café, tequila, vacío, tumbado y los tres en fila.
+lata: cerrada, abierta, dos tambaleos, tumbada y aplastada.
+botella-rota: en el suelo y empuñada.
+cenicero: limpio, con colillas y volcado.
+bandeja (grande): plana, empuñada y de canto.
+
+Las tiras -guia reproducen el sprite y añaden un punto rojo de agarre:
+  taburete, fotograma 5, (26, 72)
+  botella-rota, fotograma 1, (13, 28)
+  bandeja, fotograma 1, (47, 54)
+Los puntos se expresan en píxeles locales de su celda. Las tiras de juego
+se entregan limpias. Todas las celdas de los objetos llevan contenido.
+
+EFECTOS
+fx-cristal.png: dos filas de seis celdas de 96 × 64. Cristal claro y verde.
+fx-salpicadura.png: dos filas de seis celdas de 96 × 64. Gris para teñir
+y dorado con espuma para cerveza.
+fx-charco.png: cuatro celdas de 96 × 24, gris para teñir.
+
+VERIFICACIÓN Y REFERENCIAS
+Se comprobó el tamaño y el canal alfa de todos los PNG, la presencia de
+los fotogramas y la fila transparente de la pizarra.
+Las capas del menú se trazaron a partir de la imagen y la guía visibles
+en el chat, proyectadas al lienzo indicado. Queda pendiente comprobar la
+superposición directamente sobre el PNG nativo del juego.
+Para los objetos se aplicaron las proporciones y las descripciones del
+encargo. Queda pendiente cotejar la escala con fighter.png, el diseño
+del botellín y del taburete con los sprites originales, y el parecido de
+las bebidas y de la interfaz con sus iconos originales.
+Se omitió el logotipo opcional. La integración en el juego queda aparte.

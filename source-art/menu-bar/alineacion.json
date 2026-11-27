@@ -1,0 +1,23 @@
+{
+ "explicacion": "Transformación de las capas del paquete (lienzo 2311×1284, dibujadas sobre el primer POV del bar) a las vistas de entrada (1672×941). Calculada con SIFT + RANSAC entre el POV original y noche-encendidas.png: escala uniforme y desplazamiento. Las seis vistas están alineadas entre sí (error < 0,5 px).",
+ "affine": [
+  [
+   0.71363,
+   1e-05,
+   11.87515
+  ],
+  [
+   -1e-05,
+   0.71363,
+   12.83335
+  ]
+ ],
+ "origen": [
+  2311,
+  1284
+ ],
+ "destino": [
+  1672,
+  941
+ ]
+}

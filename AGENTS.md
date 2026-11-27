@@ -37,6 +37,11 @@ Lee `CONTEXTO_CODEX.md`, `PLAN.md`, `README.md` y `STAGE.md` antes de modificar 
 - Orden del escenario: pared, mesas/sillas, suelo frontal, personajes y proyectiles. Los personajes siempre quedan delante de las mesas.
 - Las tres imágenes del escenario comparten coordenadas y miden 544x270; ventana lógica 480x270, margen horizontal 32, suelo y=243 nativos. En Canvas 960x540, apoyo y=486.
 - Interior del bar (v0.16): panorámica 1620×540 ya a escala del canvas (`assets/stages/interior/`, se genera con `python3 tools/integrate_interior.py`; no edites esos PNG ni `interior-data.js` a mano). Es un escenario ancho: lo que dependa de dónde acaba el suelo usa `Match.arena`, `limitsFor`, `clampX`, `reach` y `viewLeft`, nunca `C.MIN_X/MAX_X` ni 480/960 como centro o borde del mundo. Los luchadores nunca se separan más de `arena.span` (820) y la cámara (en unidades, ×2 en el canvas) es parte de la simulación. En la terraza todo da lo mismo que antes. Quien está detrás de la barra se dibuja en `drawBehind` (antes de los mostradores).
+- Menú del bar (v0.17): la pantalla de inicio. Se integra con `python3 tools/integrate_menu_bar.py` (originales en `source-art/menu-bar`). No edites `assets/menu/` a mano.
+  - **Sitios, flechas y perspectiva**: `game/data/hub.js`. Las flechas son nodos `[X, Z, nivel]` sobre el suelo; ajusta ahí, no en píxeles.
+  - **Dibujo**: `game/ui/hub.js`, con su propio canvas a pantalla completa (no el de 960×540).
+  - **Botones y textos**: HTML en la pantalla `hub` de `screens.js`.
+  - Si una silueta sale mal, retoca su PNG en `source-art/menu-bar/mascaras/` y vuelve a integrar.
 - `force:true` sirve para inspección de la demo; no debe ser el modo normal de lanzar en una partida.
 - No introduzcas frameworks ni dependencias de ejecución para cambios que puedan resolverse con la estructura actual.
 

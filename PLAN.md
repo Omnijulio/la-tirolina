@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.16** (27/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.17** (27/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -207,7 +207,42 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - **Multijugador**: el escenario lo elige el anfitrión. La cámara entra en la comprobación de sincronía y el interior en la huella del código.
 - **Pruebas**: `tests/interior.test.cjs`.
 
+## Hecho en v0.17 — El menú del bar
+
+- **La pantalla de inicio es La Trolina vista desde la puerta.** Cada sitio del bar lleva a un apartado:
+
+  | Sitio | Cómo se marca | Apartado |
+  | --- | --- | --- |
+  | Pasillo hasta la puerta del fondo (la terraza) | Flecha | Modo historia |
+  | Barra | Flecha | Tienda |
+  | Escaleras al comedor | Flecha | Dianas (próximamente) |
+  | Tele | Brillo | Pelea rápida |
+  | Bola de discoteca | Brillo y luces fuera | Modo salvaje |
+  | Futbolín | Brillo | Multijugador |
+  | Cuadros de la pared | Brillo | Ranking |
+  | Carta de la barra | Brillo | Cómo se pelea |
+  | Reloj de sol | Brillo | Opciones |
+
+- **Flechas en perspectiva**, dibujadas por el juego: cintas de luz pegadas al suelo, con flechitas que avanzan y una ola que va de la puerta al sitio. La del comedor **sube los tres peldaños** siguiendo cada contrahuella. Las del paquete eran finas y no seguían el suelo: no se usan.
+- **Brillos** con la silueta exacta de cada objeto (tele, carta, bola, futbolín, cuadros y reloj), un foco que oscurece el resto del bar y el propio objeto «encendido».
+- **Cámara suave**: se acerca un poco a lo elegido. En vertical recorre el bar de un sitio a otro. Al entrar, avanza hacia el sitio y funde a negro. Al volver, retrocede desde donde estabas.
+- **Las luces se encienden** la primera vez, con parpadeo de fluorescente. Bombillas de las guirnaldas que titilan, destellos en la bola, neveras y tele que vibran y motas de polvo. Al elegir el Modo salvaje se apagan las luces y la bola reparte reflejos por todo el bar.
+- **Hora del bar**: día, tarde o noche según el reloj del móvil y el mes, o fija en Opciones (*Hora del bar en el menú*). Para probar: `?hora=dia|tarde|noche`.
+- **Interfaz del paquete**: marcas redondas con los iconos en cada sitio, letrero de madera y latón con la chapa girando, y la pizarra con el sitio elegido, «Entrar», ‹ › y la cartera.
+- **Controles**:
+  - Ratón: pasar por encima elige y hacer clic entra.
+  - Teclado: ←/→ (o A/D) y Enter.
+  - Táctil: el primer toque elige y el segundo entra; deslizar pasa de un sitio a otro.
+- **Las demás pantallas del menú** se ven sobre el bar, acercado al sitio de donde vienes.
+- Integración: `tools/integrate_menu_bar.py` (paquete `la-trolina-assets-menu-bar` y vistas `la-trolina-vista-entrada`; copia en `source-art/menu-bar`). Diseño en `game/data/hub.js`; motor en `game/ui/hub.js`; pantalla en `screens.js` (`hub`). Pruebas: `tests/hub.test.cjs`.
+- Del paquete quedan guardados para más adelante los **objetos jugables** del interior (botellines, vasos, copas, sidra, taburetes…) y sus efectos, en `source-art/menu-bar/paquete/props` y `fx`.
+
 ## Próximas fases propuestas
+
+### Fase 0 — Menú del bar
+- [ ] Probarlo en móviles reales (rendimiento del canvas a pantalla completa) y ajustar lo que haga falta.
+- [ ] Dianas: el minijuego del comedor (ahora sale «en obras»).
+- [ ] Objetos jugables en el interior con los sprites ya entregados (`source-art/menu-bar/paquete/props`).
 
 ### Fase 1b — Ajustar el combate jugando
 - [ ] Jugar v0.12 en móviles reales y ajustar números en `rules.js` (`MOVES`, `FUELLE`, `PARRY`…): duración de los asaltos, cuánto se usa el agarre, si la guardia justa es demasiado fácil o difícil.

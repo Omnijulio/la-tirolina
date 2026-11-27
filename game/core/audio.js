@@ -75,6 +75,9 @@
           case 'coin': this.tone('square', 990, 990, 0.07, 0.15); this.tone('square', 1320, 1320, 0.16, 0.15, 0.07); break;
           case 'buy': this.tone('triangle', 660, 660, 0.06, 0.25); this.tone('triangle', 880, 880, 0.1, 0.25, 0.06); break;
           case 'select': this.tone('square', 660, 700, 0.05, 0.12); break;
+          case 'hover': this.tone('triangle', 1180, 1240, 0.035, 0.06); break;
+          case 'enter': this.hiss(0.32, 0.22, 'bandpass', 500, 2600); this.tone('triangle', 520, 880, 0.22, 0.12, 0.04); break;
+          case 'lightsOn': this.tone('square', 90, 60, 0.05, 0.25); this.hiss(0.04, 0.35, 'highpass', 4000); this.tone('sine', 100, 100, 0.6, 0.06, 0.08); this.tone('square', 90, 60, 0.04, 0.2, 0.2); break;
           case 'back': this.tone('square', 440, 330, 0.07, 0.12); break;
           case 'error': this.tone('square', 180, 160, 0.16, 0.18); break;
           case 'gulp': this.tone('sine', 300, 150, 0.12, 0.3); this.tone('sine', 280, 140, 0.12, 0.3, 0.16); break;

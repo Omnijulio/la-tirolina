@@ -48,6 +48,7 @@
         throw err;
       }
       this.attract = this.makeAttract();
+      if (root.TrolinaHub) { try { root.TrolinaHub.init(); } catch (e) { console.warn('Menú del bar:', e); } }
       if (this.onlineRanking()) this.onlineRanking().flush(Save).catch(() => {});
       requestAnimationFrame((t) => this.loop(t));
       if (params.has('autoplay')) this.debugQuick(true);
@@ -102,13 +103,19 @@
         for (const [k, src] of Object.entries(root.TROLINA_COMBAT_FX.images)) jobs.push([src, (img) => { this.assets.combatFx[k] = img; }]);
         for (const [k, src] of Object.entries(root.TROLINA_COMBAT_FX.ui)) jobs.push([src, (img) => { this.assets.combatUi[k] = img; }]);
       }
+      // Menú del bar: las vistas de la hora actual, las siluetas y los halos. Si algo falla,
+      // el juego arranca igual con el menú de siempre (Hub.init devuelve false).
+      const Hub = root.TrolinaHub;
+      const hubJobs = Hub ? Hub.jobs(this, Hub.hourFor(params.get('hora') || Save.data.settings.menuHour)) : [];
       if (root.POLICE_DATA) {
         this.assets.police = {};
         jobs.push([root.POLICE_DATA.officer.image, (img) => { this.assets.police.officer = img; }]);
         jobs.push([root.POLICE_DATA.patrol.image, (img) => { this.assets.police.patrol = img; }]);
       }
       let done = 0;
-      await Promise.all(jobs.map(([src, set]) => this.loadImage(src).then((img) => { set(img); onProgress(++done / jobs.length); })));
+      const all = jobs.length + hubJobs.length;
+      await Promise.all(jobs.map(([src, set]) => this.loadImage(src).then((img) => { set(img); onProgress(++done / all); }))
+        .concat(hubJobs.map(([src, set]) => this.loadImage(src).then(set, () => console.warn('Menú del bar: no se pudo cargar ' + src)).then(() => onProgress(++done / all)))));
       this.stageCache.noche = this.assets.stage;
     },
 
@@ -604,13 +611,16 @@
     loop(now) {
       const dt = this.last === null ? 16 : Math.min(50, now - this.last);
       this.last = now;
+      const Hub = root.TrolinaHub;
+      if (this.match && Hub && Hub.visible) Hub.hide();
       if (this.match) {
         if (this.lockstep) this.lockstep.frame(dt);
         else if (!this.paused) this.match.update(dt);
         this.match.draw(this.ctx);
         this.updateTouchHud();
         Sfx.setWater(!this.paused && !this.match.ended && this.match.fountain && this.match.fountain.on);
-      } else if (this.attract) { Sfx.setWater(false); this.drawAttract(dt); }
+      } else if (Hub && Hub.ready) { Sfx.setWater(false); Hub.frame(dt); }
+      else if (this.attract) { Sfx.setWater(false); this.drawAttract(dt); }
       UI.tick(dt);
       requestAnimationFrame((t) => this.loop(t));
     },

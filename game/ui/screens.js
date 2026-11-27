@@ -5,6 +5,7 @@
   const R = root.TrolinaRules;
   const money = (c) => R.formatMoney(c);
   const clock = (ms) => { const t = Math.ceil(ms / 1000); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+  const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   const esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
 
   function el(html) {
@@ -87,7 +88,9 @@
       this.tickers = []; this.keyHandler = null; this.onNet = null;
       this.root.innerHTML = '';
       this.root.className = 'on scr-' + name;
+      const prev = this.current;
       this.current = name;
+      this.hubScreen(name, prev);
       const node = SCREENS[name].call(this, params || {});
       this.root.append(node);
       this.root.scrollTop = 0;
@@ -95,7 +98,18 @@
       if (first && !matchMedia('(pointer: coarse)').matches) first.focus({ preventScroll: true });
     },
 
-    hide() { this.tickers = []; this.keyHandler = null; this.root.className = ''; this.root.innerHTML = ''; this.current = null; },
+    hide() { this.tickers = []; this.keyHandler = null; this.root.className = ''; this.root.innerHTML = ''; this.current = null; document.body.classList.remove('hub-on'); },
+
+    /** El menú del bar (game/ui/hub.js): de fondo en todas las pantallas del menú, fuera de la pelea. */
+    hubScreen(name) {
+      const H = root.TrolinaHub, g = this.game;
+      document.body.classList.toggle('hub-on', name === 'title' && !!(H && H.ready));
+      if (!H || !H.ready) return;
+      if (g.match || name === 'loading' || name === 'cinematic' || name === 'vs') { H.hide(); return; }
+      H.setHour(H.hourFor(g.params.get('hora') || g.save.data.settings.menuHour));
+      H.show();
+      if (name !== 'title') H.enterBackdrop(this.hubLast);
+    },
     tick(dt) { for (const fn of this.tickers) fn(dt); },
     wallet() { return '<div class="wallet" title="Cartera">💰 <b>' + money(this.game.save.data.coins) + '</b></div>'; },
     header(title, backTo) {
@@ -221,6 +235,170 @@
     },
 
     title() {
+      if (root.TrolinaHub && root.TrolinaHub.ready) return SCREENS.hub.call(this);
+      return SCREENS.titleClassic.call(this);
+    },
+
+    /** Pantalla de inicio: La Trolina vista desde la puerta. Cada sitio lleva a un apartado. */
+    hub() {
+      const g = this.game, d = g.save.data, H = root.TrolinaHub, HD = root.TROLINA_HUB;
+      const touch = matchMedia('(pointer: coarse)').matches;
+      const storyN = root.TROLINA_STORY.length, stage = Math.min(d.story.stage + 1, storyN);
+      const rk = g.save.ranking.list;
+      const info = {
+        story: { name: 'Modo historia', icon: 0, sub: d.story.completed ? 'Completado · rejugar' : 'Combate ' + stage + ' / ' + storyN,
+          desc: 'Sal a la terraza: cinco peleas contra la cuadrilla, una detrás de otra.', go: () => g.beginStory() },
+        quick: { name: 'Pelea rápida', icon: 1, sub: 'Elige rival y dificultad', desc: 'Un combate suelto. Tú eliges luchador, rival y dificultad.', go: () => g.beginQuick() },
+        help: { name: 'Cómo se pelea', icon: 7, sub: 'Controles y trucos', desc: 'Golpes, guardia, agarre y fuelle, para no hacer el ridículo.', go: () => this.show('help') },
+        shop: { name: 'Tienda', icon: 3, sub: money(d.coins) + ' para gastar', desc: 'Desbloquea luchadores y compra mejoras con lo que ganas peleando.', go: () => this.show('shop') },
+        wild: { name: 'Modo salvaje', icon: -1, sub: 'Experimental', desc: 'Luces fuera. Desde el segundo 30 la pelea se vuelve un caos para los dos.', go: () => g.beginWild() },
+        darts: { name: 'Dianas', icon: 4, sub: 'Próximamente', desc: 'Las dianas del comedor. Todavía están en obras.', soon: true },
+        online: { name: 'Multijugador', icon: 2, sub: 'Experimental · dos móviles', desc: 'Contra un amigo, cada uno en su móvil, con un código de sala.', go: () => this.show('online') },
+        ranking: { name: 'Ranking', icon: 5, sub: rk.length ? '🏆 ' + esc(rk[0].name) + ' · ' + R.formatPoints(rk[0].score) : 'Firma tu puntuación',
+          desc: 'Las mejores puntuaciones de este móvil y de toda La Trolina.', go: () => this.show('ranking') },
+        options: { name: 'Opciones', icon: 6, sub: 'Sonido, controles, escenario…', desc: 'Sonido, controles táctiles, escenarios y la hora del bar.', go: () => this.show('options') }
+      };
+      const order = HD.destinations.map((x) => x.id).filter((id) => info[id]);
+      const iconHtml = (id, cls) => info[id].icon < 0 ? `<i class="ico disco ${cls || ''}"></i>` : `<i class="ico ${cls || ''}" style="--i:${info[id].icon}"></i>`;
+      const node = el(`<div class="scr hub${H.introDone ? '' : ' intro'}">
+        <div class="hub-logo logo"><span class="neon">La Trolina</span><b>FIGHTERS</b></div>
+        <div class="hub-marks">${order.map((id) => `<button class="mark${info[id].soon ? ' soon' : ''}" data-id="${id}" aria-label="${info[id].name}" data-silent="1">${iconHtml(id)}</button>`).join('')}</div>
+        <div class="hub-tag" aria-hidden="true"><div class="plate"><i class="chapa"></i><span class="tx"><b></b><small></small></span></div><i class="pico"></i></div>
+        <aside class="hub-card">
+          <div class="card-head"><span class="card-ico"></span><div><h3></h3><p class="sub"></p></div></div>
+          <p class="desc"></p>
+          <div class="card-row">
+            <button class="nav" data-nav="-1" aria-label="Anterior" data-silent="1">‹</button>
+            <button class="primary enter" data-enter data-silent="1" autofocus>Entrar</button>
+            <button class="nav" data-nav="1" aria-label="Siguiente" data-silent="1">›</button>
+          </div>
+          <div class="card-foot">${this.wallet()}<span class="muted">${d.unlocked.length}/${root.TROLINA_CHARACTERS.length} luchadores · ${d.stats.wins} victorias</span></div>
+        </aside>
+        <p class="hub-hint">${touch ? 'Toca un sitio del bar o desliza' : '← → elegir · Enter entrar · o pasa el ratón por el bar'}</p>
+      </div>`);
+      const marks = {}; node.querySelectorAll('.mark').forEach((m) => { marks[m.dataset.id] = m; });
+      const tag = node.querySelector('.hub-tag'), card = node.querySelector('.hub-card');
+      let sel = null, busy = false;
+      const isTitle = () => this.current === 'title' && this.root.contains(node);
+
+      const select = (id, quiet) => {
+        if (!info[id] || busy) return;
+        if (sel !== id && !quiet) root.TrolinaSfx.play('hover');
+        sel = id; this.hubLast = id;
+        H.select(id);
+        const it = info[id];
+        for (const [k, m] of Object.entries(marks)) m.classList.toggle('on', k === id);
+        tag.querySelector('b').textContent = it.name;
+        tag.querySelector('small').textContent = it.sub.replace(/&amp;/g, '&');
+        tag.classList.toggle('soon', !!it.soon);
+        tag.classList.remove('pop'); void tag.offsetWidth; tag.classList.add('pop');
+        card.querySelector('.card-ico').innerHTML = iconHtml(id, 'big');
+        card.querySelector('h3').textContent = it.name;
+        card.querySelector('.sub').innerHTML = it.sub;
+        card.querySelector('.desc').textContent = it.desc;
+        const enter = card.querySelector('[data-enter]');
+        enter.textContent = it.soon ? 'En obras' : 'Entrar';
+        enter.disabled = !!it.soon;
+        card.classList.remove('swap'); void card.offsetWidth; card.classList.add('swap');
+        tagSize = null;
+      };
+      const step = (k) => { const i = order.indexOf(sel); select(order[(i + k + order.length) % order.length]); };
+      const confirm = (id) => {
+        id = id || sel;
+        if (!info[id] || busy) return;
+        if (id !== sel) select(id, true);
+        const it = info[id];
+        if (it.soon) { root.TrolinaSfx.play('error'); tag.classList.remove('nope'); void tag.offsetWidth; tag.classList.add('nope'); this.snarkToast(node, 'Las dianas siguen en obras. Vuelve otro día.'); return; }
+        busy = true;
+        root.TrolinaSfx.play('enter');
+        tag.classList.add('pressed');
+        node.classList.add('leaving');
+        H.confirm(id).then(() => { if (isTitle()) it.go(); });
+      };
+
+      // Ratón: pasar por encima elige, clic entra. Táctil: el primer toque elige, el segundo entra.
+      const pick = (id) => { if (touch && id !== sel) select(id); else confirm(id); };
+      for (const [id, m] of Object.entries(marks)) {
+        m.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') select(id); });
+        m.addEventListener('click', (e) => { e.stopPropagation(); pick(id); });
+        m.addEventListener('focus', () => { if (m.matches(':focus-visible')) select(id); });   // con el tabulador
+      }
+      tag.addEventListener('click', (e) => { e.stopPropagation(); confirm(); });
+      card.querySelector('[data-enter]').addEventListener('click', () => confirm());
+      card.querySelectorAll('[data-nav]').forEach((b) => b.addEventListener('click', () => step(Number(b.dataset.nav))));
+      let lastHover = null, down = null;
+      node.addEventListener('pointermove', (e) => {
+        if (e.pointerType !== 'mouse' || busy || e.target.closest('.hub-card')) return;
+        const id = H.hitTest(e.clientX, e.clientY);
+        node.classList.toggle('pointing', !!id);
+        if (id && id !== lastHover) select(id);
+        lastHover = id;
+      });
+      node.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+      node.addEventListener('pointerup', (e) => {
+        if (!down || busy || e.target.closest('.hub-card, .mark, .hub-tag')) { down = null; return; }
+        const dx = e.clientX - down.x, dy = e.clientY - down.y;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) step(dx < 0 ? 1 : -1);   // deslizar
+        else if (Math.hypot(dx, dy) < 12) { const id = H.hitTest(e.clientX, e.clientY, e.pointerType !== 'mouse'); if (id) pick(id); }
+        down = null;
+      });
+      this.keyHandler = (e) => {
+        if (busy) return;
+        const k = e.key;
+        if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'd' || k === 's') { e.preventDefault(); step(1); }
+        else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'a' || k === 'w') { e.preventDefault(); step(-1); }
+        else if (k === 'Enter' || k === ' ') { if (!e.target.closest || !e.target.closest('button')) { e.preventDefault(); confirm(); } }
+      };
+
+      // Cada fotograma: marcas y letrero pegados a la escena (la cámara se mueve).
+      let tagSize = null;
+      const place = () => {
+        if (!isTitle()) return;
+        const W = innerWidth, Hh = innerHeight;
+        for (const dst of HD.destinations) {
+          const m = marks[dst.id]; if (!m) continue;
+          const [x, y] = H.toScreen(dst.anchor[0], dst.anchor[1]);
+          const out = x < -40 || x > W + 40 || y < -40 || y > Hh + 40;
+          // La marca, encima del sitio (su pie en el ancla); la elegida deja paso al letrero.
+          m.style.transform = `translate(${x.toFixed(1)}px,${(y - 4).toFixed(1)}px) translate(-50%,-100%)`;
+          m.classList.toggle('off', out);
+        }
+        if (!sel) return;
+        const dst = HD.destinations.find((x) => x.id === sel);
+        if (!tagSize) tagSize = [tag.offsetWidth, tag.offsetHeight];
+        const [tw, th] = tagSize;
+        const [ax, ay] = H.toScreen(dst.anchor[0], dst.anchor[1]);
+        const tx = clamp(ax - tw / 2, 8, W - tw - 8);
+        // Encima del sitio; debajo solo si arriba no cabe (o pisaría el logo).
+        const logo = node.querySelector('.hub-logo').getBoundingClientRect();
+        const fs = document.getElementById('fsBtn');
+        const fr = fs && !fs.hidden ? fs.getBoundingClientRect() : null;
+        let minTop = tx < logo.right + 6 ? logo.bottom + 4 : 6;
+        if (fr && tx + tw > fr.left - 6) minTop = Math.max(minTop, fr.bottom + 6);
+        const below = ay - th - 26 < minTop;
+        const ty = below ? ay + 26 : ay - th - 26;
+        tag.classList.toggle('below', below);
+        tag.style.transform = `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px)`;
+        tag.style.setProperty('--px', clamp(ax - tx, 18, tw - 18).toFixed(1) + 'px');
+      };
+      const layout = () => {
+        tagSize = null;
+        const portrait = innerHeight > innerWidth * 1.05;
+        node.classList.toggle('portrait', portrait);
+        const r = card.getBoundingClientRect();
+        // La cámara encuadra lo elegido en la zona que no tapa la carta.
+        H.setSafe(portrait ? { x: 0, y: 70, w: innerWidth, h: Math.max(120, r.top - 70) } : null);
+        H.updateGoal();
+      };
+      this.tickers.push(place);
+      const onResize = () => { if (isTitle()) layout(); else root.removeEventListener('resize', onResize); };
+      root.addEventListener('resize', onResize);
+      H.enterTitle({ intro: !H.introDone, reduceMotion: d.settings.reduceMotion });
+      requestAnimationFrame(() => { layout(); select(this.hubLast && info[this.hubLast] ? this.hubLast : HD.first, true); });
+      return node;
+    },
+
+    titleClassic() {
       const g = this.game, d = g.save.data;
       const stage = Math.min(d.story.stage + 1, root.TROLINA_STORY.length);
       const node = el(`<div class="scr title">
@@ -747,6 +925,8 @@
             <select data-k="stage"><option value="random">Aleatorio en cada pelea</option>${(root.TROLINA_STAGES || []).filter((st) => (st.place || 'terraza') === 'terraza').map((st) => `<option value="${st.id}">${st.icon} ${esc(st.name)}</option>`).join('')}</select></label>
           <label>Luces del interior del bar
             <select data-k="interiorLights"><option value="random">Aleatorias en cada pelea</option><option value="encendidas">💡 Encendidas</option><option value="apagadas">✨ Apagadas, con la bola de discoteca</option></select></label>
+          <label>Hora del bar en el menú
+            <select data-k="menuHour"><option value="auto">🕒 Según el reloj</option><option value="dia">☀️ De día</option><option value="tarde">🌇 Al atardecer</option><option value="noche">🌙 De noche</option></select></label>
           <label class="row">Botellines en la jardinera (+2 para lanzar cada uno) <input type="checkbox" data-k="jardinera"></label>
           <label>Fuente de la terraza
             <select data-k="fountain"><option value="random">Aleatoria en cada pelea</option><option value="on">Siempre encendida</option><option value="off">Siempre apagada</option></select></label>
@@ -766,6 +946,7 @@
         inp.addEventListener('change', () => {
           st[k] = inp.type === 'checkbox' ? inp.checked : inp.type === 'range' ? Number(inp.value) : inp.value;
           g.save.save(); g.applySettings();
+          if (k === 'menuHour' && root.TrolinaHub && root.TrolinaHub.ready) root.TrolinaHub.setHour(root.TrolinaHub.hourFor(st[k]));
         });
         if (inp.type === 'range') inp.addEventListener('input', () => { st[k] = Number(inp.value); g.applySettings(); });
       });

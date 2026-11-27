@@ -22,3 +22,17 @@ Imágenes ya generadas durante el trabajo, conservadas para volver a empaquetar 
 ## Interior del bar (v0.16)
 
 `escenarios/interior/`: lo necesario del paquete `la-trolina-interior-assets` (fondos, mostradores, muebles, `escenario.json` y `LEEME.md`). `tools/integrate_interior.py` lo reescala y escribe `assets/stages/interior/`. Sin argumentos usa esta copia.
+
+## Menú del bar (v0.17)
+
+`menu-bar/`:
+
+| Carpeta o archivo | Contenido |
+| --- | --- |
+| `paquete/` | El paquete `la-trolina-assets-menu-bar`: capas del menú, interfaz, **objetos jugables y efectos para el interior** (aún sin usar) y `LEEME.txt` |
+| `vistas/` | Las seis vistas de `la-trolina-vista-entrada` |
+| `alineacion.json` | Cómo pasan las capas del paquete a las vistas |
+| `mascaras/` | Siluetas de los objetos que se iluminan; se pueden retocar a mano |
+
+`tools/integrate_menu_bar.py` escribe `assets/menu/`.
+
