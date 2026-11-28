@@ -118,7 +118,7 @@
 
     sync() {
       this.f.facing = this.facing;
-      this.f.x = this.cx - this.facing * C.BODY;
+      this.f.x = this.cx - this.facing * C.BODY * this.size;   // el centro del cuerpo, a su escala
       this.f.y = C.GROUND + this.y;
     }
 

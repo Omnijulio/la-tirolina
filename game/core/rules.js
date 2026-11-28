@@ -175,14 +175,14 @@
   const PITI = { pauseMs: 2000, sitMs: 450, smokeMs: 1100, riseMs: 450, flickMs: 120, heal: 0.45, relief: 0.15, chinaSpeed: 1300 };
   /**
    * Ultimate de BMX, «El andamio» (v0.18). Como la pausa para el piti, la pelea se para mientras dura
-   * (no corre el reloj y nadie hace daño salvo el ladrillo; el rival solo puede fumar). BMX monta un
-   * andamio (lo que dure su animación), sube al piso (`climbMsPerPx` ms por px de celda de altura), tira
-   * el ladrillo (MOVES.ladrillo, en arco: `brickMs` de vuelo más `brickMsPerPx` por px de distancia, y
-   * `brickArc` + `brickArcPerPx` de altura), se fuma un puro (`smokeMs`: en la calada recupera `heal` de
-   * su vida máxima, una vez, y `relief` de puntillo) y baja (`downMult` del tiempo de subida).
-   * El andamio se va en `fadeMs` (solo dibujo).
+   * (no corre el reloj y nadie hace daño salvo el ladrillo; el rival solo puede fumar). Unos 6 s:
+   * BMX monta un andamio (`buildMs`), sube al piso (`climbMsPerPx` ms por px de celda de altura), apunta
+   * con el ladrillo en alto (`aimMs`) y lo tira (MOVES.ladrillo, en arco: `brickMs` de vuelo más
+   * `brickMsPerPx` por px de distancia, y `brickArc` + `brickArcPerPx` de altura). Luego se fuma un puro:
+   * `puffs` caladas (lo que duran en su animación); entre todas recupera `heal` de su vida máxima y
+   * `relief` de puntillo. Baja (`downMult` del tiempo de subida) y el andamio se va en `fadeMs` (dibujo).
    */
-  const ANDAMIO = { climbMsPerPx: 5.5, smokeMs: 1100, downMult: 0.85, heal: 0.12, relief: 0.1,
+  const ANDAMIO = { buildMs: 1200, climbMsPerPx: 7, aimMs: 400, puffs: 2, downMult: 0.8, heal: 0.12, relief: 0.1,
     brickMs: 380, brickMsPerPx: 0.35, brickArc: 50, brickArcPerPx: 0.12, fadeMs: 350 };
   /**
    * STAB (como en Pokémon): cada luchador tiene su bebida y su tabaco (`stab` en
@@ -628,7 +628,7 @@
   function dhypot(x, y) { return Math.sqrt(x * x + y * y); }
 
   /** Versión del juego: se muestra en el multijugador y se compara con la del rival. */
-  const GAME_VERSION = '0.18.0';
+  const GAME_VERSION = '0.18.1';
 
   const Rules = {
     GAME_VERSION, dsin, dcos, datan2, dhypot,

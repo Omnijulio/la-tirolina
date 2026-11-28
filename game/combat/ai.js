@@ -81,12 +81,12 @@
         if ((ph === 'recovery' || ph === 'landing') && this.seenRecovery !== (opp.f.actionId + (ph === 'landing' ? 0.5 : 0))) {
           this.seenRecovery = opp.f.actionId + (ph === 'landing' ? 0.5 : 0);
           if (r() < d.punish) {
-            if (dist < 210) this.soon('punch', reflexMs);
-            else if (dist < 270) this.soon('kick', reflexMs);
+            if (this.inReach(dist, 210)) this.soon('punch', reflexMs);
+            else if (this.inReach(dist, 270)) this.soon('kick', reflexMs);
           }
         }
         // Antiaéreo: el puño contra alguien que salta cerca sale como gancho.
-        if (opp.air && dist < 300 && -opp.y > 40 && opp.vy > -200 && r() < d.antiAir * dt / 120) this.soon('punch', reflexMs * 0.6);
+        if (opp.air && this.inReach(dist, 300) && -opp.y > 40 && opp.vy > -200 && r() < d.antiAir * dt / 120) this.soon('punch', reflexMs * 0.6);
       }
       if (this.reflex && this.t >= this.reflex.at) { this.act(this.reflex.a); this.reflex = null; }
 
@@ -109,6 +109,10 @@
       return ctl;
     }
 
+    /** ¿Le llegan sus golpes a esta distancia? Las distancias son las de un luchador normal: uno más
+     * pequeño (BMX, Rizos) tiene los brazos y las piernas más cortos y tiene que acercarse más. */
+    inReach(dist, d) { return dist < 64 + (d - 64) * (this.me.size || 1); }
+
     decide(dist, toward, opp, match) {
       const d = this.d, me = this.me, r = Math.random, F = R().FUELLE;
       const aggr = Math.min(0.95, d.aggression * (this.style === 'rushdown' ? 1.2 : this.style === 'zoner' ? 0.8 : this.style === 'brawler' ? 1.1 : 1));
@@ -122,8 +126,8 @@
       }
       // Rival indefenso (desmayado, mareado por guardia rota): a por él.
       if (opp.faintT > 0 || opp.dizzyT > 0) {
-        if (dist < 200) this.act(r() < 0.6 ? 'punch' : 'kick');
-        else if (dist < 270) this.act('kick');
+        if (this.inReach(dist, 200)) this.act(r() < 0.6 ? 'punch' : 'kick');
+        else if (this.inReach(dist, 270)) this.act('kick');
         else this.set('approach', 300);
         return;
       }
@@ -166,7 +170,7 @@
       if (incoming && r() < d.antiAir * 0.8) { this.act('jump'); this.set('approach', 450); return; }
       if (me.air) {
         if (-me.y > 60 && dist < 420 && dist > 120 && r() < d.dive + 0.2) { this.act('kick'); return; }
-        if (dist < 200) { this.act('punch'); return; }
+        if (this.inReach(dist, 200)) { this.act('punch'); return; }
       }
       // El rival se cubre (o se ha quedado quieto cubriéndose): agarre.
       const G = R().GRAB;
@@ -177,14 +181,14 @@
       }
 
       const lowHp = me.hp / me.maxHp < 0.35;
-      if (dist < 200) {
+      if (this.inReach(dist, 200)) {
         // De cerca: el puño es más rápido y seguro; la patada, para rematar.
         const x = r();
         if (x < aggr) this.act(r() < 0.65 ? 'punch' : r() < 0.6 ? 'kick' : 'grab');
         else if (x < aggr + 0.15) this.set('retreat', 220 + r() * 220);
         else if (x < aggr + 0.25 && me.fuelle > 30) this.set('block', 300);
         else this.set('idle', 200);
-      } else if (dist < 290) {
+      } else if (this.inReach(dist, 290)) {
         // Media distancia: la patada llega; el puño no.
         const x = r();
         if (x < aggr * 0.55) this.act('kick');

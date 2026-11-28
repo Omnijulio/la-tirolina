@@ -42,6 +42,7 @@
         }
         const c = p.owner && p.owner.combatant;
         if (!c) continue;
+        this.aimAtSize(p, c);
         const spread = R.impairment(this.match.levelOf(c), c.loadout.aim).throwSpread;
         if (spread > 0) {
           p.vx *= 1 + (Math.random() * 2 - 1) * 0.35 * spread;
@@ -54,6 +55,18 @@
           this.match.say(c, 'bottleBack');
         }
       }
+    }
+    /** Contra uno más pequeño (BMX), el arco del botellín se baja a su escala: al llegar donde está, va a
+     * la altura a la que iría contra uno normal, pero en su cuerpo. Si no, le pasaría por encima. */
+    aimAtSize(p, c) {
+      const m = this.match, opp = c === m.p1 ? m.p2 : m.p1, k = opp ? opp.size || 1 : 1;
+      if (k >= 1 || !p.vx || Math.sign(opp.cx - p.x) !== Math.sign(p.vx)) return;
+      const T = Math.abs(opp.cx - p.x) / Math.abs(p.vx);
+      if (T < 0.08) return;
+      const h0 = C.GROUND - p.y, up = -p.vy, g = p.gravity;
+      const hT = h0 + up * T - g * T * T / 2;
+      if (hT <= 0) return;   // contra uno normal ya habría caído al suelo antes
+      p.vy = -Math.max(-1200, Math.min(600, (k * hT - h0 + g * T * T / 2) / T));
     }
     breakBottle(p) {
       super.breakBottle(p); this.match.sfx('glass'); this.match.addBottleNoise(R.NOISE.bottleBreak);
@@ -700,14 +713,16 @@
       def.f.play('idle', true); def.pending = []; def.guard = false; def.walking = false; def.dashT = 0; def.diving = false;
       this.bottles.reset(); this.darts = [];
       const A = X.anims, P = R.ANDAMIO, len = (n) => A[n].frames.reduce((k, f) => k + f[2], 0);
-      const up = Math.round(sc.rise * P.climbMsPerPx);
-      const phases = [['build', len('montar-andamio')], ['up', up], ['throw', len('lanzar-ladrillo')], ['smoke', P.smokeMs], ['down', Math.round(up * P.downMult)]];
+      const up = Math.round(sc.rise * P.climbMsPerPx), F = A['fumar-puro'].frames;
+      // Fumar: saca el puro, `puffs` caladas (cuadros 2 y 3 de su animación) y lo baja.
+      const smoke = F[0][2] + P.puffs * (F[1][2] + F[2][2]) + F[3][2];
+      const phases = [['build', P.buildMs], ['up', up], ['aim', P.aimMs], ['throw', len('lanzar-ladrillo')], ['smoke', smoke], ['down', Math.round(up * P.downMult)]];
       // Su ancla, a `sc.at` px de celda del pie del luchador hacia el rival (mirando a la izquierda, reflejado).
       const scaffold = { owner: att, def: sc, x: att.f.x + sc.at * att.S * att.facing, flip: att.facing, s: att.S, frame: 0, fading: false, fadeT: 0 };
       this.scaffolds = this.scaffolds.filter((s) => s.owner !== att);
       this.scaffolds.push(scaffold);
       this.truce = { kind: 'andamio', att, def, t: 0, phases, total: phases.reduce((k, p) => k + p[1], 0), scaffold,
-        rise: -sc.rise * att.S, step: 0, released: false, healed: false, lit: false };
+        rise: -sc.rise * att.S, step: 0, released: false, puffed: 0, lit: false };
       this.superText = { text: '¡' + this.specialOf(att).name.toUpperCase() + '!', t: 0, c: att };
       this.sfx('super');
       if (att === this.p1) this.stats.ultimates++;
@@ -723,7 +738,7 @@
       const [phase, ms] = tr.phases[i];
       if (phase === 'build') {
         // Cada fase del montaje cambia la imagen del andamio (y suena a hierro).
-        const B = A['montar-andamio'], f = this.extraFrame(B, t);
+        const B = A['montar-andamio'], f = this.extraFrame(B, t, ms);
         att.extraPose = { anim: 'montar-andamio', frame: f };
         const step = B.build ? B.build[f] : f + 1;
         sc.frame = Math.max(0, Math.min(step, sc.def.frames) - 1);
@@ -735,6 +750,8 @@
         const j = Math.min(n - 1, Math.floor(k * n)), u = k * n - j;
         const T = A.trepar, tl = T.frames.reduce((s, f) => s + f[2], 0);
         att.extraPose = { anim: 'trepar', frame: this.extraFrame(T, t % tl), dy: tr.rise * (j + u * u * (3 - 2 * u)) / n };
+      } else if (phase === 'aim') {
+        att.extraPose = { anim: 'lanzar-ladrillo', frame: 0, dy: tr.rise };   // ladrillo en alto, apuntando
       } else if (phase === 'throw') {
         const L = A['lanzar-ladrillo'], f = this.extraFrame(L, t);
         att.extraPose = { anim: 'lanzar-ladrillo', frame: f, dy: tr.rise };
@@ -744,15 +761,18 @@
           this.spawnBrick(att, tr.def, { x: from.x, y: from.y + tr.rise });
         }
       } else {
-        // Se fuma el puro: en la calada se cura (una vez) y baja el puntillo poco a poco.
-        const F = A['fumar-puro'], f = this.extraFrame(F, t, ms);
+        // Se fuma el puro: saca el puro, da `puffs` caladas (cada una cura su parte y echa humo) y lo baja.
+        const F = A['fumar-puro'], d = F.frames.map((fr) => fr[2]), puff = d[1] + d[2];
+        let f = 3, n = -1;
+        if (t < d[0]) f = 0;
+        else if (t < d[0] + P.puffs * puff) { n = Math.floor((t - d[0]) / puff); f = (t - d[0]) - n * puff < d[1] ? 1 : 2; }
         att.extraPose = { anim: 'fumar-puro', frame: f, dy: tr.rise };
         if (!tr.lit) { tr.lit = true; this.sfx('lighter'); }
         att.relief += P.relief * dt / ms;
-        if (!tr.healed && (!F.heal || f >= F.heal.frame)) {
-          tr.healed = true;
+        if (f === 2 && n >= tr.puffed) {
+          tr.puffed = n + 1;
           const before = att.hp;
-          att.hp = Math.min(att.maxHp, att.hp + P.heal * att.maxHp);
+          att.hp = Math.min(att.maxHp, att.hp + P.heal / P.puffs * att.maxHp);
           if (att.hp - before >= 1) this.popup(att, '+' + Math.round(att.hp - before) + ' VIDA', '#8bf2ce');
           const mouth = F.emit ? this.extraPoint(att, F, F.emit.at) : { x: att.cx, y: C.GROUND - 200 };
           this.scaffoldFx.push({ kind: 'humo', c: att, x: mouth.x, y: mouth.y + tr.rise, t: 0, life: 730 });
@@ -1029,13 +1049,24 @@
       return true;
     }
 
+    /** Golpes entre luchadores de distinto tamaño (BMX, Rizos): la altura de un golpe (sobre el suelo) se
+     * pasa a la escala del que lo recibe. Si no, los puños de los demás le pasarían por encima de la cabeza
+     * al pequeño. Solo cambia la altura: el alcance sigue siendo el de quien pega. */
+    toBody(box, att, def) {
+      const k = (def.size || 1) / (att.size || 1);
+      if (k === 1) return box;
+      const top = C.GROUND - (C.GROUND - box.y) * k, bottom = C.GROUND - (C.GROUND - box.y - box.h) * k;
+      return { ...box, y: top, h: bottom - top };
+    }
+
     /** Caja de una celda de la segunda hoja ([x, y, w, h] de celda) en el mundo. */
     extraBox(c, anim, b) {
       const p = this.extraPoint(c, anim, [b[0], b[1]]), q = this.extraPoint(c, anim, [b[0] + b[2], b[1] + b[3]]);
       return { x: Math.min(p.x, q.x), y: Math.min(p.y, q.y), w: Math.abs(q.x - p.x), h: Math.abs(q.y - p.y) };
     }
-    reaches(box, def) {
+    reaches(box, def, att) {
       if (def.state !== 'fight' || def.downed) return false;
+      if (att) box = this.toBody(box, att, def);
       const h = def.f.getHurtbox();
       return box.x < h.x + h.w && box.x + box.w > h.x && box.y < h.y + h.h && box.y + box.h > h.y;
     }
@@ -1057,7 +1088,7 @@
           if (att.extras.puff && PD) this.puffs.push({ c: att, x: at.x, y: at.y, facing: att.facing, t: 0, life: PD.ms });
           this.sfx('throw');
           const pb = A.puff.box, box = this.extraBox(att, A, [pb[0], pb[1], pb[2] + R.BOLSA.puffReach, pb[3]]);
-          if (this.reaches(box, b.def)) {
+          if (this.reaches(box, b.def, att)) {
             this.applyHit(att, b.def, 'soplo', box.x + box.w / 2, box.y + box.h / 2);
             b.def.blindT = R.BOLSA.blindMs;
             this.popup(b.def, '¡PUAJ!', '#c8f5dc');
@@ -1066,7 +1097,7 @@
         if (!b.struck && A.impact && i >= A.impact.frame) {
           b.struck = true;
           const box = this.extraBox(att, A, A.impact.box);
-          if (this.reaches(box, b.def)) this.applyHit(att, b.def, 'remate', att.facing > 0 ? box.x + box.w : box.x, box.y + box.h / 2);
+          if (this.reaches(box, b.def, att)) this.applyHit(att, b.def, 'remate', att.facing > 0 ? box.x + box.w : box.x, box.y + box.h / 2);
           else { this.popup(att, '¡AL AIRE!', '#f8ce73'); this.sfx('whiff'); }
         }
         if (b.t >= A.frames.reduce((n, f) => n + f[2], 0)) this.endBolsa(att);
@@ -1440,6 +1471,7 @@
         // Con el arma en la mano, el puño (y el gancho) llega más lejos.
         const reach = att.reachFor(anim);
         if (reach) hbs = hbs.map((h) => (att.facing > 0 ? { ...h, w: h.w + reach } : { ...h, x: h.x - reach, w: h.w + reach }));
+        hbs = hbs.map((h) => this.toBody(h, att, def));   // a la altura de su cuerpo (tamaños distintos)
         const hurt = def.f.getHurtbox();
         const hit = hbs.find((h) => h.x < hurt.x + hurt.w && h.x + h.w > hurt.x && h.y < hurt.y + hurt.h && h.y + h.h > hurt.y);
         if (!hit) continue;

@@ -72,10 +72,11 @@
     },
     {
       // Arte propio (source-art/personajes/bmx, paquete la-trolina-bmx-assets). Nombre provisional.
-      // Ágil y con buena puntería; su ultimate le da algo de vida. Sin bebida ni tabaco propios (STAB) todavía.
+      // Pequeñito (al 60 %: dibujo y alcance), ágil y con buena puntería; su ultimate le da algo de vida.
+      // Sin bebida ni tabaco propios (STAB) todavía.
       id: 'bmx', name: 'BMX', color: '#86b7a3',
-      atlas: 'assets/characters/bmx.png',
-      tagline: 'Gorra, barba y brazos tatuados. Llega en BMX y, si hace falta, monta un andamio en un momento.',
+      atlas: 'assets/characters/bmx.png', size: 0.6,
+      tagline: 'Pequeñito, con gorra, barba y brazos tatuados. Llega en BMX y, si hace falta, monta un andamio en un momento.',
       stats: { hp: 98, power: 1.0, speed: 1.1, tolerance: 0.15, aim: 1.15 },
       unlock: { start: true, price: 0 },
       special: {

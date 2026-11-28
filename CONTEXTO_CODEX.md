@@ -1,6 +1,6 @@
 # Contexto para continuar en Codex
 
-Estado: **v0.18** (28 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
+Estado: **v0.18.1** (28 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
 
 ## Objetivo del usuario y decisiones aceptadas
 
@@ -137,14 +137,15 @@ Peticiones incorporadas, en orden:
       - Bici aparcada ajustada a la del último cuadro (`fit_parked`).
       - Andamios en tira con sus fases (`bmx-andamio-<sitio>.png`): `frames`, `anchor`, `rise` (altura del piso), `deck` y `at` (su ancla desde el pie del luchador, hacia el rival, para que sus manos lleguen a la escalera).
       - `fx` (ladrillo, humo, curación).
-      - En `juego.json` → `andamio`: `nivel`, `escalera` y `hasta` (fuera se queda en la 2.ª fase: un piso).
+      - En `juego.json` → `andamio`: `nivel` (fuera, el 2.º; dentro, el único), `escalera` y, si hiciera falta, `hasta` (dejar el andamio en una fase del montaje).
     - **«El andamio»** (`special.id: 'andamio'`): `Match.startScaffold` / `updateScaffold` usan la tregua de Rizos (`this.truce` con `kind: 'andamio'`): no corre el reloj, nadie hace daño salvo el ladrillo y el rival solo puede fumar.
-      - Fases: montar (cambia la imagen del andamio y suena), subir (`trepar` con `extraPose.dy`, peldaño a peldaño), lanzar, fumar (cura `ANDAMIO.heal` una vez y baja el puntillo) y bajar.
+      - Fases (unos 6 s): montar (`buildMs`; cambia la imagen del andamio y suena), subir (`trepar` con `extraPose.dy`, peldaño a peldaño), apuntar (`aimMs`), lanzar, fumar (`puffs` caladas con los cuadros 2 y 3; cada una cura `heal / puffs` y echa humo) y bajar.
       - El andamio (`this.scaffolds`) se dibuja detrás de los luchadores, reflejado si mira a la izquierda, y se desvanece al acabar.
       - Ladrillo: `spawnBrick` / `updateBricks`, en parábola hasta el rival (sin trigonometría), `MOVES.ladrillo` (en `ULT_MOVES`); si no le da, cae al suelo. Trozos y humo, solo decorado.
       - `extraPose.dy` sube el cuadro de la segunda hoja; subido, sin sombra.
       - `snapshot()` incluye `ladrillos=`. La CPU la usa con `sp === 'andamio'`.
     - Imágenes: `main.js` carga `extras.scaffold` y `extras.fx` en `assets.extras[id].scaffold` / `.fx`.
+    - **v0.18.1**: BMX con `size: 0.6`. `Combatant.sync` pone el centro del cuerpo a `C.BODY * size` del ancla. Entre luchadores de distinto tamaño, la altura de los golpes se pasa a la escala de quien recibe (`Match.toBody`, en `checkMelee` y `reaches`), y los botellines bajan su arco hacia el más pequeño (`MatchBottles.aimAtSize`). La CPU mide sus distancias de ataque a su tamaño (`CpuBrain.inReach`).
 
 El apodo **El Barbas** sigue siendo el nombre del personaje original. **Rizos** (v0.13, nombre provisional, disponible desde el principio, ultimate «Pausa para el piti» desde v0.14) tiene arte propio. **El Sombrerero** (v0.15, nombre provisional, `sombrero` en los archivos, disponible desde el principio) tiene arte propio con y sin bastón y la ultimate «La bolsita». **BMX** (v0.18, nombre provisional, disponible desde el principio) tiene arte propio, entrada en BMX y la ultimate «El andamio». Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
@@ -335,7 +336,6 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 - Las variantes de personaje son recoloreados con la misma cara; solo Rizos, El Sombrerero y BMX tienen arte propio (sin salto doble propio).
 - No hay animaciones dedicadas de caminar, salto, recibir golpe, caída ni victoria (se simulan con poses existentes).
 - Solo El Barbas (dardo), El Peñista (pilón), Rizos (pausa para el piti), El Sombrerero (la bolsita) y BMX (el andamio) tienen ultimate; no hay agacharse ni especiales con comandos.
-- El andamio de la fachada se monta solo hasta el primer piso: el segundo no cabe en pantalla a la escala del juego.
 - Solo El Sombrerero lleva arma propia. El bastón y el botellín empuñado en otros luchadores son de pruebas y se dibujan encima, con la mano aproximada.
 - Solo El Barbas y Rizos tienen bebida y tabaco propios (STAB).
 - Lluvia y nieve son visuales: no cambian la jugabilidad.

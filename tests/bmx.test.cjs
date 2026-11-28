@@ -27,6 +27,8 @@ const total = (a) => a.frames.reduce((n, f) => n + f[2], 0);
 
 test('BMX: en el plantel desde el principio, con arte propio y la ultimate del andamio', () => {
   assert.ok(bmx && bmx.unlock.start, 'disponible desde el principio');
+  assert.equal(bmx.size, 0.6, 'un 40 % más pequeño que los demás');
+  assert.ok(CHARACTERS.every((c) => c === bmx || (c.size || 1) > bmx.size), 'el más pequeño');
   assert.equal(bmx.atlas, 'assets/characters/bmx.png');
   assert.equal(bmx.special.id, 'andamio');
   assert.ok(art && art.portrait && fs.existsSync(path.join(root, art.portrait)));
@@ -62,19 +64,19 @@ test('BMX: segunda hoja con la entrada y la ultimate, todas con el pie a la mism
 });
 
 test('BMX: el andamio cabe en pantalla y se sube sin moverse del sitio', () => {
-  // Subido al piso, la cabeza no sube más que en un salto normal (ahí ya se juega con el marcador).
-  const apex = (940 * 940) / (2 * 2700);
+  // Se dibuja a su tamaño (como él): subido al piso, la cabeza queda por debajo del marcador.
+  const s = S * bmx.size;
   for (const place of ['exterior', 'interior']) {
     const sc = ex.scaffold[place];
     assert.ok(sc, place);
     assert.deepEqual(pngSize(sc.image), [sc.frames * sc.cell[0], sc.cell[1]], place + ': fases del montaje en fila');
-    assert.ok(sc.rise * S <= apex + 4, place + ': el piso no queda más alto que un salto');
-    assert.ok(GROUND - sc.rise * S - 140 * S > 0, place + ': la cabeza dentro de la pantalla');
+    assert.ok(GROUND - (sc.rise + 142) * s >= 120, place + ': la cabeza por debajo del marcador');
     // De pie arriba (pie de atrás en su ancla, el de delante a ~85 px al lanzar), el piso está debajo.
     assert.ok(sc.at + sc.deck[0] < 0 && sc.at + sc.deck[1] >= 80, place + ': el piso le queda debajo');
   }
-  // Fuera se queda a medio montar: un piso (el segundo no cabe).
-  assert.equal(ex.scaffold.exterior.frames, 2);
+  // Fuera, el de la fachada entero y arriba del todo (como en el paquete); dentro, el de ruedas.
+  assert.equal(ex.scaffold.exterior.level, 2);
+  assert.equal(ex.scaffold.exterior.frames, 4);
   assert.equal(ex.scaffold.interior.frames, 4);
 });
 
@@ -85,6 +87,13 @@ test('BMX: reglas de la ultimate (ladrillo imbloqueable que tumba y algo de vida
   assert.ok(R.SCORE.hit.ladrillo > 0);
   assert.ok(m.damage < R.MOVES.dart.damage, 'pega menos que el dardo: además cura');
   assert.ok(R.ANDAMIO.heal > 0 && R.ANDAMIO.heal < R.PITI.heal, 'cura menos que la pausa para el piti');
+  // Dura bastante más que la pausa para el piti: unos 5–7 s según el andamio.
+  const A = ex.anims, P = R.ANDAMIO, len = (n) => A[n].frames.reduce((k, f) => k + f[2], 0), F = A['fumar-puro'].frames;
+  for (const place of ['exterior', 'interior']) {
+    const up = ex.scaffold[place].rise * P.climbMsPerPx;
+    const ms = P.buildMs + up + P.aimMs + len('lanzar-ladrillo') + F[0][2] + P.puffs * (F[1][2] + F[2][2]) + F[3][2] + up * P.downMult;
+    assert.ok(ms >= 5000 && ms <= 7500, place + ': ' + Math.round(ms) + ' ms');
+  }
   assert.ok(R.GAME_VERSION >= '0.18.0');
 });
 

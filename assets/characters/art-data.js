@@ -279,13 +279,13 @@ window.TROLINA_CHARACTER_ART = {
             97,
             182
           ],
-          "frames": 2,
-          "level": 1,
+          "frames": 4,
+          "level": 2,
           "at": -8,
-          "rise": 83,
+          "rise": 152,
           "deck": [
-            -93,
-            95
+            -96,
+            98
           ]
         },
         "interior": {

@@ -71,7 +71,8 @@ test('Rizos: desde el principio, bajito, tanque y con su pausa para el piti', ()
   const others = CHARACTERS.filter((c) => c.id !== 'rizos');
   assert.ok(rizos && rizos.unlock.start);
   assert.equal(rizos.special.id, 'piti');
-  assert.ok(others.every((c) => (c.size || 1) > rizos.size), 'más bajito que todos');
+  // Más bajito que todos menos BMX (v0.18, al 60 %).
+  assert.ok(others.filter((c) => c.id !== 'bmx').every((c) => (c.size || 1) > rizos.size), 'más bajito que todos');
   assert.ok(others.every((c) => c.stats.hp < rizos.stats.hp), 'el que más vida tiene');
 });
 

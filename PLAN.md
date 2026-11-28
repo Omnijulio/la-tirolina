@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.18** (28/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.18.1** (28/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -237,25 +237,26 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - Integración: `tools/integrate_menu_bar.py` (paquete `la-trolina-assets-menu-bar` y vistas `la-trolina-vista-entrada`; copia en `source-art/menu-bar`). Diseño en `game/data/hub.js`; motor en `game/ui/hub.js`; pantalla en `screens.js` (`hub`). Pruebas: `tests/hub.test.cjs`.
 - Del paquete quedan guardados para más adelante los **objetos jugables** del interior (botellines, vasos, copas, sidra, taburetes…) y sus efectos, en `source-art/menu-bar/paquete/props` y `fx`.
 
-## Hecho en v0.18 — BMX
+## Hecho en v0.18 — BMX (v0.18.1: más pequeño y ultimate más larga)
 
 - **BMX** (nombre provisional; `bmx` en los archivos): gorra de rejilla, barba, brazos tatuados, camiseta gris y vaqueros rotos. Disponible desde el principio.
   - Paquete `la-trolina-bmx-assets` (en Google Drive), el primero que trae **todo junto**: atlas de 16 tiras, retratos, entrada, ultimate, objetos y efectos. `tools/integrate_character.py` ahora entiende este formato:
     - sus tiras no traen fila ni cajas, así que la fila sale de sus animaciones y las poses en el aire se detectan por si llegan al suelo (y se bajan como las de los demás);
     - la entrada (celdas 256×224) y la ultimate (celdas del luchador) van a una segunda hoja con el pie de todas a la misma altura.
   - Copia en `source-art/personajes/bmx` (y `extras/`); ajustes a mano en `juego.json`.
+  - **Pequeñito** (v0.18.1): `size: 0.6`, un 40 % más pequeño que los demás. Como Rizos, el tamaño escala el dibujo y sus golpes, así que tiene que acercarse más para pegar; la CPU lo tiene en cuenta (`CpuBrain.inReach`).
   - Stats provisionales: vida 98, fuerza 1,0, velocidad 1,1, aguante 0,15, puntería 1,15. Sin STAB todavía.
+- **Golpes entre luchadores de distinto tamaño** (v0.18.1). Las alturas se miden a la escala de quien recibe (`Match.toBody`: puños, patadas, gancho, picado y la bolsita). Los botellines bajan su arco hacia el más pequeño (`MatchBottles.aimAtSize`). Si no, a BMX le pasaba todo por encima de la gorra. El alcance sigue siendo el de quien pega.
 - **Entrada en BMX** en el primer asalto: llega pedaleando, frena, se baja y la bici se queda aparcada detrás de los luchadores.
-- **Ultimate de BMX: «El andamio»**. Como la pausa para el piti de Rizos, la pelea se para (el reloj no corre y el rival solo puede fumar). Dura unos 3,3 s:
-  - monta un andamio en tres golpes (suena a hierro);
-  - sube por la escalera;
-  - le tira un **ladrillo** en arco al rival: no se puede bloquear y lo tumba;
-  - se fuma un puro arriba, que le devuelve el **12 % de la vida** (una vez);
+- **Ultimate de BMX: «El andamio»**. Como la pausa para el piti de Rizos, la pelea se para (el reloj no corre y el rival solo puede fumar). Dura unos **6 s** (v0.18.1; antes 3,3 s):
+  - monta un andamio en tres fases (suena a hierro);
+  - sube por la escalera, peldaño a peldaño;
+  - apunta con el ladrillo en alto y se lo tira en arco al rival: no se puede bloquear y lo tumba;
+  - se fuma un puro arriba con **dos caladas**, cada una con su humo y su +6 % de vida (**12 %** en total);
   - baja y el andamio desaparece.
-- **Dónde se planta el andamio.** Con la escalera hacia el rival y el piso justo debajo de BMX: no se mueve del sitio, solo sube y baja.
-  - En el bar sale el andamio de ruedas con barandilla.
-  - En la terraza sale el de la fachada, pero solo con el primer piso montado. Su segundo piso no cabe en pantalla a la escala del juego (en el visor del paquete los luchadores salen más pequeños). Subido al primero con el de arriba montado, el segundo le cruzaba el pecho.
-  - Arriba, la cabeza llega donde llega en un salto normal.
+- **Dónde se planta el andamio.** Con la escalera hacia el rival y el piso justo debajo de BMX: no se mueve del sitio, solo sube y baja. Se dibuja a su tamaño.
+  - En la terraza, el andamio de la fachada entero, y BMX sube al **segundo piso**, como en el paquete. Desde que es más pequeño cabe en pantalla.
+  - En el bar, el andamio de ruedas con barandilla.
 - Números en `ANDAMIO` y `MOVES.ladrillo` (`rules.js`). La CPU la usa a cualquier distancia, mejor cuando ya ha recibido.
 - Multijugador: la ultimate va entera dentro de la simulación, sin azar ni trigonometría, y los ladrillos entran en la comprobación de sincronía.
 - Pruebas: `tests/bmx.test.cjs`.
@@ -287,7 +288,7 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - [ ] Animaciones que faltan: caminar, salto, recibir golpe, caída/KO, victoria, beber (las del combate, encargadas en `ASSETS_COMBATE.md`).
 - [ ] Ultimate propio para el resto de personajes (la estructura `special` ya existe; p. ej. bandeja del Camarero, sprint del Runner).
 - [ ] Pose propia de fumar y de lanzar el dardo.
-- [ ] BMX: nombre definitivo (y el de «El andamio»), su bebida y tabaco (STAB; ¿el puro?) y ajustar jugando el daño del ladrillo y la curación. Si se quiere el segundo piso de la fachada, haría falta un andamio dibujado más bajo o un plano más alejado.
+- [ ] BMX: nombre definitivo (y el de «El andamio»), su bebida y tabaco (STAB; ¿el puro?) y ajustar jugando el daño del ladrillo y la curación. ¿Compensar que pega desde más cerca por ser pequeño?
 
 ### Fase 2b — Fuente y fondos nocturnos (assets en camino)
 - [x] Fuente definitiva.
