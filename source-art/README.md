@@ -36,3 +36,7 @@ Imágenes ya generadas durante el trabajo, conservadas para volver a empaquetar 
 
 `tools/integrate_menu_bar.py` escribe `assets/menu/`.
 
+
+## BMX (v0.18)
+
+`personajes/bmx/`: del paquete `la-trolina-bmx-assets` se guardan el atlas (`fighter.png`, `fighter.json`), los retratos y `LEEME.md`; en `extras/`, `extension.json`, las tiras de la entrada y de la ultimate, los objetos (bici, andamios con sus fases de montaje, ladrillo, puro) y los efectos (humo, curación). Las tiras sueltas del atlas, el visor y las vistas previas se quedan en el paquete. `juego.json` lleva los ajustes a mano (boca, y piso, escalera y fase final de cada andamio). `tools/integrate_character.py` (sin argumentos) lo vuelve a integrar.

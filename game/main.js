@@ -82,6 +82,9 @@
           if (ex.smoke) jobs.push([ex.smoke.image, (img) => { box.smoke = img; }]);
           if (ex.scooter) jobs.push([ex.scooter.image, (img) => { box.scooter = img; }]);
           if (art.weapon && art.weapon.puff) jobs.push([art.weapon.puff.image, (img) => { box.puff = img; }]);
+          // Ultimate del andamio (BMX, v0.18): andamios de la terraza y del bar, ladrillo, humo y curación.
+          for (const [k, sc] of Object.entries(ex.scaffold || {})) jobs.push([sc.image, (img) => { (box.scaffold || (box.scaffold = {}))[k] = img; }]);
+          for (const [k, fx] of Object.entries(ex.fx || {})) jobs.push([fx.image, (img) => { (box.fx || (box.fx = {}))[k] = img; }]);
         }
         // Arma dibujada (v0.15): su atlas sin ella.
         if (art.weapon && art.weapon.unarmed) jobs.push([art.weapon.unarmed, (img) => { this.assets.unarmed[id] = img; }]);

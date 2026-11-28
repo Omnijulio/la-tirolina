@@ -34,6 +34,15 @@ soplo de la ultimate) y `extras` con una segunda hoja de celdas 192x176 (ultimat
 recoger el arma y entrada en bicicleta), además de la bici aparcada y las animaciones de estado que
 el paquete alarga (guardHit, parry). Lo usan game/combat/combatant.js y game/combat/match.js.
 
+Paquetes completos (desde v0.18, BMX: la-trolina-bmx-assets): fighter.json + fighter.png y, en la
+misma carpeta, extension.json con «actions» (cada animación en su propia tira y con su ancla), «props»
+(bici, andamio exterior e interior con sus fases de montaje, ladrillo, humo, curación), «entrance» y
+«ultimate». Sus tiras del atlas no traen fila ni cajas: la fila sale de sus animaciones y, celda a
+celda, se mira si la pose toca el suelo (las que no, se bajan como siempre). Se copia a
+source-art/personajes/<id>/ (y extras/) y se escriben en art-data.js `extras` con una segunda hoja de
+celdas 256x224 (entrada en BMX y la ultimate del andamio, todas con el pie en y=208), la bici aparcada,
+los andamios y lo que lanza y fuma. Lo usa game/combat/match.js (startScaffold / updateScaffold).
+
 Uso:  python3 tools/integrate_character.py [carpeta-del-paquete ...]
       sin carpetas, reintegra todo lo que haya en source-art/personajes/.
 Después registra el personaje en game/data/characters.js (atlas assets/characters/<id>.png).
@@ -57,11 +66,48 @@ LOWER_AIRBORNE = {'jump', 'air', 'hit', 'grabbed'}
 # Lo que se guarda del paquete (las tiras sueltas, guías y vistas previas se quedan en el paquete).
 KEEP = ['fighter.png', 'fighter.json', 'portraits', 'LEEME_CODEX.md', 'COMPROBACION.json', 'PROMPTS_GENERACION.json']
 KEEP_EXTRAS = ['extension.json', 'extras-atlas.png', 'objetos', 'efectos', 'LEEME_CODEX.md', 'COMPROBACION.json', 'PROMPTS_GENERACION.json']
+# Una pose cuyo pie no baja de aquí (ancla y=160) está en el aire (paquetes sin la marca «airborne»).
+GROUNDED = 158
 # Golpes cuyo punto activo (del paquete) debe caer dentro de la caja común del juego.
 ACTIVE_CHECK = {'punch': 'punch', 'kick': 'kick', 'gancho': 'gancho', 'airPunch': 'airPunch', 'dive': 'dive'}
 
 
+def is_complete(pkg):
+    """Paquete completo (BMX): atlas y extension.json con «actions» en la misma carpeta."""
+    ext = pkg / 'extension.json'
+    return (pkg / 'fighter.json').exists() and ext.exists() and 'actions' in json.loads(ext.read_text(encoding='utf-8'))
+
+
+def import_complete(pkg):
+    """Atlas, retratos y notas a source-art/personajes/<id>/; extension.json, las tiras de sus
+    animaciones, objetos y efectos a extras/ (las tiras sueltas del atlas, el visor y las vistas previas
+    se quedan en el paquete)."""
+    meta = json.loads((pkg / 'fighter.json').read_text(encoding='utf-8'))
+    ext = json.loads((pkg / 'extension.json').read_text(encoding='utf-8'))
+    cid = meta['id']
+    dst = SRC_DIR / cid
+    dst.mkdir(parents=True, exist_ok=True)
+    for name in ('fighter.png', 'fighter.json', 'portraits', 'LEEME.md'):
+        p = pkg / name
+        if p.is_dir():
+            shutil.copytree(p, dst / name, dirs_exist_ok=True)
+        elif p.exists():
+            shutil.copy2(p, dst / name)
+    ex = dst / 'extras'
+    ex.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(pkg / 'extension.json', ex / 'extension.json')
+    for a in ext['actions'].values():
+        (ex / a['image']).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(pkg / a['image'], ex / a['image'])
+    for name in ('objetos', 'efectos'):
+        if (pkg / name).is_dir():
+            shutil.copytree(pkg / name, ex / name, dirs_exist_ok=True)
+    return dst
+
+
 def import_package(pkg):
+    if is_complete(pkg):
+        return import_complete(pkg)
     if (pkg / 'extension.json').exists():
         return import_extras(pkg)
     if (pkg / 'con-baston' / 'fighter.json').exists():
@@ -199,6 +245,125 @@ def integrate_extras(src, cid):
     return out
 
 
+def fit_parked(cell, prop):
+    """Escala y borde del objeto suelto (la bici) para que case con el del último cuadro de la entrada:
+    mismo borde delantero y misma altura en su cuarto delantero (lejos del luchador)."""
+    ca, pa = cell.getchannel('A'), prop.getchannel('A')
+    cb, pb = ca.getbbox(), pa.getbbox()
+    wp = pb[2] - pb[0]
+    tp = pa.crop((pb[2] - wp // 4, 0, pb[2], pa.height)).getbbox()[1]
+    s = 0.8
+    for _ in range(3):
+        tc = ca.crop((cb[2] - int(wp * s / 4), 0, cb[2], ca.height)).getbbox()[1]
+        s = (cb[3] - tc) / (pb[3] - tp)
+    return s, cb[2], pb[2]
+
+
+def integrate_actions(src, cid, tune):
+    """Paquete completo (BMX): segunda hoja con la entrada y la ultimate, bici aparcada, andamios,
+    ladrillo, humo y curación. Devuelve los datos para art-data.js.
+
+    Todas las animaciones van en celdas de 256x224 con el pie en y=208: las de la entrada (256x224,
+    con la bici dentro) tal cual; las de la ultimate (192x176, celdas del luchador) pegadas abajo.
+    `ref` es el punto que se dibuja en el ancla del luchador. tune (juego.json → andamio): por sitio,
+    «nivel» (piso donde se sube), «escalera» (x de la escalera en la imagen) y «hasta» (si se queda en
+    una fase del montaje: el andamio montado es esa fase y no la imagen final); «manos»: hasta dónde
+    llegan sus manos al trepar, desde su pie (si no, se mide en la tira)."""
+    ext = json.loads((src / 'extension.json').read_text(encoding='utf-8'))
+    acts, P, U = ext['actions'], ext['props'], ext.get('ultimate', {})
+    CW = max(a['frameWidth'] for a in acts.values())
+    CH = max(a['frameHeight'] for a in acts.values())
+    cols = max(len(a['frames']) for a in acts.values())
+    sheet = Image.new('RGBA', (cols * CW, len(acts) * CH), (0, 0, 0, 0))
+    entrance = [n for n in ext.get('entrance', {}).get('order', []) if n in acts]
+    ultimate = list(dict.fromkeys(n for n in U.get('order', []) if n in acts))
+    # Las celdas de la entrada son más grandes que las del luchador: su pie está donde lo deja el evento
+    # return-to-base de la última (en las demás, el mismo sitio de la celda).
+    hand = next((e['actorAnchorInCell'] for f in acts[entrance[-1]]['frames'] for e in f.get('events', [])
+                 if e.get('type') == 'return-to-base'), None) if entrance else None
+    anims = {}
+    for row, (name, a) in enumerate(acts.items()):
+        strip = Image.open(src / a['image']).convert('RGBA')
+        oy = CH - a['frameHeight']
+        foot = hand if name in entrance and hand else a['anchor']
+        out = {'loop': bool(a.get('loop')), 'ref': [foot['x'], foot['y'] + oy], 'frames': []}
+        for i, f in enumerate(a['frames']):
+            sheet.paste(strip.crop((f['x'], f['y'], f['x'] + f['w'], f['y'] + f['h'])), (i * CW, row * CH + oy))
+            out['frames'].append([i * CW, row * CH, f['duration']])
+            for e in f.get('events', []):
+                t = e.get('type')
+                if t == 'scaffold-build':     # cambia la fase del andamio que se está montando
+                    out.setdefault('build', [0] * len(a['frames']))[i] = e['step']
+                elif t == 'spawn-projectile':   # suelta el ladrillo desde la mano
+                    out['release'] = {'frame': i, 'at': [e['socket']['x'], e['socket']['y'] + oy]}
+                elif t == 'emit-effect':        # el humo sale de la boca
+                    out['emit'] = {'frame': i, 'at': [e['socket']['x'], e['socket']['y'] + oy]}
+                elif t == 'heal':               # la calada: cura una vez
+                    out['heal'] = {'frame': i, 'fraction': e.get('amountFractionSuggested', 0.12)}
+        anims[name] = out
+    save_png(sheet, OUT / f'{cid}-extras.png')
+    data = {'image': f'assets/characters/{cid}-extras.png', 'cell': [CW, CH], 'anims': anims}
+
+    if entrance:
+        data['entrance'] = {'sequence': entrance, 'rideMs': ext['entrance'].get('rideDurationSuggested', 1200)}
+        # Bici aparcada: la suelta, a la escala y en el sitio de la del último cuadro.
+        bike = P.get('bmx') or P.get('bike')
+        if bike:
+            last = acts[entrance[-1]]
+            lf = last['frames'][-1]
+            cell = Image.open(src / last['image']).convert('RGBA').crop((lf['x'], lf['y'], lf['x'] + lf['w'], lf['y'] + lf['h']))
+            im = Image.open(src / bike['image']).convert('RGBA')
+            s, front, pfront = fit_parked(cell, im)
+            shutil.copy2(src / bike['image'], OUT / f'{cid}-bici.png')
+            data['scooter'] = {'image': f'assets/characters/{cid}-bici.png', 'cell': list(im.size),
+                               'anchor': [bike['anchor']['x'], bike['anchor']['y']], 'scale': round(s, 3),
+                               'at': [round(front - (pfront - bike['anchor']['x']) * s, 1), CH - (last['frameHeight'] - last['anchor']['y'])]}
+
+    if ultimate:
+        data['ultimate'] = {'kind': 'andamio', 'sequence': ultimate}
+        # Hasta dónde llegan las manos al trepar (desde su pie): ahí va la escalera.
+        climb = acts.get('trepar')
+        reach = tune.get('manos')
+        if reach is None and climb:
+            f = climb['frames'][0]
+            box = Image.open(src / climb['image']).convert('RGBA').crop((f['x'], f['y'], f['x'] + f['w'], f['y'] + f['h'])).getchannel('A').getbbox()
+            reach = box[2] - climb['anchor']['x']
+        data['scaffold'] = {}
+        for place in ('exterior', 'interior'):
+            setup = U.get(place)
+            if not setup:
+                continue
+            p, t = P[setup['scaffold']], tune.get(place, {})
+            level = t.get('nivel', setup.get('platformLevel', 1))
+            plat = next(q for q in p['platforms'] if q['level'] == level)
+            files = p.get('construction', []) + [p['image']]
+            if t.get('hasta'):
+                files = p['construction'][:t['hasta']]   # se queda a medio montar: esa fase es el andamio
+            strip = Image.new('RGBA', (p['width'] * len(files), p['height']), (0, 0, 0, 0))
+            for i, f in enumerate(files):
+                strip.paste(Image.open(src / f).convert('RGBA'), (i * p['width'], 0))
+            save_png(strip, OUT / f'{cid}-andamio-{place}.png')
+            ax, ay = p['anchor']['x'], p['anchor']['y']
+            ladder = t.get('escalera', ax + p['width'] * 0.39)
+            deck = Image.open(src / files[-1]).convert('RGBA').getchannel('A').crop((0, plat['y'], p['width'], plat['y'] + 1)).getbbox()
+            data['scaffold'][place] = {
+                'image': f'assets/characters/{cid}-andamio-{place}.png', 'cell': [p['width'], p['height']],
+                'anchor': [ax, ay], 'frames': len(files), 'level': level,   # la última, montado
+                'at': round(reach - (ladder - ax)),     # x de su ancla desde el pie del luchador, hacia el rival
+                'rise': ay - plat['y'],                 # altura del piso (px de celda)
+                'deck': [deck[0] - ax, deck[2] - ax]}   # el piso, desde su ancla
+        data['fx'] = {}
+        for key in ('ladrillo', 'humo', 'curacion'):
+            q = P.get(key)
+            if q:
+                shutil.copy2(src / q['image'], OUT / f'{cid}-{key}.png')
+                data['fx'][key] = {'image': f'assets/characters/{cid}-{key}.png', 'size': [q['width'], q['height']],
+                                   'anchor': [q['anchor']['x'], q['anchor']['y']]}
+    print(f'  extras: {len(anims)} animaciones ({CW}x{CH}), bici {"sí" if "scooter" in data else "no"}, '
+          f'andamios {", ".join(data.get("scaffold", {})) or "no"}, efectos {", ".join(data.get("fx", {})) or "no"}')
+    return data
+
+
 def base_rows():
     data = json.loads(BASE.read_text(encoding='utf-8'))
     rows = dict(BASE_ROWS)
@@ -212,6 +377,26 @@ def inside(pt, box, lowered):
     return box['x'] <= x <= box['x'] + box['w'] and box['y'] <= y <= box['y'] + box['h']
 
 
+def strip_table(meta, sheet):
+    """Tiras del paquete: {nombre: {'row', 'frames': [{'index', 'airborne', 'bbox'}]}}.
+    Rizos y El Sombrerero las traen así. Otros (BMX) solo dan el PNG de cada tira: la fila sale de sus
+    animaciones y, celda a celda, la caja visible y si está en el aire (si no llega al suelo)."""
+    out = {}
+    for i, (name, s) in enumerate(meta['strips'].items()):
+        if isinstance(s, dict):
+            out[name] = s
+            continue
+        used = {f['y'] // H for a in meta['animations'].values() if a.get('strip') == name for f in a['frames']}
+        row = used.pop() if len(used) == 1 else i
+        frames = []
+        for col in range(COLS):
+            box = sheet.crop((col * W, row * H, (col + 1) * W, (row + 1) * H)).getchannel('A').getbbox()
+            if box:
+                frames.append({'index': col, 'bbox': list(box), 'airborne': box[3] < GROUNDED})
+        out[name] = {'row': row, 'frames': frames}
+    return out
+
+
 def build_atlas(src, rows, dst):
     """Atlas del juego (mismas filas que assets/fighter.png) a partir de fighter.json + fighter.png.
     Devuelve (meta, filas, filas vacías, poses bajadas)."""
@@ -219,6 +404,7 @@ def build_atlas(src, rows, dst):
     assert (meta['frameWidth'], meta['frameHeight']) == (W, H), 'celdas distintas de 192x176'
     assert (meta['anchor']['x'], meta['anchor']['y']) == (56, 160), 'ancla distinta de (56,160)'
     sheet = Image.open(src / 'fighter.png').convert('RGBA')
+    meta['strips'] = strip_table(meta, sheet)
     n_rows = max(rows.values()) + 1
     atlas = Image.new('RGBA', (COLS * W, n_rows * H), (0, 0, 0, 0))
     filled, shifts = set(), {}
@@ -293,6 +479,7 @@ def integrate(src, base, rows):
     if (src / 'juego.json').exists():
         extra = json.loads((src / 'juego.json').read_text(encoding='utf-8'))
         extra.pop('_nota', None)
+    tune = extra.pop('andamio', {})   # colocación del andamio (paquetes completos), no va tal cual
 
     info = {
         **extra,
@@ -305,7 +492,10 @@ def integrate(src, base, rows):
         'loweredAirborne': shifts,
     }
     if (src / 'extras' / 'extension.json').exists():
-        info['extras'] = integrate_extras(src / 'extras', cid)
+        if 'actions' in json.loads((src / 'extras' / 'extension.json').read_text(encoding='utf-8')):
+            info['extras'] = integrate_actions(src / 'extras', cid, tune)
+        else:
+            info['extras'] = integrate_extras(src / 'extras', cid)
     if (src / 'sin-arma' / 'fighter.json').exists() and (src / 'arma' / 'extras.json').exists():
         integrate_weapon(src, cid, meta, rows, shifts, info)
     return cid, info

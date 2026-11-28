@@ -12,7 +12,8 @@
  *   tolerance  aguante al alcohol (0 = normal, positivo reduce el "puntillo")
  *   aim        puntería: reduce fallos e imprecisión del lanzamiento (1 = normal)
  * special: ultimate propio del personaje (se carga encadenando golpes).
- *   id 'dardo' (El Barbas), 'fuente' (El Peñista), 'piti' (Rizos) o 'bolsa' (El Sombrerero). El resto lo recibirá más adelante.
+ *   id 'dardo' (El Barbas), 'fuente' (El Peñista), 'piti' (Rizos), 'bolsa' (El Sombrerero) o 'andamio' (BMX).
+ *   El resto lo recibirá más adelante.
  * weapon: arma que lleva (id de TrolinaRules.WEAPONS, p. ej. 'baston'). Se la pueden quitar y la recupera;
  *   ver game/data/weapons.js. Con arte propio, su atlas sin arma está en assets/characters/art-data.js.
  * stab: su bebida y su tabaco (ids de game/data/items.js). Si los lleva, su fuerza se
@@ -68,6 +69,20 @@
         desc: 'Recupera el bastón si se le había caído, saca una bolsa blanca atada con hilo verde, se la sopla en la cara al rival y le arrea un bastonazo que lo tumba. Se carga encadenando golpes.'
       },
       cpu: { bottles: 1, style: 'balanced' }
+    },
+    {
+      // Arte propio (source-art/personajes/bmx, paquete la-trolina-bmx-assets). Nombre provisional.
+      // Ágil y con buena puntería; su ultimate le da algo de vida. Sin bebida ni tabaco propios (STAB) todavía.
+      id: 'bmx', name: 'BMX', color: '#86b7a3',
+      atlas: 'assets/characters/bmx.png',
+      tagline: 'Gorra, barba y brazos tatuados. Llega en BMX y, si hace falta, monta un andamio en un momento.',
+      stats: { hp: 98, power: 1.0, speed: 1.1, tolerance: 0.15, aim: 1.15 },
+      unlock: { start: true, price: 0 },
+      special: {
+        id: 'andamio', name: 'El andamio', short: 'ANDAMIO',
+        desc: 'Monta un andamio en un momento, se sube y le tira un ladrillo al rival que no se puede bloquear y lo tumba. Arriba se fuma un puro que le devuelve un poco de vida. Mientras, el rival solo puede fumar. Se carga encadenando golpes.'
+      },
+      cpu: { bottles: 1, style: 'rushdown' }
     },
     {
       id: 'runner', name: 'El Runner', color: '#3fd0d4',

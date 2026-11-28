@@ -19,6 +19,6 @@
   /* Solo durante el desarrollo: en la elección de luchador (no en el multijugador) aparece «Arma (pruebas)»
    * para darle a estos personajes el bastón, el botellín o nada. Para quitarlo: enabled: false. */
   root.TROLINA_DEV = {
-    weaponPicker: { enabled: true, characters: ['sombrero', 'barbas', 'rizos'], weapons: ['baston', 'botellin'] }
+    weaponPicker: { enabled: true, characters: ['sombrero', 'barbas', 'rizos', 'bmx'], weapons: ['baston', 'botellin'] }
   };
 })(typeof window !== 'undefined' ? window : globalThis);

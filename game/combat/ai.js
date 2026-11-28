@@ -59,7 +59,7 @@
       // Combos: un puño que conecta se encadena; puño o patada que conecta, al ultimate.
       if (me.canCancelSpecial() && this.comboAction !== me.f.actionId) {
         this.comboAction = me.f.actionId;
-        if (me.meterFull && me.char.special.id !== 'piti' && r() < comboP) this.act('special');
+        if (me.meterFull && me.char.special.id !== 'piti' && me.char.special.id !== 'andamio' && r() < comboP) this.act('special');
         else if (me.canCancel() && r() < comboP) this.act(r() < 0.55 ? 'punch' : 'kick');
       }
 
@@ -140,7 +140,9 @@
         // El dardo vale a cualquier distancia; el pilón necesita estar cerca y con el rival en el suelo.
         // La pausa para el piti cura: mejor cuando ya ha recibido.
         // La bolsita: soplo y bastonazo de cerca (y le devuelve el bastón si lo ha perdido).
+        // El andamio: el ladrillo llega a cualquier distancia y el puro cura un poco; mejor si ya ha recibido.
         const ok = sp === 'fuente' ? dist < 420 && !opp.air : sp === 'piti' ? me.hp < me.maxHp * 0.75 || r() < 0.1 :
+          sp === 'andamio' ? !opp.air && (me.hp < me.maxHp * 0.85 || r() < 0.3) :
           sp === 'bolsa' ? dist < 300 && !opp.air : dist < 850;
         if (ok && (opp.hitstun > 0 || r() < 0.45)) { this.act('special'); return; }
       }

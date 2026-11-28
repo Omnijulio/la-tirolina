@@ -1,0 +1,568 @@
+{
+  "id": "bmx-andamio",
+  "facing": 1,
+  "actions": {
+    "bmx-rodar": {
+      "image": "tiras/bmx-rodar.png",
+      "anchor": {
+        "x": 108,
+        "y": 208
+      },
+      "frameWidth": 256,
+      "frameHeight": 224,
+      "loop": true,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 256,
+          "h": 224,
+          "duration": 125,
+          "bounds": {
+            "x": 59,
+            "y": 54,
+            "w": 139,
+            "h": 155,
+            "count": 9893
+          },
+          "events": []
+        },
+        {
+          "x": 256,
+          "y": 0,
+          "w": 256,
+          "h": 224,
+          "duration": 125,
+          "bounds": {
+            "x": 58,
+            "y": 54,
+            "w": 140,
+            "h": 155,
+            "count": 10104
+          },
+          "events": []
+        }
+      ]
+    },
+    "bmx-frenar": {
+      "image": "tiras/bmx-frenar.png",
+      "anchor": {
+        "x": 108,
+        "y": 208
+      },
+      "frameWidth": 256,
+      "frameHeight": 224,
+      "loop": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 256,
+          "h": 224,
+          "duration": 185,
+          "bounds": {
+            "x": 65,
+            "y": 55,
+            "w": 133,
+            "h": 154,
+            "count": 9128
+          },
+          "events": []
+        },
+        {
+          "x": 256,
+          "y": 0,
+          "w": 256,
+          "h": 224,
+          "duration": 240,
+          "bounds": {
+            "x": 67,
+            "y": 58,
+            "w": 131,
+            "h": 151,
+            "count": 9004
+          },
+          "events": []
+        }
+      ]
+    },
+    "bmx-bajar": {
+      "image": "tiras/bmx-bajar.png",
+      "anchor": {
+        "x": 108,
+        "y": 208
+      },
+      "frameWidth": 256,
+      "frameHeight": 224,
+      "loop": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 256,
+          "h": 224,
+          "duration": 230,
+          "bounds": {
+            "x": 36,
+            "y": 55,
+            "w": 162,
+            "h": 154,
+            "count": 10436
+          },
+          "events": []
+        },
+        {
+          "x": 256,
+          "y": 0,
+          "w": 256,
+          "h": 224,
+          "duration": 250,
+          "bounds": {
+            "x": 23,
+            "y": 61,
+            "w": 175,
+            "h": 148,
+            "count": 10034
+          },
+          "events": [
+            {
+              "type": "return-to-base",
+              "animation": "idle",
+              "actorAnchorInCell": {
+                "x": 34,
+                "y": 208
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "montar-andamio": {
+      "image": "tiras/montar-andamio.png",
+      "anchor": {
+        "x": 56,
+        "y": 160
+      },
+      "frameWidth": 192,
+      "frameHeight": 176,
+      "loop": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 245,
+          "bounds": {
+            "x": 32,
+            "y": 60,
+            "w": 86,
+            "h": 101,
+            "count": 5432
+          },
+          "events": [
+            {
+              "type": "scaffold-build",
+              "step": 1
+            }
+          ]
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 245,
+          "bounds": {
+            "x": 46,
+            "y": 21,
+            "w": 92,
+            "h": 140,
+            "count": 6210
+          },
+          "events": [
+            {
+              "type": "scaffold-build",
+              "step": 2
+            }
+          ]
+        },
+        {
+          "x": 384,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 265,
+          "bounds": {
+            "x": 46,
+            "y": 16,
+            "w": 93,
+            "h": 145,
+            "count": 6137
+          },
+          "events": [
+            {
+              "type": "scaffold-build",
+              "step": 3
+            }
+          ]
+        }
+      ]
+    },
+    "trepar": {
+      "image": "tiras/trepar.png",
+      "anchor": {
+        "x": 56,
+        "y": 160
+      },
+      "frameWidth": 192,
+      "frameHeight": 176,
+      "loop": true,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 170,
+          "bounds": {
+            "x": 45,
+            "y": 29,
+            "w": 77,
+            "h": 132,
+            "count": 4367
+          },
+          "events": []
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 170,
+          "bounds": {
+            "x": 45,
+            "y": 29,
+            "w": 77,
+            "h": 132,
+            "count": 4367
+          },
+          "events": []
+        }
+      ]
+    },
+    "lanzar-ladrillo": {
+      "image": "tiras/lanzar-ladrillo.png",
+      "anchor": {
+        "x": 56,
+        "y": 160
+      },
+      "frameWidth": 192,
+      "frameHeight": 176,
+      "loop": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 175,
+          "bounds": {
+            "x": 46,
+            "y": 20,
+            "w": 96,
+            "h": 141,
+            "count": 6541
+          },
+          "events": []
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 180,
+          "bounds": {
+            "x": 42,
+            "y": 13,
+            "w": 117,
+            "h": 148,
+            "count": 7807
+          },
+          "events": []
+        },
+        {
+          "x": 384,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 105,
+          "bounds": {
+            "x": 45,
+            "y": 24,
+            "w": 128,
+            "h": 137,
+            "count": 5987
+          },
+          "events": [
+            {
+              "type": "spawn-projectile",
+              "projectile": "ladrillo",
+              "socket": {
+                "x": 167,
+                "y": 69
+              }
+            }
+          ]
+        },
+        {
+          "x": 576,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 200,
+          "bounds": {
+            "x": 45,
+            "y": 34,
+            "w": 107,
+            "h": 127,
+            "count": 5353
+          },
+          "events": []
+        }
+      ]
+    },
+    "fumar-puro": {
+      "image": "tiras/fumar-puro.png",
+      "anchor": {
+        "x": 56,
+        "y": 160
+      },
+      "frameWidth": 192,
+      "frameHeight": 176,
+      "loop": false,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 230,
+          "bounds": {
+            "x": 47,
+            "y": 21,
+            "w": 72,
+            "h": 140,
+            "count": 5340
+          },
+          "events": []
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 410,
+          "bounds": {
+            "x": 47,
+            "y": 19,
+            "w": 72,
+            "h": 142,
+            "count": 5651
+          },
+          "events": []
+        },
+        {
+          "x": 384,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 525,
+          "bounds": {
+            "x": 47,
+            "y": 20,
+            "w": 72,
+            "h": 141,
+            "count": 5444
+          },
+          "events": [
+            {
+              "type": "emit-effect",
+              "effect": "humo",
+              "socket": {
+                "x": 114,
+                "y": 45
+              }
+            },
+            {
+              "type": "heal",
+              "effect": "curacion",
+              "amountFractionSuggested": 0.12,
+              "oncePerActivation": true
+            }
+          ]
+        },
+        {
+          "x": 576,
+          "y": 0,
+          "w": 192,
+          "h": 176,
+          "duration": 240,
+          "bounds": {
+            "x": 45,
+            "y": 20,
+            "w": 74,
+            "h": 141,
+            "count": 5475
+          },
+          "events": []
+        }
+      ]
+    }
+  },
+  "props": {
+    "bmx": {
+      "image": "objetos/bmx.png",
+      "width": 162,
+      "height": 113,
+      "anchor": {
+        "x": 81,
+        "y": 112
+      }
+    },
+    "andamio-exterior": {
+      "image": "objetos/andamio-exterior.png",
+      "width": 195,
+      "height": 183,
+      "anchor": {
+        "x": 97,
+        "y": 182
+      },
+      "platforms": [
+        {
+          "level": 1,
+          "x": 101,
+          "y": 99
+        },
+        {
+          "level": 2,
+          "x": 101,
+          "y": 30
+        }
+      ],
+      "construction": [
+        "objetos/andamio-exterior-montaje-1.png",
+        "objetos/andamio-exterior-montaje-2.png",
+        "objetos/andamio-exterior-montaje-3.png"
+      ]
+    },
+    "andamio-interior": {
+      "image": "objetos/andamio-interior.png",
+      "width": 153,
+      "height": 95,
+      "anchor": {
+        "x": 76,
+        "y": 94
+      },
+      "platforms": [
+        {
+          "level": 1,
+          "x": 80,
+          "y": 32
+        }
+      ],
+      "construction": [
+        "objetos/andamio-interior-montaje-1.png",
+        "objetos/andamio-interior-montaje-2.png",
+        "objetos/andamio-interior-montaje-3.png"
+      ]
+    },
+    "ladrillo": {
+      "image": "objetos/ladrillo.png",
+      "width": 32,
+      "height": 26,
+      "anchor": {
+        "x": 16,
+        "y": 13
+      }
+    },
+    "puro": {
+      "image": "objetos/puro.png",
+      "width": 37,
+      "height": 12,
+      "anchor": {
+        "x": 18,
+        "y": 11
+      }
+    },
+    "humo": {
+      "image": "efectos/humo.png",
+      "width": 32,
+      "height": 47,
+      "anchor": {
+        "x": 16,
+        "y": 46
+      }
+    },
+    "curacion": {
+      "image": "efectos/curacion.png",
+      "width": 46,
+      "height": 44,
+      "anchor": {
+        "x": 23,
+        "y": 43
+      }
+    }
+  },
+  "entrance": {
+    "order": [
+      "bmx-rodar",
+      "bmx-frenar",
+      "bmx-bajar",
+      "idle"
+    ],
+    "rideDurationSuggested": 1050,
+    "note": "Las poses de entrada incorporan la bici. Usa la bici independiente al aparcarla."
+  },
+  "ultimate": {
+    "order": [
+      "montar-andamio",
+      "trepar",
+      "lanzar-ladrillo",
+      "fumar-puro",
+      "trepar",
+      "idle"
+    ],
+    "exterior": {
+      "scaffold": "andamio-exterior",
+      "platformLevel": 2,
+      "placement": "fachada"
+    },
+    "interior": {
+      "scaffold": "andamio-interior",
+      "platformLevel": 1,
+      "placement": "suelo interior"
+    },
+    "cartoonBrick": {
+      "delivery": "arco de videojuego",
+      "sourceEvent": "spawn-projectile"
+    },
+    "recovery": {
+      "sourceEvent": "heal",
+      "oncePerActivation": true,
+      "cap": "maxHP"
+    }
+  },
+  "rendering": {
+    "units": "px y ms",
+    "drawOrder": [
+      "escenario",
+      "andamio",
+      "personaje",
+      "proyectil",
+      "humo",
+      "curación"
+    ],
+    "worldCoordinates": "El escenario fija el apoyo del andamio. Las plataformas son relativas a su imagen, desde arriba a la izquierda."
+  }
+}

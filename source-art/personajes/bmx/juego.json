@@ -1,0 +1,8 @@
+{
+  "_nota": "Ajustes a mano para el juego (tools/integrate_character.py los copia a assets/characters/art-data.js). Coordenadas de celda 192x176. andamio: piso al que sube en cada sitio, x de la escalera en la imagen del andamio y, fuera, «hasta»: el de la fachada se queda en la 2.ª fase del montaje (un piso). Su segundo piso no cabe en pantalla a la escala del juego y, subido al primero, le cruzaba el pecho.",
+  "mouth": { "x": 95, "y": 44 },
+  "andamio": {
+    "exterior": { "nivel": 1, "escalera": 171, "hasta": 2 },
+    "interior": { "nivel": 1, "escalera": 133 }
+  }
+}

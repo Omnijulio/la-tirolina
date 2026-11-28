@@ -46,10 +46,12 @@
     china: { damage: 6, hitstun: 700, knockback: 1250, blockstun: 0, unblockable: true, knockdown: true, launch: -360 },
     // Ultimate de Sombrero: el soplo de la bolsa (le deja vendido, sin poder cubrirse) y el bastonazo que remata.
     soplo: { damage: 2, hitstun: 1100, knockback: 0, blockstun: 0, unblockable: true, push: 6 },
-    remate: { damage: 24, hitstun: 700, knockback: 900, blockstun: 0, unblockable: true, knockdown: true, launch: -380 }
+    remate: { damage: 24, hitstun: 700, knockback: 900, blockstun: 0, unblockable: true, knockdown: true, launch: -380 },
+    // Ultimate de BMX: el ladrillo que tira desde lo alto del andamio. No se puede bloquear y lo tumba.
+    ladrillo: { damage: 22, hitstun: 750, knockback: 700, blockstun: 0, unblockable: true, knockdown: true, launch: -340 }
   };
   /** Golpes a distancia o de ultimate: sin escala de combo ni carga del ultimate. */
-  const ULT_MOVES = { dart: 1, china: 1, soplo: 1, remate: 1 };
+  const ULT_MOVES = { dart: 1, china: 1, soplo: 1, remate: 1, ladrillo: 1 };
 
   /* ---------- Armas (v0.15) ----------
    * Algunos luchadores llevan un arma (`weapon` en game/data/characters.js; en pruebas, cualquiera de
@@ -172,6 +174,17 @@
    */
   const PITI = { pauseMs: 2000, sitMs: 450, smokeMs: 1100, riseMs: 450, flickMs: 120, heal: 0.45, relief: 0.15, chinaSpeed: 1300 };
   /**
+   * Ultimate de BMX, «El andamio» (v0.18). Como la pausa para el piti, la pelea se para mientras dura
+   * (no corre el reloj y nadie hace daño salvo el ladrillo; el rival solo puede fumar). BMX monta un
+   * andamio (lo que dure su animación), sube al piso (`climbMsPerPx` ms por px de celda de altura), tira
+   * el ladrillo (MOVES.ladrillo, en arco: `brickMs` de vuelo más `brickMsPerPx` por px de distancia, y
+   * `brickArc` + `brickArcPerPx` de altura), se fuma un puro (`smokeMs`: en la calada recupera `heal` de
+   * su vida máxima, una vez, y `relief` de puntillo) y baja (`downMult` del tiempo de subida).
+   * El andamio se va en `fadeMs` (solo dibujo).
+   */
+  const ANDAMIO = { climbMsPerPx: 5.5, smokeMs: 1100, downMult: 0.85, heal: 0.12, relief: 0.1,
+    brickMs: 380, brickMsPerPx: 0.35, brickArc: 50, brickArcPerPx: 0.12, fadeMs: 350 };
+  /**
    * STAB (como en Pokémon): cada luchador tiene su bebida y su tabaco (`stab` en
    * game/data/characters.js). Si los lleva, su fuerza se multiplica (cada uno por separado).
    */
@@ -227,7 +240,7 @@
    * la victoria. Al final se multiplica por la dificultad y por el modo salvaje.
    */
   const SCORE = {
-    hit: { punch: 100, kick: 150, gancho: 250, airPunch: 120, dive: 200, grab: 250, bottle: 200, dart: 1500, fountain: 2000, china: 1200, soplo: 300, remate: 1500 },
+    hit: { punch: 100, kick: 150, gancho: 250, airPunch: 120, dive: 200, grab: 250, bottle: 200, dart: 1500, fountain: 2000, china: 1200, soplo: 300, remate: 1500, ladrillo: 1500 },
     comboStep: 0.5,       // cada golpe más del combo vale un 50 % más
     styleMax: 1,          // hasta +100 % con el puntillo al máximo
     block: 20,
@@ -615,13 +628,13 @@
   function dhypot(x, y) { return Math.sqrt(x * x + y * y); }
 
   /** Versión del juego: se muestra en el multijugador y se compara con la del rival. */
-  const GAME_VERSION = '0.17.0';
+  const GAME_VERSION = '0.18.0';
 
   const Rules = {
     GAME_VERSION, dsin, dcos, datan2, dhypot,
     BOTTLE_PRICE, MAX_BOTTLES, START_COINS, DIFFICULTIES, DIFFICULTY_ORDER, MOVES,
     ROUND_SECONDS, ROUNDS_TO_WIN, HP_SCALE, SUGAR, SMOKE, MAX_CHAIN, METER_MAX, NOISE, POLICE, WET, FOUNTAIN,
-    PITI, STAB, stabOf, CPU_STAB,
+    PITI, ANDAMIO, STAB, stabOf, CPU_STAB,
     ULT_MOVES, WEAPONS, WEAPON, WEAPON_MELEE, WEAPON_REACH, weaponPower, disarms, BOLSA,
     FUELLE, GUARD_BREAK, PARRY, COUNTER, KNOCKDOWN, DASH, GRAB, DIVE, GANCHO,
     fuelleRegen, isParry, hitType, hitTypeMult, frameData, blockAdvantage, PUSH, pushSpeed, splitPush,

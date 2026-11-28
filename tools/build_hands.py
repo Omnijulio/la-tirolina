@@ -10,7 +10,7 @@ agarre del bastón de Sombrero (mismas poses en las mismas celdas).
 Escribe assets/characters/hands-data.js (window.TROLINA_HANDS = {id: {"col,fila": [x, y, giro]}}),
 en coordenadas de celda 192x176. Aproximado: es para pruebas, no sustituye al arte con el arma.
 
-Uso:  python3 tools/build_hands.py [ids…]   (por defecto: barbas rizos sombrero)
+Uso:  python3 tools/build_hands.py [ids…]   (por defecto: barbas rizos sombrero bmx)
       sombrero: usa su atlas sin arma y su agarre del bastón, sin buscar manos.
 Requiere Pillow, numpy y scipy (ver requirements-art.txt).
 """
@@ -70,7 +70,7 @@ def find_hand(cell):
 
 def main():
     art = load_art()
-    ids = sys.argv[1:] or ['barbas', 'rizos', 'sombrero']
+    ids = sys.argv[1:] or ['barbas', 'rizos', 'sombrero', 'bmx']
     ref = (art.get('sombrero') or {}).get('weapon', {}).get('grip', {})
     out = {}
     for cid in ids:

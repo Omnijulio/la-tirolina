@@ -1,6 +1,6 @@
 # Contexto para continuar en Codex
 
-Estado: **v0.17** (27 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
+Estado: **v0.18** (28 de noviembre de 2026): juego jugable de 1 jugador, publicado en GitHub Pages (`Omnijulio/la-tirolina`), construido sobre el kit visual y técnico v1.3 (15/11/2026). Este directorio es un proyecto portátil; no depende de las rutas ni del entorno donde se creó.
 
 ## Objetivo del usuario y decisiones aceptadas
 
@@ -130,7 +130,23 @@ Peticiones incorporadas, en orden:
     - **Ajustes**: `settings.menuHour` (`auto` | `dia` | `tarde` | `noche`) y `?hora=` para probar. Sonidos nuevos: `hover`, `enter` y `lightsOn`.
     - **Carga**: las vistas de la hora actual entran en la carga inicial. Si fallan, el juego arranca con el menú de siempre. Las otras horas se cargan al cambiar la opción.
 
-El apodo **El Barbas** sigue siendo el nombre del personaje original. **Rizos** (v0.13, nombre provisional, disponible desde el principio, ultimate «Pausa para el piti» desde v0.14) tiene arte propio. **El Sombrerero** (v0.15, nombre provisional, `sombrero` en los archivos, disponible desde el principio) tiene arte propio con y sin bastón y la ultimate «La bolsita». Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
+24. **v0.18 — BMX** (paquete `la-trolina-bmx-assets`, el primero que trae atlas, entrada, ultimate, objetos y efectos en una sola carpeta).
+    - **`tools/integrate_character.py`** reconoce el formato (`is_complete` / `import_complete`: `fighter.json` y `extension.json` con `actions` juntos):
+      - `strip_table` normaliza las tiras que solo traen el PNG: fila a partir de sus animaciones, caja visible por celda y `airborne` si el pie no baja de y=158 (`GROUNDED`). Las poses en el aire se bajan como siempre.
+      - `integrate_actions` hace la segunda hoja `bmx-extras.png` (celdas 256×224, todas con el pie en y=208; las de 192×176 pegadas abajo) con `ref` por animación: el `return-to-base` de la entrada o el ancla del luchador. Eventos: `build` (fase del montaje por cuadro), `release`, `emit` y `heal`.
+      - Bici aparcada ajustada a la del último cuadro (`fit_parked`).
+      - Andamios en tira con sus fases (`bmx-andamio-<sitio>.png`): `frames`, `anchor`, `rise` (altura del piso), `deck` y `at` (su ancla desde el pie del luchador, hacia el rival, para que sus manos lleguen a la escalera).
+      - `fx` (ladrillo, humo, curación).
+      - En `juego.json` → `andamio`: `nivel`, `escalera` y `hasta` (fuera se queda en la 2.ª fase: un piso).
+    - **«El andamio»** (`special.id: 'andamio'`): `Match.startScaffold` / `updateScaffold` usan la tregua de Rizos (`this.truce` con `kind: 'andamio'`): no corre el reloj, nadie hace daño salvo el ladrillo y el rival solo puede fumar.
+      - Fases: montar (cambia la imagen del andamio y suena), subir (`trepar` con `extraPose.dy`, peldaño a peldaño), lanzar, fumar (cura `ANDAMIO.heal` una vez y baja el puntillo) y bajar.
+      - El andamio (`this.scaffolds`) se dibuja detrás de los luchadores, reflejado si mira a la izquierda, y se desvanece al acabar.
+      - Ladrillo: `spawnBrick` / `updateBricks`, en parábola hasta el rival (sin trigonometría), `MOVES.ladrillo` (en `ULT_MOVES`); si no le da, cae al suelo. Trozos y humo, solo decorado.
+      - `extraPose.dy` sube el cuadro de la segunda hoja; subido, sin sombra.
+      - `snapshot()` incluye `ladrillos=`. La CPU la usa con `sp === 'andamio'`.
+    - Imágenes: `main.js` carga `extras.scaffold` y `extras.fx` en `assets.extras[id].scaffold` / `.fx`.
+
+El apodo **El Barbas** sigue siendo el nombre del personaje original. **Rizos** (v0.13, nombre provisional, disponible desde el principio, ultimate «Pausa para el piti» desde v0.14) tiene arte propio. **El Sombrerero** (v0.15, nombre provisional, `sombrero` en los archivos, disponible desde el principio) tiene arte propio con y sin bastón y la ultimate «La bolsita». **BMX** (v0.18, nombre provisional, disponible desde el principio) tiene arte propio, entrada en BMX y la ultimate «El andamio». Los otros cinco luchadores (El Runner, El Peñista, El Camarero, El Motero, El Dueño) son **variantes de color provisionales** del mismo sprite con estadísticas propias; están pensados para sustituirse por arte propio.
 
 ## Cómo está organizado el juego (v0.2)
 
@@ -153,7 +169,7 @@ Sin frameworks ni dependencias de ejecución: scripts clásicos que se cargan en
 | `game/ui/screens.js` | Pantallas: título, selección, La Barra, cinemática, VS, resultados, pausa, tienda, opciones, ayuda |
 | `game/main.js` | Arranque, carga de recursos, bucle y flujo entre pantallas (incluida la consecuencia policial) |
 | `src/police.js`, `assets/police/` | Controlador y sprites de la intervención policial (paquete v1.4) |
-| `assets/characters/*.png` | Atlas de los 8 luchadores (mismo formato y filas que `fighter.png`), El Sombrerero también sin bastón, retratos de Rizos y El Sombrerero y sus segundas hojas |
+| `assets/characters/*.png` | Atlas de los 9 luchadores (mismo formato y filas que `fighter.png`), El Sombrerero también sin bastón, retratos de Rizos, El Sombrerero y BMX, sus segundas hojas y los objetos de sus ultimates y entradas |
 | `assets/characters/art-data.js` | Generado por `tools/integrate_character.py`: lo propio de los luchadores con arte propio |
 | `assets/icons/` + `manifest.webmanifest` | Icono y manifest para instalar en la pantalla de inicio |
 
@@ -233,7 +249,7 @@ Detalles y tabla de ruido en `POLICE.md`. Resumen: `Match` acumula `noise` (0–
 ### Economía, progreso y dificultad
 
 - Dinero en céntimos. Se empieza con 30 €. Victoria: 120 € × multiplicador de dificultad (1 / 1,5 / 2,2 / 3,2) + 30 € por asalto ganado + perfectos, tiempo sobrante, combos, ultimates acertados, “valor etílico” por botellines, jefe y primera vez. Derrota: 12 € + 6 € por asalto ganado.
-- Historia: Runner → Peñista → Camarero → Motero → Dueño (jefe). Ganar a cada uno lo desbloquea. El Barbas, Rizos y El Sombrerero están desde el principio. Tienda: personajes (120–800 €) y 4 mejoras permanentes de 3 niveles.
+- Historia: Runner → Peñista → Camarero → Motero → Dueño (jefe). Ganar a cada uno lo desbloquea. El Barbas, Rizos, El Sombrerero y BMX están desde el principio. Tienda: personajes (120–800 €) y 4 mejoras permanentes de 3 niveles.
 - Dificultad elegible en la selección y en Opciones; afecta a reacción, agresividad, guardia, antiaéreos, errores, daño y pedido de la CPU y a la recompensa.
 
 ## Kit base (v1.3, sigue vigente)
@@ -316,9 +332,10 @@ Tres PNG alineados de 544×270 (pared 0,18 / mesas 0,55 / suelo y personajes 1 d
 
 ## Límites actuales
 
-- Las variantes de personaje son recoloreados con la misma cara; solo Rizos y El Sombrerero tienen arte propio (sin salto doble propio).
+- Las variantes de personaje son recoloreados con la misma cara; solo Rizos, El Sombrerero y BMX tienen arte propio (sin salto doble propio).
 - No hay animaciones dedicadas de caminar, salto, recibir golpe, caída ni victoria (se simulan con poses existentes).
-- Solo El Barbas (dardo), El Peñista (pilón), Rizos (pausa para el piti) y El Sombrerero (la bolsita) tienen ultimate; no hay agacharse ni especiales con comandos.
+- Solo El Barbas (dardo), El Peñista (pilón), Rizos (pausa para el piti), El Sombrerero (la bolsita) y BMX (el andamio) tienen ultimate; no hay agacharse ni especiales con comandos.
+- El andamio de la fachada se monta solo hasta el primer piso: el segundo no cabe en pantalla a la escala del juego.
 - Solo El Sombrerero lleva arma propia. El bastón y el botellín empuñado en otros luchadores son de pruebas y se dibujan encima, con la mano aproximada.
 - Solo El Barbas y Rizos tienen bebida y tabaco propios (STAB).
 - Lluvia y nieve son visuales: no cambian la jugabilidad.

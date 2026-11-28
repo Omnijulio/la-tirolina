@@ -1,6 +1,6 @@
 # La Trolina Fighters — plan del proyecto
 
-Estado: **v0.17** (27/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
+Estado: **v0.18** (28/11/2026). Un jugador contra la CPU, en navegador de escritorio y móvil, publicado en GitHub Pages.
 
 ## Hecho en v0.2
 
@@ -237,6 +237,29 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - Integración: `tools/integrate_menu_bar.py` (paquete `la-trolina-assets-menu-bar` y vistas `la-trolina-vista-entrada`; copia en `source-art/menu-bar`). Diseño en `game/data/hub.js`; motor en `game/ui/hub.js`; pantalla en `screens.js` (`hub`). Pruebas: `tests/hub.test.cjs`.
 - Del paquete quedan guardados para más adelante los **objetos jugables** del interior (botellines, vasos, copas, sidra, taburetes…) y sus efectos, en `source-art/menu-bar/paquete/props` y `fx`.
 
+## Hecho en v0.18 — BMX
+
+- **BMX** (nombre provisional; `bmx` en los archivos): gorra de rejilla, barba, brazos tatuados, camiseta gris y vaqueros rotos. Disponible desde el principio.
+  - Paquete `la-trolina-bmx-assets` (en Google Drive), el primero que trae **todo junto**: atlas de 16 tiras, retratos, entrada, ultimate, objetos y efectos. `tools/integrate_character.py` ahora entiende este formato:
+    - sus tiras no traen fila ni cajas, así que la fila sale de sus animaciones y las poses en el aire se detectan por si llegan al suelo (y se bajan como las de los demás);
+    - la entrada (celdas 256×224) y la ultimate (celdas del luchador) van a una segunda hoja con el pie de todas a la misma altura.
+  - Copia en `source-art/personajes/bmx` (y `extras/`); ajustes a mano en `juego.json`.
+  - Stats provisionales: vida 98, fuerza 1,0, velocidad 1,1, aguante 0,15, puntería 1,15. Sin STAB todavía.
+- **Entrada en BMX** en el primer asalto: llega pedaleando, frena, se baja y la bici se queda aparcada detrás de los luchadores.
+- **Ultimate de BMX: «El andamio»**. Como la pausa para el piti de Rizos, la pelea se para (el reloj no corre y el rival solo puede fumar). Dura unos 3,3 s:
+  - monta un andamio en tres golpes (suena a hierro);
+  - sube por la escalera;
+  - le tira un **ladrillo** en arco al rival: no se puede bloquear y lo tumba;
+  - se fuma un puro arriba, que le devuelve el **12 % de la vida** (una vez);
+  - baja y el andamio desaparece.
+- **Dónde se planta el andamio.** Con la escalera hacia el rival y el piso justo debajo de BMX: no se mueve del sitio, solo sube y baja.
+  - En el bar sale el andamio de ruedas con barandilla.
+  - En la terraza sale el de la fachada, pero solo con el primer piso montado. Su segundo piso no cabe en pantalla a la escala del juego (en el visor del paquete los luchadores salen más pequeños). Subido al primero con el de arriba montado, el segundo le cruzaba el pecho.
+  - Arriba, la cabeza llega donde llega en un salto normal.
+- Números en `ANDAMIO` y `MOVES.ladrillo` (`rules.js`). La CPU la usa a cualquier distancia, mejor cuando ya ha recibido.
+- Multijugador: la ultimate va entera dentro de la simulación, sin azar ni trigonometría, y los ladrillos entran en la comprobación de sincronía.
+- Pruebas: `tests/bmx.test.cjs`.
+
 ## Próximas fases propuestas
 
 ### Fase 0 — Menú del bar
@@ -254,7 +277,7 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - [ ] Ajustar equilibrio con lo que digan: daño, duración de asaltos, fuerza de la niebla, precios.
 
 ### Fase 2 — Identidad de personajes
-- [ ] Arte propio para cada luchador (fotos de cada amigo → sprites como El Barbas). Hecho: **Rizos** (v0.13) y **El Sombrerero** (v0.15); el resto, con `tools/integrate_character.py`.
+- [ ] Arte propio para cada luchador (fotos de cada amigo → sprites como El Barbas). Hecho: **Rizos** (v0.13), **El Sombrerero** (v0.15) y **BMX** (v0.18); el resto, con `tools/integrate_character.py`.
 - [ ] Ajustar las armas jugando (`WEAPON`, `WEAPONS`): si el combo de 3 y la guardia justa desarman demasiado o demasiado poco, los 10 s de vuelta y la fuerza del bastón. Nombre definitivo de El Sombrerero y de «La bolsita», y su bebida y tabaco (STAB).
 - [ ] ¿Más luchadores con arma (p. ej. la bandeja del Camarero, de defensa)? Con arte con y sin ella, como El Sombrerero.
 - [ ] Quitar la opción «Arma (pruebas)» cuando acaben las pruebas (`game/data/weapons.js`).
@@ -264,6 +287,7 @@ Rediseño de la pelea (detalle y números en `COMBATE.md`):
 - [ ] Animaciones que faltan: caminar, salto, recibir golpe, caída/KO, victoria, beber (las del combate, encargadas en `ASSETS_COMBATE.md`).
 - [ ] Ultimate propio para el resto de personajes (la estructura `special` ya existe; p. ej. bandeja del Camarero, sprint del Runner).
 - [ ] Pose propia de fumar y de lanzar el dardo.
+- [ ] BMX: nombre definitivo (y el de «El andamio»), su bebida y tabaco (STAB; ¿el puro?) y ajustar jugando el daño del ladrillo y la curación. Si se quiere el segundo piso de la fachada, haría falta un andamio dibujado más bajo o un plano más alejado.
 
 ### Fase 2b — Fuente y fondos nocturnos (assets en camino)
 - [x] Fuente definitiva.

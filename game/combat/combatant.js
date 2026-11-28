@@ -556,6 +556,13 @@
         rearm();
         return true;
       }
+      if (id === 'andamio') {
+        // El andamio (BMX): como la pausa para el piti, lo dirige el combate (Match.startScaffold).
+        if (this.smoking || !match.startScaffold || !match.startScaffold(this)) return false;
+        this.meter = 0; this.chain = 0; this.ultimates++;
+        rearm();
+        return true;
+      }
       if (id === 'bolsa') {
         // La bolsita: la dirige el combate (Match.startBolsa), que también le devuelve el bastón.
         if (this.smoking || !match.startBolsa || !match.startBolsa(this)) return false;
@@ -731,7 +738,8 @@
       if (this.extraPose && this.extras) {
         // Segunda hoja: el cuadro se dibuja con su punto de enlace (`ref`) en el ancla del luchador.
         const ep = this.extraPose, D = this.extras.def, A = D.anims[ep.anim], fr = A && A.frames[ep.frame];
-        if (fr) return { extra: { x: fr[0], y: fr[1], w: D.cell[0], h: D.cell[1], ref: A.ref, dx: ep.dx || 0 }, frame: null, rot: 0, dy: 0, shield: 0, item: null, pivot: null, cig: false, dart: null };
+        // dx/dy: desplazamiento del cuadro (llegar en la bici, subir al andamio), en px de canvas.
+        if (fr) return { extra: { x: fr[0], y: fr[1], w: D.cell[0], h: D.cell[1], ref: A.ref, dx: ep.dx || 0, dy: ep.dy || 0 }, frame: null, rot: 0, dy: 0, shield: 0, item: null, pivot: null, cig: false, dart: null };
       }
       const data = this.f.data, anims = data.animations, Mv = M();
       const at = (name, since, reverse) => Mv.poseFrame(data, name, this.t - (since === undefined ? 0 : since), reverse);
@@ -841,6 +849,7 @@
     }
 
     drawShadow(ctx) {
+      if (this.extraPose && (this.extraPose.dy || 0) < -12) return;   // subido al andamio: la sombra es suya
       const h = Math.min(1, -this.y / 300), k = this.size * (1 - h * 0.5);
       const dx = this.extraPose && this.extraPose.dx ? this.extraPose.dx : 0;
       ctx.fillStyle = 'rgba(12,8,16,0.55)';
@@ -857,7 +866,7 @@
         ctx.save();
         if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
         ctx.imageSmoothingEnabled = false;
-        ctx.translate(Math.round(this.f.x + e.dx + (o.dx || 0)), Math.round(this.f.y + (o.dy || 0)));
+        ctx.translate(Math.round(this.f.x + e.dx + (o.dx || 0)), Math.round(this.f.y + e.dy + (o.dy || 0)));
         ctx.scale(this.S * this.facing, this.S);
         ctx.drawImage(this.extras.img, e.x, e.y, e.w, e.h, -e.ref[0], -e.ref[1], e.w, e.h);
         ctx.restore();

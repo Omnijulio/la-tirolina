@@ -1,5 +1,350 @@
 /* Generado por tools/integrate_character.py: personajes con arte propio. */
 window.TROLINA_CHARACTER_ART = {
+  "bmx": {
+    "mouth": {
+      "x": 95,
+      "y": 44
+    },
+    "name": "BMX",
+    "source": "source-art/personajes/bmx",
+    "rows": 16,
+    "missingRows": [],
+    "portrait": "assets/characters/bmx-retrato.png",
+    "sockets": [
+      {
+        "x": 102,
+        "y": 66,
+        "rotation": -0.15
+      },
+      {
+        "x": 124,
+        "y": 69,
+        "rotation": -0.8
+      },
+      {
+        "x": 124,
+        "y": 69,
+        "rotation": -1.1
+      },
+      {
+        "x": 154,
+        "y": 68,
+        "rotation": 0.2
+      }
+    ],
+    "loweredAirborne": {
+      "hit:4": 18,
+      "hit:5": 14,
+      "grabbed:1": 19,
+      "grabbed:2": 14,
+      "grabbed:3": 18,
+      "air:0": 23,
+      "air:1": 20,
+      "air:2": 15,
+      "air:3": 15,
+      "jump:1": 20,
+      "jump:2": 20,
+      "jump:3": 20
+    },
+    "extras": {
+      "image": "assets/characters/bmx-extras.png",
+      "cell": [
+        256,
+        224
+      ],
+      "anims": {
+        "bmx-rodar": {
+          "loop": true,
+          "ref": [
+            34,
+            208
+          ],
+          "frames": [
+            [
+              0,
+              0,
+              125
+            ],
+            [
+              256,
+              0,
+              125
+            ]
+          ]
+        },
+        "bmx-frenar": {
+          "loop": false,
+          "ref": [
+            34,
+            208
+          ],
+          "frames": [
+            [
+              0,
+              224,
+              185
+            ],
+            [
+              256,
+              224,
+              240
+            ]
+          ]
+        },
+        "bmx-bajar": {
+          "loop": false,
+          "ref": [
+            34,
+            208
+          ],
+          "frames": [
+            [
+              0,
+              448,
+              230
+            ],
+            [
+              256,
+              448,
+              250
+            ]
+          ]
+        },
+        "montar-andamio": {
+          "loop": false,
+          "ref": [
+            56,
+            208
+          ],
+          "frames": [
+            [
+              0,
+              672,
+              245
+            ],
+            [
+              256,
+              672,
+              245
+            ],
+            [
+              512,
+              672,
+              265
+            ]
+          ],
+          "build": [
+            1,
+            2,
+            3
+          ]
+        },
+        "trepar": {
+          "loop": true,
+          "ref": [
+            56,
+            208
+          ],
+          "frames": [
+            [
+              0,
+              896,
+              170
+            ],
+            [
+              256,
+              896,
+              170
+            ]
+          ]
+        },
+        "lanzar-ladrillo": {
+          "loop": false,
+          "ref": [
+            56,
+            208
+          ],
+          "frames": [
+            [
+              0,
+              1120,
+              175
+            ],
+            [
+              256,
+              1120,
+              180
+            ],
+            [
+              512,
+              1120,
+              105
+            ],
+            [
+              768,
+              1120,
+              200
+            ]
+          ],
+          "release": {
+            "frame": 2,
+            "at": [
+              167,
+              117
+            ]
+          }
+        },
+        "fumar-puro": {
+          "loop": false,
+          "ref": [
+            56,
+            208
+          ],
+          "frames": [
+            [
+              0,
+              1344,
+              230
+            ],
+            [
+              256,
+              1344,
+              410
+            ],
+            [
+              512,
+              1344,
+              525
+            ],
+            [
+              768,
+              1344,
+              240
+            ]
+          ],
+          "emit": {
+            "frame": 2,
+            "at": [
+              114,
+              93
+            ]
+          },
+          "heal": {
+            "frame": 2,
+            "fraction": 0.12
+          }
+        }
+      },
+      "entrance": {
+        "sequence": [
+          "bmx-rodar",
+          "bmx-frenar",
+          "bmx-bajar"
+        ],
+        "rideMs": 1050
+      },
+      "scooter": {
+        "image": "assets/characters/bmx-bici.png",
+        "cell": [
+          162,
+          113
+        ],
+        "anchor": [
+          81,
+          112
+        ],
+        "scale": 0.841,
+        "at": [
+          129.9,
+          208
+        ]
+      },
+      "ultimate": {
+        "kind": "andamio",
+        "sequence": [
+          "montar-andamio",
+          "trepar",
+          "lanzar-ladrillo",
+          "fumar-puro"
+        ]
+      },
+      "scaffold": {
+        "exterior": {
+          "image": "assets/characters/bmx-andamio-exterior.png",
+          "cell": [
+            195,
+            183
+          ],
+          "anchor": [
+            97,
+            182
+          ],
+          "frames": 2,
+          "level": 1,
+          "at": -8,
+          "rise": 83,
+          "deck": [
+            -93,
+            95
+          ]
+        },
+        "interior": {
+          "image": "assets/characters/bmx-andamio-interior.png",
+          "cell": [
+            153,
+            95
+          ],
+          "anchor": [
+            76,
+            94
+          ],
+          "frames": 4,
+          "level": 1,
+          "at": 9,
+          "rise": 62,
+          "deck": [
+            -71,
+            72
+          ]
+        }
+      },
+      "fx": {
+        "ladrillo": {
+          "image": "assets/characters/bmx-ladrillo.png",
+          "size": [
+            32,
+            26
+          ],
+          "anchor": [
+            16,
+            13
+          ]
+        },
+        "humo": {
+          "image": "assets/characters/bmx-humo.png",
+          "size": [
+            32,
+            47
+          ],
+          "anchor": [
+            16,
+            46
+          ]
+        },
+        "curacion": {
+          "image": "assets/characters/bmx-curacion.png",
+          "size": [
+            46,
+            44
+          ],
+          "anchor": [
+            23,
+            43
+          ]
+        }
+      }
+    }
+  },
   "rizos": {
     "mouth": {
       "x": 95,

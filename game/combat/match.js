@@ -154,7 +154,8 @@
       const dataFor = (ch) => datas[ch.id] || (datas[ch.id] = Match.fighterData(ch));
       const extrasFor = (ch) => {
         const art = (root.TROLINA_CHARACTER_ART || {})[ch.id], img = this.assets.extras && this.assets.extras[ch.id];
-        return art && art.extras && img ? { img: img.sheet, def: art.extras, smoke: img.smoke, scooter: img.scooter, puff: img.puff, puffDef: art.weapon && art.weapon.puff } : null;
+        return art && art.extras && img ? { img: img.sheet, def: art.extras, smoke: img.smoke, scooter: img.scooter, puff: img.puff, puffDef: art.weapon && art.weapon.puff,
+          scaffold: img.scaffold || {}, fx: img.fx || {} } : null;
       };
       // Arma (v0.15): la suya (character.weapon) o, en pruebas, la elegida (sel.weapon: id o null = ninguna).
       const weaponFor = (ch, sel) => {
@@ -216,6 +217,7 @@
       this.sparks = []; this.popups = []; this.dusts = []; this.smokes = []; this.darts = [];
       this.superFreeze = 0; this.superOwner = null;
       this.truce = null; this.chinas = []; this.pitiFx = []; this.parked = [];   // ultimate de Rizos y su patinete
+      this.scaffolds = []; this.bricks = []; this.scaffoldFx = [];               // ultimate de BMX (v0.18)
       this.dropped = []; this.puffs = [];   // armas por el suelo (v0.15) y soplos de la bolsita
       this.stats = { perfectRounds: 0, timeLeft: 0, maxCombo: 0, ultimates: 0 };
       // Policía Local: aparece si el ruido llega a 100 (ver TrolinaRules.NOISE).
@@ -285,6 +287,7 @@
       this.bottles.reset();
       this.darts = []; this.smokes = []; this.superFreeze = 0;
       this.cancelTruce(); this.chinas = []; this.pitiFx = [];
+      this.scaffolds = []; this.bricks = []; this.scaffoldFx = [];
       this.dropped = []; this.puffs = [];   // reset() ya los ha armado y ha cortado bolsitas y recogidas
       this.timer = R.ROUND_SECONDS;
       this.phase = 'intro'; this.phaseT = 0; this.fightCalled = false;
@@ -644,6 +647,7 @@
     updateTruce(dt) {
       const tr = this.truce;
       if (!tr) return;
+      if (tr.kind === 'andamio') { this.updateScaffold(tr, dt); return; }
       const P = R.PITI, att = tr.att, A = att.extras.def.anims;
       tr.t += dt;
       const riseMs = Math.max(200, P.pauseMs - P.sitMs - P.smokeMs);
@@ -674,7 +678,172 @@
       const tr = this.truce;
       if (!tr) return;
       tr.att.locked = false; tr.att.extraPose = null; tr.att.f.play('idle', true);
+      if (tr.scaffold) tr.scaffold.fading = true;   // el andamio se va (solo dibujo)
       this.truce = null;
+    }
+
+    /* ---------- BMX: «El andamio» (v0.18) ---------- */
+
+    /** Ultimate de BMX. Como la pausa para el piti, para la pelea (R.ANDAMIO): monta un andamio delante de
+     * la escalera, sube, tira el ladrillo (MOVES.ladrillo), se fuma un puro (cura) y baja. No se mueve del sitio:
+     * el andamio se planta para que el piso le quede debajo, con la escalera hacia el rival. */
+    startScaffold(att) {
+      const X = att.extras && att.extras.def, U = X && X.ultimate;
+      const sc = X && X.scaffold && X.scaffold[this.interior ? 'interior' : 'exterior'];
+      if (this.truce || this.phase !== 'fight' || !U || U.kind !== 'andamio' || !sc) return false;
+      const def = att === this.p1 ? this.p2 : this.p1;
+      if (this.grab || def.locked || def.bolsa) return false;   // el rival está en plena ultimate
+      this.cancelThrow();
+      att.locked = true; att.f.play('idle', true); att.pending = [];
+      att.vx = 0; att.guard = false; att.walking = false; att.dashT = 0;
+      att.facing = Math.sign(def.cx - att.cx) || att.facing; att.sync();
+      def.f.play('idle', true); def.pending = []; def.guard = false; def.walking = false; def.dashT = 0; def.diving = false;
+      this.bottles.reset(); this.darts = [];
+      const A = X.anims, P = R.ANDAMIO, len = (n) => A[n].frames.reduce((k, f) => k + f[2], 0);
+      const up = Math.round(sc.rise * P.climbMsPerPx);
+      const phases = [['build', len('montar-andamio')], ['up', up], ['throw', len('lanzar-ladrillo')], ['smoke', P.smokeMs], ['down', Math.round(up * P.downMult)]];
+      // Su ancla, a `sc.at` px de celda del pie del luchador hacia el rival (mirando a la izquierda, reflejado).
+      const scaffold = { owner: att, def: sc, x: att.f.x + sc.at * att.S * att.facing, flip: att.facing, s: att.S, frame: 0, fading: false, fadeT: 0 };
+      this.scaffolds = this.scaffolds.filter((s) => s.owner !== att);
+      this.scaffolds.push(scaffold);
+      this.truce = { kind: 'andamio', att, def, t: 0, phases, total: phases.reduce((k, p) => k + p[1], 0), scaffold,
+        rise: -sc.rise * att.S, step: 0, released: false, healed: false, lit: false };
+      this.superText = { text: '¡' + this.specialOf(att).name.toUpperCase() + '!', t: 0, c: att };
+      this.sfx('super');
+      if (att === this.p1) this.stats.ultimates++;
+      return true;
+    }
+
+    updateScaffold(tr, dt) {
+      const att = tr.att, A = att.extras.def.anims, P = R.ANDAMIO, sc = tr.scaffold;
+      tr.t += dt;
+      if (tr.t >= tr.total) { this.cancelTruce(); return; }
+      let t = tr.t, i = 0;
+      while (t >= tr.phases[i][1]) { t -= tr.phases[i][1]; i++; }
+      const [phase, ms] = tr.phases[i];
+      if (phase === 'build') {
+        // Cada fase del montaje cambia la imagen del andamio (y suena a hierro).
+        const B = A['montar-andamio'], f = this.extraFrame(B, t);
+        att.extraPose = { anim: 'montar-andamio', frame: f };
+        const step = B.build ? B.build[f] : f + 1;
+        sc.frame = Math.max(0, Math.min(step, sc.def.frames) - 1);
+        if (step !== tr.step) { tr.step = step; this.sfx('block'); this.dust(sc.x, C.GROUND, 0.35); }
+      } else if (phase === 'up' || phase === 'down') {
+        // Trepa peldaño a peldaño (sin trigonometría: es parte de la simulación).
+        sc.frame = sc.def.frames - 1;
+        const k = phase === 'up' ? t / ms : 1 - t / ms, n = Math.max(2, Math.round(sc.def.rise / 14));
+        const j = Math.min(n - 1, Math.floor(k * n)), u = k * n - j;
+        const T = A.trepar, tl = T.frames.reduce((s, f) => s + f[2], 0);
+        att.extraPose = { anim: 'trepar', frame: this.extraFrame(T, t % tl), dy: tr.rise * (j + u * u * (3 - 2 * u)) / n };
+      } else if (phase === 'throw') {
+        const L = A['lanzar-ladrillo'], f = this.extraFrame(L, t);
+        att.extraPose = { anim: 'lanzar-ladrillo', frame: f, dy: tr.rise };
+        if (!tr.released && L.release && f >= L.release.frame) {
+          tr.released = true;
+          const from = this.extraPoint(att, L, L.release.at);
+          this.spawnBrick(att, tr.def, { x: from.x, y: from.y + tr.rise });
+        }
+      } else {
+        // Se fuma el puro: en la calada se cura (una vez) y baja el puntillo poco a poco.
+        const F = A['fumar-puro'], f = this.extraFrame(F, t, ms);
+        att.extraPose = { anim: 'fumar-puro', frame: f, dy: tr.rise };
+        if (!tr.lit) { tr.lit = true; this.sfx('lighter'); }
+        att.relief += P.relief * dt / ms;
+        if (!tr.healed && (!F.heal || f >= F.heal.frame)) {
+          tr.healed = true;
+          const before = att.hp;
+          att.hp = Math.min(att.maxHp, att.hp + P.heal * att.maxHp);
+          if (att.hp - before >= 1) this.popup(att, '+' + Math.round(att.hp - before) + ' VIDA', '#8bf2ce');
+          const mouth = F.emit ? this.extraPoint(att, F, F.emit.at) : { x: att.cx, y: C.GROUND - 200 };
+          this.scaffoldFx.push({ kind: 'humo', c: att, x: mouth.x, y: mouth.y + tr.rise, t: 0, life: 730 });
+          this.scaffoldFx.push({ kind: 'curacion', c: att, x: att.f.x + 71 * att.S * att.facing, y: C.GROUND + tr.rise - 72 * att.S, t: 0, life: 730 });
+        }
+      }
+    }
+
+    /** El ladrillo: en arco hasta donde está el rival al soltarlo. Si le da, MOVES.ladrillo; si no, al suelo. */
+    spawnBrick(owner, target, from) {
+      const P = R.ANDAMIO, hb = target.f.getHurtbox();
+      const tx = hb.x + hb.w / 2, ty = hb.y + hb.h * 0.3, dx = tx - from.x;
+      const T = P.brickMs + P.brickMsPerPx * R.dhypot(dx, ty - from.y);
+      this.bricks.push({ owner, target, x0: from.x, y0: from.y, x1: tx, y1: ty, T, arc: P.brickArc + P.brickArcPerPx * Math.abs(dx), t: 0, x: from.x, y: from.y, dir: Math.sign(dx) || owner.facing });
+      this.sfx('throw');
+    }
+
+    updateBricks(dt) {
+      for (const b of this.bricks) {
+        let left = dt;
+        while (left > 0 && !b.dead) {
+          const ms = Math.min(16, left); left -= ms;
+          const ax = b.x, ay = b.y;
+          b.t += ms;
+          const k = b.t / b.T;
+          b.x = b.x0 + (b.x1 - b.x0) * k; b.y = b.y0 + (b.y1 - b.y0) * k - b.arc * 4 * k * (1 - k);
+          if (this.phase === 'fight' && b.target.state === 'fight' && !b.target.downed) {
+            const s = BottleSystem.segmentBox(ax, ay, b.x, b.y, b.target.f.getHurtbox(), 8);
+            if (s !== null) {
+              b.x = ax + (b.x - ax) * s; b.y = ay + (b.y - ay) * s; b.dead = true;
+              this.applyHit(b.owner, b.target, 'ladrillo', b.x, b.y);
+              this.popup(b.target, '¡LADRILLAZO!', '#ff9a4a');
+              this.brickBits(b);
+              continue;
+            }
+          }
+          if (k > 0.5 && b.y >= C.GROUND - 6) {
+            b.dead = true; b.y = C.GROUND - 6;
+            this.dust(b.x, C.GROUND, 0.7); this.brickBits(b); this.sfx('land');
+            this.popup(b.owner, '¡AL AIRE!', '#f8ce73');
+          } else if (b.t > b.T * 4) b.dead = true;
+        }
+      }
+      this.bricks = this.bricks.filter((b) => !b.dead);
+    }
+
+    /** Trozos de ladrillo (solo decorado). */
+    brickBits(b) {
+      const rnd = root.__trolinaRealRandom || Math.random;
+      for (let i = 0; i < 7; i++) {
+        this.dusts.push({ brick: true, x: b.x, y: b.y, vx: (rnd() - 0.5) * 320 + b.dir * 60, vy: -140 - rnd() * 220, r: 3 + rnd() * 3, t: 0, life: 560 });
+      }
+    }
+
+    /** El andamio (detrás de los luchadores), con la fase del montaje y el fundido al irse. */
+    drawScaffolds(c) {
+      for (const s of this.scaffolds) {
+        const img = s.owner.extras && s.owner.extras.scaffold[this.interior ? 'interior' : 'exterior'];
+        if (!img) continue;
+        const D = s.def, a = s.fading ? Math.max(0, 1 - s.fadeT / R.ANDAMIO.fadeMs) : 1;
+        c.save(); c.imageSmoothingEnabled = false; c.globalAlpha = a;
+        c.translate(Math.round(s.x), C.GROUND);
+        c.scale(s.s * s.flip, s.s);
+        c.drawImage(img, s.frame * D.cell[0], 0, D.cell[0], D.cell[1], -D.anchor[0], -D.anchor[1], D.cell[0], D.cell[1]);
+        c.restore();
+      }
+    }
+
+    /** Ladrillos en el aire, el humo del puro y el destello de la curación. */
+    drawBricks(c) {
+      for (const b of this.bricks) {
+        const ex = b.owner.extras, F = ex && ex.def.fx && ex.def.fx.ladrillo, img = ex && ex.fx.ladrillo;
+        if (!img || !F) continue;
+        c.save(); c.imageSmoothingEnabled = false;
+        c.translate(Math.round(b.x), Math.round(b.y)); c.rotate(b.dir * b.t / 90);
+        c.scale(b.owner.S, b.owner.S);
+        c.drawImage(img, -F.anchor[0], -F.anchor[1]);
+        c.restore();
+      }
+      for (const e of this.scaffoldFx) {
+        const F = e.c.extras.def.fx[e.kind], img = e.c.extras.fx[e.kind];
+        if (!F || !img) continue;
+        const k = e.t / e.life, S = e.c.S;
+        // Humo: sube, se aleja y se abre. Curación: sube un poco y se desvanece.
+        const x = e.kind === 'humo' ? e.x + e.c.facing * 20 * S * k : e.x, y = e.kind === 'humo' ? e.y - 39 * S * k : e.y - 22 * S * k;
+        const z = e.kind === 'humo' ? 0.72 + 0.35 * k : 0.83;
+        c.save(); c.imageSmoothingEnabled = false; c.globalAlpha = (e.kind === 'humo' ? 0.77 : 1) * (1 - k);
+        c.translate(Math.round(x), Math.round(y)); c.scale(S * z * e.c.facing, S * z);
+        c.drawImage(img, -F.anchor[0], -F.anchor[1]);
+        c.restore();
+      }
     }
 
     /** La china del cigarro: vuela recta hacia el rival y, si le da, lo manda para atrás. */
@@ -1208,6 +1377,11 @@
       this.collectDartEvents();
       this.updateDarts(dt);
       this.updateChinas(dt);
+      this.updateBricks(dt);
+      for (const e of this.scaffoldFx) e.t += dt;
+      this.scaffoldFx = this.scaffoldFx.filter((e) => e.t < e.life);
+      for (const sc of this.scaffolds) if (sc.fading) sc.fadeT += dt;
+      this.scaffolds = this.scaffolds.filter((sc) => !sc.fading || sc.fadeT < R.ANDAMIO.fadeMs);
       for (const e of this.pitiFx) e.t += dt;
       this.pitiFx = this.pitiFx.filter((e) => e.t < e.life);
       for (const c of this.fighters) if (c.dropCig) { c.dropCig = false; this.popup(c, '¡SE LE CAE EL PITILLO!', '#ff8a7a'); }
@@ -1462,7 +1636,7 @@
         if (att.meterFull) { this.popup(att, '¡' + this.specialOf(att).short + ' LISTO!', '#f8ce73'); this.sfx('ready'); }
       }
       if (kind === 'dart' && att === this.p1) this.stats.ultimates++;
-      this.hitstop = res === 'ko' ? 170 : kind === 'dart' || kind === 'remate' ? 220 : kind === 'china' ? 150 : kind === 'gancho' ? 120 : kind === 'kick' || type ? 95 : kind === 'dive' ? 80 : 65;
+      this.hitstop = res === 'ko' ? 170 : kind === 'dart' || kind === 'remate' ? 220 : kind === 'ladrillo' ? 200 : kind === 'china' ? 150 : kind === 'gancho' ? 120 : kind === 'kick' || type ? 95 : kind === 'dive' ? 80 : 65;
       this.shake = res === 'ko' || ult ? 14 : kind === 'punch' || kind === 'airPunch' ? 5 : 8;
       if (res === 'ko') this.onKO(att, def);
     }
@@ -1600,6 +1774,7 @@
           const soaking = this.grab && this.grab.phase === 'soak';
           if (this.fountain) this.fountain.drawBack(c, !soaking);
           if (this.parked.length) this.drawParked(c);
+          if (this.scaffolds.length) this.drawScaffolds(c);
           for (const f of this.fighters) if (f.state !== 'soaked' && f.state !== 'grabbed') f.drawShadow(c);
           if (this.dropped.length) this.drawDropped(c, true);
           if (this.sink) this.sink.draw(c);
@@ -1625,6 +1800,7 @@
           this.drawPuffs(c);
           this.drawDarts(c);
           this.drawPiti(c);
+          this.drawBricks(c);
           if (this.fountain) { if (soaking) this.fountain.drawFront(c); else this.fountain.drawDrops(c); }
           if (this.police) this.police.drawFront(c);
           this.drawWorldFx(c);
@@ -1859,6 +2035,13 @@
         if (d.drop) {
           c.fillStyle = 'rgba(160,220,255,' + (0.85 * (1 - k)) + ')';
           c.fillRect(Math.round(d.x), Math.round(d.y + d.vy * d.t / 1000 + 300 * (d.t / 1000) ** 2), 2, 3);
+          continue;
+        }
+        if (d.brick) {
+          // Trozos del ladrillo de BMX.
+          const s = d.t / 1000, gy = Math.min(C.GROUND - 2, d.y + d.vy * s + 1300 * s * s);
+          c.fillStyle = 'rgba(' + (d.r > 4.5 ? '168,70,44' : '214,112,70') + ',' + (1 - k) + ')';
+          c.fillRect(Math.round(d.x + d.vx * s), Math.round(gy), Math.ceil(d.r), Math.ceil(d.r));
           continue;
         }
         if (d.glass) {

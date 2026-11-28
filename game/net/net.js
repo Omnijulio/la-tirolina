@@ -371,7 +371,7 @@
         'ar=' + (c.weapon ? (c.armed ? 1 : 0) + '/' + r(c.disarmT, 0) : '-')].join(' ');
       const b = (m.bottles.projectiles || []).filter((p) => p.alive).map((p) => r(p.x, 0) + '/' + r(p.y, 0)).join(',');
       return ['t=' + this.tick, 'rng=' + this.rngCalls, 'fase=' + m.phase, 'reloj=' + r(m.timer), 'asalto=' + m.round, 'gana=' + m.wins.join('-'),
-        'bot=[' + b + ']', 'dardos=' + m.darts.length, 'armas=[' + (m.dropped || []).map((d) => d.state + '@' + r(d.x, 0)).join(',') + ']', 'agarre=' + (m.throwing ? 1 : 0) + (m.grab ? 'p' : ''), 'cam=' + r(m.camera),
+        'bot=[' + b + ']', 'dardos=' + m.darts.length, 'ladrillos=' + (m.bricks || []).map((b) => r(b.x, 0) + '/' + r(b.y, 0)).join(','), 'armas=[' + (m.dropped || []).map((d) => d.state + '@' + r(d.x, 0)).join(',') + ']', 'agarre=' + (m.throwing ? 1 : 0) + (m.grab ? 'p' : ''), 'cam=' + r(m.camera),
         '| P1 ' + f(m.p1), '| P2 ' + f(m.p2)].join(' ');
     }
 
